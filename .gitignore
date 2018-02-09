@@ -1,0 +1,4 @@
+.DS_Store
+/system/
+/application/logs/
+/static/bower_components/
