@@ -15,3 +15,11 @@ application/logs/*
 !application/logs/index.html
 !application/logs/.htaccess
 /vendor/
+
+.DS_Store
+/system/
+/application/logs/
+/application/cache/
+/static/
+/.idea
+TODO.md

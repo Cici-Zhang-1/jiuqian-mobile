@@ -26,8 +26,8 @@
       <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../jiuqian-mobile/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="16" column="8" lean-forward="false" selection-start-line="16" selection-start-column="8" selection-end-line="16" selection-end-column="8" />
+            <state relative-caret-position="456">
+              <caret line="24" column="7" lean-forward="false" selection-start-line="24" selection-start-column="7" selection-end-line="24" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -164,6 +164,11 @@
               <item name="jiuqian" type="b2602c69:ProjectViewProjectNode" />
               <item name="jiuqian-mobile" type="2a2b976b:PhpTreeStructureProvider$1" />
             </path>
+            <path>
+              <item name="jiuqian" type="b2602c69:ProjectViewProjectNode" />
+              <item name="jiuqian-mobile" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="application" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -273,7 +278,7 @@
       <workItem from="1518141315091" duration="22000" />
       <workItem from="1518191757180" duration="17597000" />
       <workItem from="1518445045239" duration="2637000" />
-      <workItem from="1519339918141" duration="1505000" />
+      <workItem from="1519339918141" duration="1662000" />
     </task>
     <task id="LOCAL-00001" summary="1. Add Init Files">
       <created>1518194263459</created>
@@ -300,7 +305,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="79997000" />
+    <option name="totallyTimeSpent" value="80154000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -719,8 +724,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../jiuqian-mobile/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="16" column="8" lean-forward="false" selection-start-line="16" selection-start-column="8" selection-end-line="16" selection-end-column="8" />
+        <state relative-caret-position="456">
+          <caret line="24" column="7" lean-forward="false" selection-start-line="24" selection-start-column="7" selection-end-line="24" selection-end-column="7" />
           <folding />
         </state>
       </provider>
