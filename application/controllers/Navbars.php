@@ -8,13 +8,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc =>
  */
-class Navbars extends CI_Controller {
+class Navbars extends MY_Controller {
     function __construct() {
         parent::__construct();
     }
     
     public function index() {
-        $data = array(
+        $Data = array(
             array(
                 'id' => 'Home',
                 'name' => '首页',
@@ -41,7 +41,7 @@ class Navbars extends CI_Controller {
                 'size' => 'fa-2x',
                 'href' => '/app',
                 'show' => false,
-                'funcs' => [],
+                'funcs' => array(),
                 'component' => 'navbar-dropdown'
             ),
             array(
@@ -54,9 +54,6 @@ class Navbars extends CI_Controller {
                 'component' => 'navbar-item'
             )
         );
-        /*$this->output->set_header('Access-Control-Allow-Origin: *');
-        $this->output->set_header('Access-Control-Allow-Methods: GET');*/
-        header("Access-Control-Allow-Origin: *");
-        exit(json_encode($data));
+        $this->_ajax_return($Data);
     }
 }
