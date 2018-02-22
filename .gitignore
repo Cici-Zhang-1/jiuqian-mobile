@@ -18,8 +18,8 @@ application/logs/*
 
 .DS_Store
 /system/
-/application/logs/
-/application/cache/
 /static/
-/.idea
+/.idea/
 TODO.md
+contributing.md
+readme.rst
