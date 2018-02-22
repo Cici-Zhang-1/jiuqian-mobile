@@ -19,8 +19,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body class="py-6">
 <div id="app"></div>
 <!-- built files will be auto injected -->
-<script type="text/javascript" src="/jiuqian/static/js/manifest.a355e80073079c6adf21.js"></script>
-<script type="text/javascript" src="/jiuqian/static/js/vendor.b9906e09818e08961a38.js"></script>
-<script type="text/javascript" src="/jiuqian/static/js/app.32d82122668779b33081.js"></script>
-</body>
+<script type="text/javascript" src="/jiuqian/static/js/manifest.f6d718146be4dc3430b9.js"></script><script type="text/javascript" src="/jiuqian/static/js/vendor.b9906e09818e08961a38.js"></script><script type="text/javascript" src="/jiuqian/static/js/app.c8a4aff152459dc0db11.js"></script></body>
 </html>

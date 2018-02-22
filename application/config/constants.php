@@ -83,3 +83,88 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+defined('EXIT_SIGNIN')         OR define('EXIT_SIGNIN', 10); // signin error
+
+
+/**
+ * DAY
+ */
+define('DAY', 1);
+define('WEEK', 7);
+define('MONTH', 30);
+define('YEAR', 365);
+/*
+ * Seconds
+ */
+define('MINUTES', 60);
+define('QUAETER', 900);
+define('HOURS', 3600);
+define('DAYS', 86400);
+define('WEEKS', 604800);
+define('MONTHS', 2592000);
+define('YEARS', 31536000);
+
+define('CLIENT_MULTI_RESULTS', 131072);
+
+
+// 定义当前请求的系统常量
+define('NOW_TIME',      $_SERVER['REQUEST_TIME']);
+define('REQUEST_METHOD',$_SERVER['REQUEST_METHOD']);
+define('IS_GET',        REQUEST_METHOD =='GET' ? true : false);
+define('IS_POST',       REQUEST_METHOD =='POST' ? true : false);
+define('IS_PUT',        REQUEST_METHOD =='PUT' ? true : false);
+define('IS_DELETE',     REQUEST_METHOD =='DELETE' ? true : false);
+
+
+// 定义订单编号的长度的常量
+define('ORDER_PREFIX', 6);
+define('ORDER_SUFFIX', 4);
+define('QRCODE_PREFIX', 4);
+define('QRCODE_SUFFIX', 3);
+
+/**
+ * WORKFLOW
+ */
+define('O_REMOVE', 0);
+define('O_CREATE', 1);
+define('O_DISMANTLING', 2);
+define('O_DISMANTLED', 3);
+define('O_CHECK', 4);
+define('O_CHECKING', 5);
+define('O_CHECKED', 6);
+define('O_QUOTE', 7);
+define('O_QUOTED', 8);
+define('O_MONEY_PRODUCE', 9);
+define('O_WAIT_ASURE', 10);
+define('O_PRODUCE', 11);
+define('O_PRODUCING', 12);
+define('O_INING', 13);
+define('O_INED', 14);
+define('O_MONEY_DELIVERY', 15);
+define('O_DELIVERY', 16);
+define('O_DELIVERIED', 17);
+define('O_MONEY_LOGISTICS', 18);
+define('O_MONEY_MONTH', 19);
+define('O_MONEY_FACTORY', 20);
+define('O_OUTTED', 21);
+
+define('T_EDGE', 2);
+define('H_EDGE', 1.5);
+define('I_EDGE', 1.0);
+define('B_EDGE', 0.7);
+define('O_EDGE', 0);
+
+
+define('A_ALL', '__');
+
+define('M_REGULAR', 1000);
+define('M_ONE', 10000);
+define('M_TWO', 100);
+define('MIN_AREA', 0.01);
+define('MIN_M_AREA', 0.1);
+define('MIN_K_AREA', 0.4);
+define('MIN_B_AREA', 0.01);
+
+define('MIN_PAGESIZE', 100);
+define('MAX_PAGESIZE', 1000);

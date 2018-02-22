@@ -232,7 +232,6 @@ class Location extends CI_Controller {
 
         );
         $keyword = $this->input->get('keyword');
-        header("Access-Control-Allow-Origin: *");
         if (isset($keyword) && $keyword != '') {
             $page = $this->input->get('page');
             if ($page <= 2) {
@@ -265,10 +264,6 @@ class Location extends CI_Controller {
                 'code' => EXIT_ERROR
             );
         }
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($Return));
     }
 
@@ -280,11 +275,6 @@ class Location extends CI_Controller {
                 'status' => 1
             )
         );
-
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($data));
     }
 
@@ -302,10 +292,6 @@ class Location extends CI_Controller {
                 'message' => 'You Id is Not Right, Please Check'
             );
         }
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($Return));
     }
 
@@ -314,10 +300,6 @@ class Location extends CI_Controller {
             'code' => EXIT_ERROR,
             'message' => '入库失败!'
         );
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($Return));
     }
 
@@ -326,10 +308,6 @@ class Location extends CI_Controller {
             'code' => EXIT_SUCCESS,
             'message' => '出库成功!'
         );
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($Return));
     }
 
@@ -347,10 +325,6 @@ class Location extends CI_Controller {
                 )
             )
         );
-        header("Access-Control-Allow-Origin: http://localhost:8080");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE');
         exit(json_encode($Return));
     }
 }

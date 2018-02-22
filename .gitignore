@@ -1,4 +1,7 @@
 .DS_Store
 /system/
 /application/logs/
-/static/bower_components/
+/application/cache/
+/static/
+/.idea
+TODO.md
