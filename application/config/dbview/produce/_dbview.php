@@ -1,0 +1,25 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+$config['produce/finished/read'] = array(
+	'op_id' => 'opid',
+	'o_id' => 'oid',
+	'p_name' => 'product',
+	'o_num' => 'num',
+	'o_remark' => 'remark',
+	'status_text' => 'status_text',
+	'o_status' => 'status',
+	'o_dealer_name' => 'dealer',
+	'o_dealer_linker' => 'dealer_linker',
+	'o_dealer_address' => 'dealer_address',
+	'o_dealer_phone' => 'dealer_phone',
+	'o_owner' => 'owner',
+	'o_logistics' => 'logistics',
+	'o_delivery_address' => 'delivery_address',
+	'o_delivery_linker' => 'delivery_linker',
+	'o_delivery_phone' => 'delivery_phone',
+	'o_request_outdate' => 'request_outdate',
+	'finisher' => 'finisher',
+	'op_finished_datetime' => 'finished_datetime',
+	'ender' => 'ender',
+	'end_datetime' => 'end_datetime',
+);

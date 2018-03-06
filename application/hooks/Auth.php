@@ -42,16 +42,16 @@ class Auth {
 			$Message = '';
 	        if(is_null(self::$_sign_in)){
 				$Uid = $this->_CI->input->cookie('uid') || $this->_CI->input->post('access2008_cookie_uid'); // Default or Upload
-				log_message('error', $Uid);
 				if (empty($Uid)) {
 					self::$_sign_in = false;
 					$Message = '请登陆系统!';
 				}else {
 					if (!!($User = $this->_CI->user->signed_in($Uid))) {
+					    log_message('debug', 'Sign In Success By ' . $Uid);
 						self::$_sign_in = true;
 					}else {
 						self::$_sign_in = false;
-						$Message = '请登陆系统!';
+						$Message = '您的会话已过期，请重新登陆系统!';
 					}
 
 				}

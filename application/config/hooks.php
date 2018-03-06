@@ -20,6 +20,13 @@ $hook['post_controller_constructor'][] = array(
 );
 
 $hook['post_controller_constructor'][] = array(
+    'class'    => 'Permit',
+    'function' => 'is_permit',
+    'filename' => 'Permit.php',
+    'filepath' => 'hooks'
+);
+
+$hook['post_controller_constructor'][] = array(
     'class'    => 'Mobile',
     'function' => 'is_mobile',
     'filename' => 'Mobile.php',

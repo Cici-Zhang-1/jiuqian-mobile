@@ -8,14 +8,53 @@
 
 class MY_Model extends CI_Model
 {
-	public function __construct()
-	{
+    public $HostDb;
+
+    protected $_Module;
+    protected $_Model;
+    protected $_Item;
+    protected $_DbviewFile;
+    protected $_DbtableFile;
+    protected $_Cache;
+
+    protected $_Element;
+
+	public function __construct($Module = '', $Model = '') {
 		parent::__construct();
 		log_message('debug', 'Model My_Model Start');
 
+        $this->_Module = $Module;
+        $this->_Model = $Model;
+        $this->_init();
+
 		$this->load->driver('cache', array('adapter' => 'apc', 'backup' => 'file')); /* 开启缓存 */
 	}
-	
+
+    private function _init() {
+	    $this->HostDb = $this->db;
+
+        $this->_Module = str_replace("\\", "/", $this->_Module);
+        $this->_Module = substr($this->_Module, strrpos($this->_Module, '/')+1);
+        $this->_Model = strtolower($this->_Model);
+        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
+
+        $_Model = explode('_', $this->_Model);
+        array_pop($_Model);
+        $_Model = implode('_', $_Model);
+
+        $this->_DbviewFile = 'dbview/' . $this->_Module . '/' . $_Model . '_dbview';
+        $this->_DbtableFile = 'dbtable/' . $this->_Module . '/' . $_Model . '_dbtable';
+        $this->_Cache = str_replace('/', '_', $this->_Item);
+    }
+
+    /**
+     * METHOD 设置可显示元素
+     * @param $E
+     */
+    public function set_element($E) {
+        $this->_Element = $E;
+    }
+
 	public function remove_cache($File, $Reg = true){
 	    $this->load->helper('file');
 	    if($Reg){
@@ -25,18 +64,23 @@ class MY_Model extends CI_Model
 	    }
 	}
 	
-	protected function _unformat_as($Item, $File){
-	    $this->config->load('dbview/'.$File);
-	    $Dbview = $this->config->item($Item);
-	    $Return = array();
-	    foreach ($Dbview as $key => $value){
-	        $Return[] = $key.' as '.$value;
-	    }
-	    return implode(',', $Return);
+	protected function _unformat_as($Item, $File = ''){
+        $this->config->load($this->_DbviewFile);
+        $Dbview = $this->config->item($Item);
+        $Return = array();
+        if (isset($this->_Element) && is_array($this->_Element) && count($this->_Element) > 0) {
+            $Dbview = array_filter($Dbview, function($val) {
+                return in_array($val, $this->_Element);
+            });
+        }
+        foreach ($Dbview as $key => $value){
+            $Return[] = $key.' as '.$value;
+        }
+        return implode(',', $Return);
 	}
 
-	protected function _unformat($Data, $Item, $File){
-	    $this->config->load('dbview/'.$File);
+	protected function _unformat($Data, $Item){
+	    $this->config->load($this->_DbviewFile);
 	    $Dbview = $this->config->item($Item);
 	    $Return = array();
 	    foreach ($Data as $key => $value){
@@ -47,8 +91,8 @@ class MY_Model extends CI_Model
 	    return $Return;
 	}
 	
-	protected function _format($Data, $Item, $File){
-	    $this->config->load('formview/'. $File);
+	protected function _format($Data, $Item){
+	    $this->config->load($this->_DbtableFile);
 	    $FormView = $this->config->item($Item);
 	    foreach ($FormView as $key=>$value){
 	        if(isset($Data[$key])){
@@ -68,12 +112,12 @@ class MY_Model extends CI_Model
 	
 	/**
 	 * 通过Data来格式化数据
-	 * @param unknown $Data
-	 * @param unknown $Item
-	 * @param unknown $File
+	 * @param array $Data
+	 * @param string $Item
+	 * @param string $File
 	 */
-	protected function _format_re($Data, $Item, $File){
-	    $this->config->load('formview/'. $File);
+	protected function _format_re($Data, $Item, $File = ''){
+	    $this->config->load($this->_DbtableFile);
 	    $FormView = $this->config->item($Item);
 	    foreach ($Data as $key => $value){
 	        if(is_array($value)){

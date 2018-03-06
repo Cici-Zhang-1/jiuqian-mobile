@@ -1,0 +1,55 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+$config['finance/finance_received_model/select'] = array(
+	'fr_id' => 'frid',
+	'fa_id' => 'faid',
+	'fa_name' => 'name',
+	'fr_type' => 'type',
+	'fr_cargo_no' => 'cargo_no',
+	'fr_amount' => 'amount',
+	'fr_fee' => 'fee',
+	'fr_dealer_id' => 'did',
+	'fr_dealer' => 'dealer',
+	'fr_corresponding' => 'corresponding',
+	'fr_bank_date' => 'bank_date',
+	'u_truename' => 'creator',
+	'fr_create_datetime' => 'create_datetime',
+	'fr_remark' => 'remark',
+);
+$config['finance/finance_received_model/select_outtime'] = array(
+	'fr_id' => 'frid',
+	'fa_id' => 'faid',
+	'fa_name' => 'name',
+	'fr_type' => 'type',
+	'fr_cargo_no' => 'cargo_no',
+	'fr_amount' => 'amount',
+	'fr_fee' => 'fee',
+	'fr_dealer_id' => 'did',
+	'fr_dealer' => 'dealer',
+	'fr_corresponding' => 'corresponding',
+	'fr_bank_date' => 'bank_date',
+	'u_truename' => 'creator',
+	'fr_create_datetime' => 'create_datetime',
+	'fr_remark' => 'remark',
+);
+$config['finance/finance_received_model/select_for_debt'] = array(
+	'fr_id' => 'frid',
+	'fa_name' => 'name',
+	'fr_amount' => 'amount',
+	'fr_corresponding' => 'corresponding',
+	'fr_create_datetime' => 'create_datetime',
+	'fr_remark' => 'remark',
+);
+$config['finance/finance_received_model/is_valid_finance_received'] = array(
+	'fr_id' => 'frid',
+	'fa_id' => 'faid',
+	'fa_name' => 'name',
+	'fr_cargo_no' => 'cargo_no',
+	'fr_dealer_id' => 'did',
+	'fr_dealer' => 'dealer',
+	'fr_amount' => 'amount',
+	'fr_corresponding' => 'corresponding',
+	'fr_fee' => 'fee',
+	'fr_remark' => 'remark',
+	'fr_status' => 'status',
+);

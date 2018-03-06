@@ -15,39 +15,42 @@ class Permit{
     private $_CI;
     
     private $_Operation;
+    private $_Ugid;
     
     public function __construct(){
-        $this->_CI = & get_instance();
         log_message('debug', "Hook Permit/__construct Start");
+        $this->_CI = & get_instance();
+        $this->_Ugid = $this->_CI->session->userdata('ugid');
     }
     
     /**
      * 判断用户是否可以执行当前操作
      */
     public function is_permit(){
-        $this->_CI->load->model('manage/usergroup_priviledge_model');
-        $Ugid = $this->_CI->session->userdata('ugid');
-        $Ugid = intval(trim($Ugid));
-        $Return = false;
-        if(!$this->_allowed_page() && !$this->_is_test()){
-            if($this->_get_operation()){
-                if(!!($UsergroupPriviledge = $this->_CI->usergroup_priviledge_model->select_operation($Ugid))){
-                    foreach ($UsergroupPriviledge as $value){
-                        if($this->_Operation == $value['url']){
-                            $Return = TRUE;
-                            break;
-                        }
+        if (ENVIRONMENT === 'development') {
+            $Return = false;
+            if(!$this->_is_public()){
+                if($this->_get_operation()){
+                    if (!!($this->_not_exist()) || !!($this->_is_allowed('menu')) || !!($this->_is_allowed('func')) || !!($this->_is_allowed('visit'))) {
+                        $Return = true;
+                    }else {
+                        $Return = false;
                     }
+                }else {
+                    $Return = false;
                 }
+            }else{
+                $Return = true;
             }
-        }else{
-            $Return = TRUE;
+        }else {
+            $Return = true;
         }
+
         if(!$Return){
-            show_error('不好意思, 您无权执行此操作!');
+            gh_return(EXIT_PERMISSION, 'Sorry, you visit non-exist page or you can not visit this page!');
         }
     }
-    
+
     /**
      * 设置当前操作
      */
@@ -57,25 +60,49 @@ class Permit{
         if('index' == $this->_CI->router->method){
             if(count($Uri) > 0){
                 $this->_Operation = $this->_Operation.'/'.array_shift($Uri);
-            }else{
-                return false;
+            }else {
+                $this->_Operation = $this->_Operation . '/' . '_read';
             }
         }
+        $GLOBALS['Permission']['Operation'] = $this->_Operation;
         return true;
     }
-    
+
     /**
-     * 判断是否是执行登录/登出操作
+     * 是否是公共许可访问的
      */
-    private function _allowed_page(){
-        $Uri = uri_string();
-        return preg_match('/^(sign\/|home\/)/', uri_string())||empty($Uri);
+    private function _is_public(){
+        return preg_match('/^(sign\/|home\/)/', uri_string())||empty(uri_string());
     }
-    
+
     /**
-     * 判断是否未测试
+     * 是否允许...
+     * @param $Type
+     * @return bool
      */
-    private function _is_test(){
-        return true;
+    private function _is_allowed($Type) {
+        $Model = $Type . '_model';
+        $this->_CI->load->model('permission/' . $Model);
+        if (!!($Query = $this->_CI->$Model->select_is_allowed_operation($this->_Ugid, $this->_Operation))) {
+            foreach ($Query as $Key => $Value) {
+                $Key = name_to_id($Key, true);
+                if (!isset($GLOBALS[$Key])) {
+                    $GLOBALS['Permission'][$Key] = $Value;
+                }
+            }
+            log_message('debug', 'Permit allowed by ' . $Type . ' path '. $this->_Operation);
+            return true;
+        }
+        log_message('debug', 'No permit allowed by ' . $Type . ' path'. $this->_Operation);
+        return false;
+    }
+
+    private function _not_exist() {
+        $this->_CI->load->model('permission/menu_model');
+        $this->_CI->load->model('permission/func_model');
+        $this->_CI->load->model('permission/visit_model');
+        return $this->_CI->menu_model->select_not_exist_operation($this->_Operation) &&
+            $this->_CI->func_model->select_not_exist_operation($this->_Operation) &&
+            $this->_CI->visit_model->select_not_exist_operation($this->_Operation);
     }
 }

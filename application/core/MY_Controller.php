@@ -7,6 +7,12 @@
  */
 class MY_Controller extends CI_Controller
 {
+    protected $_Module;
+    protected $_Controller;
+    protected $_Item;
+    protected $_Cookie;
+    protected $_Validation;
+
 	protected $Code = EXIT_SUCCESS;	// 返回码，默认是成功返回
 	protected $Message = ''; // 返回时，携带的信息
 	protected $Location = '';
@@ -14,13 +20,83 @@ class MY_Controller extends CI_Controller
 	{
 		parent::__construct();
 		log_message('debug','Controller CWDMS_Controller/__construct Start');
+		$this->_init();
 	}
+
+    private function _init() {
+        $this->_Module = $this->router->directory;
+        $this->_Controller = $this->router->class;
+        $this->_Item = $this->_Module.$this->_Controller.'/';
+        $this->_Validation = 'validation/' . $this->_Module . $this->_Controller . '_validation';
+        $this->_Cookie = str_replace('/', '_', $this->_Item);
+    }
+
+    /**
+     * 实施表单验证
+     * @param string $Item
+     * @param string $File
+     */
+    protected function _do_form_validation($Item = '', $File = '') {
+        if (!(isset($File) && $File != false)) {
+            $File = $this->_Validation;
+        }
+
+        if (isset($Item) && $Item != false) {
+            $Item = $this->_Item . $Item;
+        } else {
+            $Item = $this->_Item . $this->router->method;
+        }
+        $this->config->load($File, true, true);
+        if (!!($Rules = $this->config->item($Item, $File))) {
+            $this->form_validation->set_rules($Rules);
+            if($this->form_validation->run()){
+                return true;
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = validation_errors();
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '没有找到对应验证配置!';
+        }
+        return false;
+    }
+    /**
+     * Load Index View
+     * @param $View
+     */
+    protected function _index($View) {
+        $Item = $this->_Item.$View . $this->session->userdata('ugid');
+        if (!file_exists(VIEWPATH . $Item . '.php') || file_expired(VIEWPATH . $Item . '.php', VIEW_EXPIRED)) {
+            $this->load->library('permission');
+            $Data['Func'] = $this->permission->get_allowed_func('name');
+            $Data['Form'] = $this->permission->get_allowed_form('name');
+            $Data['PageSearch'] = $this->permission->get_allowed_page_search('name');
+            $Data['Card'] = $this->permission->get_allowed_card('name');
+            $Data['Element'] = $this->permission->get_allowed_element('name');
+            $this->load->library('template');
+            $this->template->generate($Item, $Data);
+        }
+        $this->load->view($Item);
+    }
+
+    /**
+     * Alias of _ajax_return
+     * @param array $Data
+     */
+	public function _return($Data = array()) {
+	    $this->_ajax_return($Data);
+    }
 	/**
 	 * @param array $Data
 	 */
 	public function _ajax_return($Data = array()) {
 		$this->Message .= isset($GLOBALS['message'])?(is_array($GLOBALS['message'])?implode(',', $GLOBALS['message']):$GLOBALS['message']):'';
-		exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'contents' => $Data)));
+		if (isset($_GET['callback'])) {
+            exit($_GET['callback'] . '(' .json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'contents' => $Data)) . ')');
+        }else {
+            exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'contents' => $Data)));
+        }
 	}
 
 	/**

@@ -166,5 +166,5 @@ define('MIN_M_AREA', 0.1);
 define('MIN_K_AREA', 0.4);
 define('MIN_B_AREA', 0.01);
 
-define('MIN_PAGESIZE', 100);
+define('MIN_PAGESIZE', 10);
 define('MAX_PAGESIZE', 1000);

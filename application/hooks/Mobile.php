@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Date: 2018/2/9
  * Time: 15:56
  *
- * Desc: 是否是显示在移动端
+ * Desc: 是否是显示在移动端，这是在移动端显示，否则跳转到桌面端
  */
 
 class Mobile {
