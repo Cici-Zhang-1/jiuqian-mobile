@@ -18,6 +18,7 @@ application/logs/*
 
 .DS_Store
 /static/
+/o-static/
 /.idea/
 TODO.md
 contributing.md
