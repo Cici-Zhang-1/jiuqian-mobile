@@ -1,0 +1,17 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+{% for key, config in configs %}
+$config['{{ key }}'] = array(
+    {% set i = 0 %}
+    {% set num = config | length %}
+    {% for ikey, value in config %}
+        {% if i < num %}
+            '{{ ikey }}' => '{{ value }}',
+        {% else %}
+            '{{ ikey }}' => '{{ value }}'
+        {% endif %}
+        {%  set i = i + 1 %}
+    {% endfor %}
+);
+{% endfor %}

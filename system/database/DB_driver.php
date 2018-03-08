@@ -1285,6 +1285,44 @@ abstract class CI_DB_driver {
 		return $this->data_cache['table_names'];
 	}
 
+    /**
+     * Get the info of table
+     * @param $table_name
+     * @param bool $constrain_by_prefix
+     * @author Cici
+     * @datetime 2018/03/6
+     */
+	public function table_info($table_name = '', $constrain_by_prefix = FALSE) {
+        // Is there a cached result?
+        if ($table_name != '') {
+            $table_name = $this->protect_identifiers($table_name, TRUE, FALSE, FALSE);
+        }
+        if ($table_name == '' && isset($this->data_cache['table_info'])) {
+            return $this->data_cache['table_info'];
+        } elseif (isset($this->data_cache['table_info'][$table_name])) {
+            return $this->data_cache['table_info'][$table_name];
+        }
+
+        if (FALSE === ($sql = $this->_table_info($table_name, $constrain_by_prefix)))
+        {
+            return ($this->db_debug) ? $this->display_error('db_unsupported_function') : FALSE;
+        }
+
+        $this->data_cache['table_info'] = array();
+        $query = $this->query($sql);
+
+        foreach ($query->result_object() as $row) {
+            $retval = new stdClass();
+            $retval->name = $row->Name;
+            $retval->comment = $row->Comment;
+
+            $this->data_cache['table_info'][$row->Name] = $retval;
+        }
+
+        // var_dump($this->data_cache['table_names']);
+        return $table_name == '' ? $this->data_cache['table_info'] : $this->data_cache['table_info'][$table_name];
+    }
+
 	// --------------------------------------------------------------------
 
 	/**

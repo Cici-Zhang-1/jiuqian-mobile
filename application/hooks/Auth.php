@@ -71,7 +71,7 @@ class Auth {
 	 * 判断是否是执行登录/登出操作
 	 */
 	private function _is_sign_page(){
-	    return preg_match('/^sign\//', uri_string());
+	    return preg_match('/^sign\/|^generate/', uri_string());
 	}
 }
 

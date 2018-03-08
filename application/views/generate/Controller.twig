@@ -2,28 +2,20 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * {{ title | title | replace({'_': ' '}) }} Controller
+ * { title | title | replace({'_': ' '}) } Controller
  *
  * @package  CodeIgniter
  * @category Controller
  */
 class {{ title | capitalize }} extends MY_Controller {
 
-    /**
-{% for model in models %}
-     * @param {{ model | capitalize }}
-{% endfor %}
-     */
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller {{ tittle | capitalize }} __construct Start!');
-{% for model in models %}
-        $this->load->model('{{ model }}');
-{% endfor %}
+        $this->load->model('{{ dirs }}/{{ model }}');
     }
 
     /**
-    * Displays a listing of {{ plural | lower | replace({'_': ' '}) }}.
     *
     * @return void
     */
@@ -38,7 +30,6 @@ class {{ title | capitalize }} extends MY_Controller {
     }
 
     /**
-     * Shows the form for creating a new {{ singular | lower | replace({'_': ' '}) }}.
      *
      * @return void
      */
@@ -57,12 +48,10 @@ class {{ title | capitalize }} extends MY_Controller {
     }
 
     /**
-    * Shows the form for editing the specified {{ singular | lower | replace({'_': ' '}) }}.
     *
-    * @param  int $id
     * @return void
     */
-    public function edit($id) {
+    public function edit() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
             $Where = $Post['selected'];
@@ -78,15 +67,14 @@ class {{ title | capitalize }} extends MY_Controller {
     }
 
     /**
-     * Deletes the specified {{ singular | lower | replace({'_': ' '}) }} from storage.
-     * 
+     *
      * @param  int $id
      * @return void
      */
-    public function remove($id) {
+    public function remove() {
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('selected', true);
-            if ($this->{{ model }}->delete($Where) {
+            if ($this->{{ model }}->delete($Where)) {
                 $this->Message = '删除成功，刷新后生效!';
             } else {
                 $this->Code = EXIT_ERROR;

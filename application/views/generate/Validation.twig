@@ -1,0 +1,68 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+$config['{{ module }}/{{ title }}/add'] = array(
+{% for key, config in configs %}
+    {% if config.name != 'v' %}
+        {% if loop.last %}
+        array (
+            'field' => '{{ config.name }}',
+            'label' => '{{ config.comment }}',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        )
+        {% else %}
+        array (
+            'field' => '{{ config.name }}',
+            'label' => '{{ config.comment }}',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        ),
+        {% endif %}
+    {% endif %}
+{% endfor %}
+);
+
+$config['{{ module }}/{{ title }}/edit'] = array(
+{% for key, config in configs %}
+    {% if config.name == 'v' %}
+        {% if loop.last %}
+        array(
+            'field' => 'selected',
+            'label' => '编号',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        )
+        {% else %}
+        array(
+            'field' => 'selected',
+            'label' => '编号',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        ),
+        {% endif %}
+    {% else %}
+        {% if loop.last %}
+        array (
+            'field' => '{{ config.name }}',
+            'label' => '{{ config.comment }}',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        )
+        {% else %}
+        array (
+            'field' => '{{ config.name }}',
+            'label' => '{{ config.comment }}',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        ),
+        {% endif %}
+    {% endif %}
+{% endfor %}
+);
+
+$config['{{ module }}/{{ title }}/remove'] = array(
+{% for key, config in configs %}
+    {% if config.name == 'v' %}
+        array(
+            'field' => 'selected[]',
+            'label' => '选择项',
+            'rules' => 'trim|{{ config.rules | join('|') }}'
+        )
+    {% endif %}
+{% endfor %}
+);

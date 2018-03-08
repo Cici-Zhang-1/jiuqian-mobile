@@ -2,21 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * {{ name | title | replace({'_': ' '}) }} Model
+ * {{ title }} Model
  *
  * @package  CodeIgniter
  * @category Model
-{% if type == 'doctrine' %}
- *
- * @Entity
- * @Table(name="{{ name }}")
-{% endif %}
  */
-class {{ name | capitalize }} extends MY_Model {
+class {{ title }} extends MY_Model {
 
     public function __construct(){
         parent::__construct(__DIR__, __CLASS__);
-        log_message('debug', 'Model {{ name }} Start!');
+        log_message('debug', 'Model {{ dirs }}/{{ title }} Start!');
     }
 
     /**
@@ -47,7 +42,7 @@ class {{ name | capitalize }} extends MY_Model {
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
-        if($this->HostDb->insert('card', $Data)){
+        if($this->HostDb->insert('{{ table['name'] }}', $Data)){
             $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
         } else {
@@ -64,7 +59,7 @@ class {{ name | capitalize }} extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format($value, $Item);
         }
-        if($this->HostDb->insert_batch('table['name']', $Data)){
+        if($this->HostDb->insert_batch('{{ table['name'] }}', $Data)){
             $this->remove_cache($this->_Module);
             return true;
         } else {

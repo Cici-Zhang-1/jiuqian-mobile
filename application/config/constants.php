@@ -110,7 +110,7 @@ define('CLIENT_MULTI_RESULTS', 131072);
 
 // 定义当前请求的系统常量
 define('NOW_TIME',      $_SERVER['REQUEST_TIME']);
-define('REQUEST_METHOD',$_SERVER['REQUEST_METHOD']);
+define('REQUEST_METHOD',isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET');
 define('IS_GET',        REQUEST_METHOD =='GET' ? true : false);
 define('IS_POST',       REQUEST_METHOD =='POST' ? true : false);
 define('IS_PUT',        REQUEST_METHOD =='PUT' ? true : false);
@@ -168,3 +168,6 @@ define('MIN_B_AREA', 0.01);
 
 define('MIN_PAGESIZE', 10);
 define('MAX_PAGESIZE', 1000);
+
+defined('YES')                              OR define('YES', 1);
+defined('NO')                               OR define('NO', 0);

@@ -437,6 +437,27 @@ class CI_DB_mysqli_driver extends CI_DB {
 		return $sql;
 	}
 
+    /**
+     * Status table query
+     * @param $table_name
+     * @param bool $prefix_limit
+     * @return string
+     * @author Cici
+     * @datetime 2018/03/05
+     */
+	protected function _table_info($table = '', $prefix_limit = FALSE) {
+        $sql = 'SHOW TABLE STATUS FROM '.$this->escape_identifiers($this->database);
+
+        if ($prefix_limit !== FALSE && $this->dbprefix !== '')
+        {
+            $sql =  $sql." LIKE '".$this->escape_like_str($this->dbprefix)."%'";
+        }
+        if ($table != '') {
+            $sql = $sql . ' WHERE Name = "' . $this->protect_identifiers($table, TRUE, FALSE, FALSE) . '"';
+        }
+
+        return $sql;
+    }
 	// --------------------------------------------------------------------
 
 	/**
@@ -462,7 +483,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	public function field_data($table)
 	{
-		if (($query = $this->query('SHOW COLUMNS FROM '.$this->protect_identifiers($table, TRUE, NULL, FALSE))) === FALSE)
+		if (($query = $this->query('SHOW FULL COLUMNS FROM '.$this->protect_identifiers($table, TRUE, NULL, FALSE))) === FALSE)
 		{
 			return FALSE;
 		}
@@ -480,7 +501,9 @@ class CI_DB_mysqli_driver extends CI_DB {
 			);
 
 			$retval[$i]->default		= $query[$i]->Default;
+			$retval[$i]->null           = $query[$i]->Null === 'NO' ? NO : YES;
 			$retval[$i]->primary_key	= (int) ($query[$i]->Key === 'PRI');
+			$retval[$i]->comment        = $query[$i]->Comment;   // Extend By Cici 20180305
 		}
 
 		return $retval;
