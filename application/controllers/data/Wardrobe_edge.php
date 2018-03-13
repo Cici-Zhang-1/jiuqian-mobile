@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 衣柜封边
  */
-class Wardrobe_edge extends CWDMS_Controller{
+class Wardrobe_edge extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

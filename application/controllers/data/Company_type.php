@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Company_type extends CWDMS_Controller{
+class Company_type extends MY_Controller{
 	private $Module = 'data';
 	private $Item = '';
 	public function __construct(){

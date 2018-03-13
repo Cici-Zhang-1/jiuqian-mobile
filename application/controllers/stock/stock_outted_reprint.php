@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Stock_outted_reprint extends CWDMS_Controller{
+class Stock_outted_reprint extends MY_Controller{
     private $_Module = 'stock';
     private $_Controller ;
     private $_Item ;

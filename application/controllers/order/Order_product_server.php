@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_server extends CWDMS_Controller{
+class Order_product_server extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

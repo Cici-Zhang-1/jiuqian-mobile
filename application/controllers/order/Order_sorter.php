@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 
  * 下单排行榜
  */
-class Order_sorter extends CWDMS_Controller{
+class Order_sorter extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

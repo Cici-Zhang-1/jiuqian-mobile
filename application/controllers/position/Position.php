@@ -8,7 +8,7 @@
  * Desc: 库位管理
  */
 
-class Position extends CWDMS_Controller{
+class Position extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 售后修改
  */
-class Post_sale extends CWDMS_Controller{
+class Post_sale extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

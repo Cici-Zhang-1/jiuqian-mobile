@@ -35,8 +35,9 @@ class Generate extends MY_Controller {
             echo 'Please Give the name';
             exit();
         }
+
         echo "Start...\n";
-        if ($Type != '' && method_exists(__CLASS__, '_' . $Type)) {
+        if ($Type != false && method_exists(__CLASS__, '_' . $Type)) {
             $Method = '_' . $Type;
             $this->$Method();
         } else {

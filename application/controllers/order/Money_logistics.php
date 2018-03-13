@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 物流代收
  */
-class Money_logistics extends CWDMS_Controller{
+class Money_logistics extends MY_Controller{
     private $_Module = 'order';
     private $_Item ;
     private $_Cookie ;

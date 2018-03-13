@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 流程节点记录
  */
 
-class Workflow_msg extends CWDMS_Controller{
+class Workflow_msg extends MY_Controller{
     private $_Module = 'data';
     private $_Controller;
     private $_Item;

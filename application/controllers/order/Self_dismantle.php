@@ -8,7 +8,7 @@
  * Desc:统计自己的拆单数据统计数据
  */
 
-class Self_dismantle extends CWDMS_Controller{
+class Self_dismantle extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

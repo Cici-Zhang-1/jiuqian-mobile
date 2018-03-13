@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Workflow extends CWDMS_Controller{
+class Workflow extends MY_Controller{
 	private $Module = 'manage';
 	private $Item = '';
 	public function __construct($Alias = ''){

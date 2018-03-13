@@ -5,7 +5,7 @@
  * @version
  * @des
  */
-class Dismantle_g extends CWDMS_Controller{
+class Dismantle_g extends MY_Controller{
     public function __construct(){
         log_message('debug', 'Controller Order/Dismantle_g eStart!');
         parent::__construct();

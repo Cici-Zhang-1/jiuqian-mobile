@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 等待核价
  */
  
-class Wait_check extends CWDMS_Controller{
+class Wait_check extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

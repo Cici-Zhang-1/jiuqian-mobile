@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 封边
  */
-class Edge extends CWDMS_Controller{
+class Edge extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

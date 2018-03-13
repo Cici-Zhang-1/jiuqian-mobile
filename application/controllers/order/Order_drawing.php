@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 获取相关图纸
  */
-class Order_drawing extends CWDMS_Controller{
+class Order_drawing extends MY_Controller{
     private $Module = 'order';
 
     public function __construct(){

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 经销商跟踪
  */
-class Dealer_trace extends CWDMS_Controller{
+class Dealer_trace extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

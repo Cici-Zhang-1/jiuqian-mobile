@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 任务等级
  */
-class Task_level extends CWDMS_Controller{
+class Task_level extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

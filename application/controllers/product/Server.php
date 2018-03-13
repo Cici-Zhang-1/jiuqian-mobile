@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 服务类产品
  */
-class Server extends CWDMS_Controller{
+class Server extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

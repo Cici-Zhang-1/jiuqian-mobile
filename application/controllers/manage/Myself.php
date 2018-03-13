@@ -6,7 +6,7 @@
  * @description  
  * 个人中心
  */
-class Myself extends CWDMS_Controller{
+class Myself extends MY_Controller{
 	private $_Module;
     private $_Controller;
     private $_Item ;

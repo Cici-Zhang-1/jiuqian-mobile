@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 发货详情
  */
-class Stock_outted_detail extends CWDMS_Controller{
+class Stock_outted_detail extends MY_Controller{
     private $_Module = 'stock';
     private $_Item ;
 

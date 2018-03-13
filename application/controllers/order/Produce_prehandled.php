@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 当前订单的预处理状态
  */
 
-class Produce_prehandled extends CWDMS_Controller{
+class Produce_prehandled extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

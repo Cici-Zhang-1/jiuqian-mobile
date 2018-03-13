@@ -6,7 +6,7 @@
  * Time: 14:02
  * Description: 记录用户登录信息
  */
-class Signin extends CWDMS_Controller{
+class Signin extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 经销商欠款
  */
-class Dealer_money extends CWDMS_Controller{
+class Dealer_money extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

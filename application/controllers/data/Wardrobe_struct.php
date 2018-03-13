@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Wardrobe_struct extends CWDMS_Controller{
+class Wardrobe_struct extends MY_Controller{
     private $Module = 'data';
     private $Item = '';
     public function __construct(){

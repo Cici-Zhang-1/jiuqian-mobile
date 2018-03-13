@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 清理配件
  */
-class Order_clear_fitting extends CWDMS_Controller{
+class Order_clear_fitting extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 拆单
  */
-class Dismantle extends CWDMS_Controller{
+class Dismantle extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 售后服务中外购
  */
-class Post_sale_g extends CWDMS_Controller{
+class Post_sale_g extends MY_Controller{
     public function __construct(){
         log_message('debug', 'Controller Order/Post_sale_g eStart!');
         parent::__construct();

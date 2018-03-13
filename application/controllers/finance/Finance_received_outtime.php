@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 非及时到账
  */
-class Finance_received_outtime extends CWDMS_Controller{
+class Finance_received_outtime extends MY_Controller{
     private $_Module = 'finance';
     private $_Controller;
     private $_Item ;

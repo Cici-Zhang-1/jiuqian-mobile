@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Workflow_node extends CWDMS_Controller{
+class Workflow_node extends MY_Controller{
 	private $Module = 'manage';
 	
 	public function __construct(){

@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class User extends CWDMS_Controller{
+class User extends MY_Controller{
 	private $_Module = 'manage';
 	private $_Controller;
 	private $_Item;

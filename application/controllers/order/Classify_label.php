@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Classify_label extends CWDMS_Controller{
+class Classify_label extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

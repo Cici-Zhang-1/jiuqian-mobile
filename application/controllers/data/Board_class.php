@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 板材等级
  */
-class Board_class extends CWDMS_Controller{
+class Board_class extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

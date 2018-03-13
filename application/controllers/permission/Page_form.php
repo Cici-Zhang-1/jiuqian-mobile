@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: 页面表单管理
  */
 
-class Page_form extends CWDMS_Controller {
+class Page_form extends MY_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('permission/page_form_model');

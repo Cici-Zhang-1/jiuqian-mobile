@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 产品类型
  */
-class Product extends CWDMS_Controller{
+class Product extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

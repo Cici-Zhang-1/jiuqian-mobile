@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 衣柜结构之打孔
  */
-class Wardrobe_punch extends CWDMS_Controller{
+class Wardrobe_punch extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

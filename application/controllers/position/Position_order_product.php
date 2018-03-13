@@ -8,7 +8,7 @@
  * Desc: 库位与订单对应
  */
 
-class Position_order_product extends CWDMS_Controller{
+class Position_order_product extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

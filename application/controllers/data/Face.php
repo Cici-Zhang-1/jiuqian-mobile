@@ -8,7 +8,7 @@
  * Desc: 单双面
  */
 
-class Face extends CWDMS_Controller{
+class Face extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

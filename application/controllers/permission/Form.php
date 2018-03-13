@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: 表单管理
  */
 
-class Form extends CWDMS_Controller {
+class Form extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

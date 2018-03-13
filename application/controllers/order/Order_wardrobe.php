@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 衣柜柜体
  */
-class Order_wardrobe extends CWDMS_Controller{
+class Order_wardrobe extends MY_Controller{
     private $Module = 'order';
 
     public function __construct(){

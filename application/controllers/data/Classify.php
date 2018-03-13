@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 板材归类
  */
-class Classify extends CWDMS_Controller{
+class Classify extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item ;

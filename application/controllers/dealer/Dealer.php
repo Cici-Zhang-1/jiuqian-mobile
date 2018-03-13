@@ -6,7 +6,7 @@
  * @description
  * 经销商
  */
-class Dealer extends CWDMS_Controller{
+class Dealer extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Dismantle_w extends CWDMS_Controller{
+class Dismantle_w extends MY_Controller{
     private $_EditParam;
     public function __construct(){
         log_message('debug', 'Controller Order/Dismantle_w eStart!');

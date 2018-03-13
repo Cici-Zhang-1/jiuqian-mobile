@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Board_thick extends CWDMS_Controller{
+class Board_thick extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 出厂方式
  */
-class Out_method extends CWDMS_Controller{
+class Out_method extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

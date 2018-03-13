@@ -34,29 +34,51 @@ class Permission {
         $Model = $P . '_model';
         $Param = '_' . name_to_id($P, true);
         $this->_CI->load->model('permission/' . $Model);
+        echo $this->_Ugid;
+        echo $this->_Mid;
         return $this->_Mid && $this->$Param = $this->_CI->$Model->select_allowed($this->_Ugid, $this->_Mid);
     }
-    public function get_allowed_func($Attr) {
+
+    /**
+     * 获取准许的func
+     * @param $Attr // Field_data
+     * @return array
+     */
+    public function get_allowed_func($Attr = false) {
         $Return = array();
         if ($this->_allowed('func')) {
             if (is_array($Attr)) {
-                foreach ($this->_Func as $key => $value) {
+                foreach ($this->_Func as $key => $Value) {
+                    if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
+                        $Value['img'] = $Matched[1];
+                    }
+                    $Value['forms'] = $this->get_allowed_form();
                     foreach ($Attr as $ivalue) {
-                        $Return[$value['fid']][$ivalue] = $value[$ivalue];
+                        $Return[$Value['fid']][$ivalue] = $Value[$ivalue];
                     }
                 }
             }elseif (is_string($Attr)) {
-                foreach ($this->_Func as $key => $value) {
-                    $Return[$value['fid']] = $value[$Attr];
+                foreach ($this->_Func as $key => $Value) {
+                    if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
+                        $Value['img'] = $Matched[1];
+                    }
+                    $Value['forms'] = $this->get_allowed_form();
+                    $Return[$Value['fid']] = $Value[$Attr];
                 }
             }else {
-                $Return = $this->_Func;
+                foreach ($this->_Func as $Key => $Value) {
+                    if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
+                        $Value['img'] = $Matched[1];
+                    }
+                    $Value['forms'] = $this->get_allowed_form();
+                    $Return[$Key] = $Value;
+                }
             }
         }
         return $Return;
     }
 
-    public function get_allowed_form($Attr) {
+    public function get_allowed_form($Attr = false) {
         $Return = array();
         if ($this->_allowed('form')) {
             if (is_array($Attr)) {
@@ -79,7 +101,7 @@ class Permission {
         return $Return;
     }
 
-    public function get_allowed_page_search($Attr) {
+    public function get_allowed_page_search($Attr = false) {
         $Return = array();
         if ($this->_allowed('page_search')) {
             if (is_array($Attr)) {
@@ -99,27 +121,32 @@ class Permission {
         return $Return;
     }
 
-    public function get_allowed_card($Attr) {
+    public function get_allowed_card($Attr = false) {
         $Return = array();
         if ($this->_allowed('card')) {
             if (is_array($Attr)) {
                 foreach ($this->_Card as $key => $value) {
+                    $value['elements'] = $this->get_allowed_element();
                     foreach ($Attr as $ivalue) {
                         $Return[$value['cid']][$ivalue] = $value[$ivalue];
                     }
                 }
             }elseif (is_string($Attr)) {
                 foreach ($this->_Card as $key => $value) {
+                    $value['elements'] = $this->get_allowed_element();
                     $Return[$value['cid']] = $value[$Attr];
                 }
             }else {
-                $Return = $this->_Card;
+                foreach ($this->_Card as $key => $value) {
+                    $value['elements'] = $this->get_allowed_element();
+                    $Return = $this->_Card;
+                }
             }
         }
         return $Return;
     }
 
-    public function get_allowed_element($Attr) {
+    public function get_allowed_element($Attr = false) {
         $Return = array();
         if ($this->_allowed('element')) {
             if (is_array($Attr)) {

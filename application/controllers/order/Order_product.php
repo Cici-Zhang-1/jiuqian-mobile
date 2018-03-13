@@ -8,7 +8,7 @@
  *
  * Desc:
  */
-class Order_product extends CWDMS_Controller {
+class Order_product extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 电子锯
  */
-class Table_saw extends CWDMS_Controller{
+class Table_saw extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

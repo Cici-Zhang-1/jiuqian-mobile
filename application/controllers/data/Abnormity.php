@@ -6,7 +6,7 @@
  * @description  
  * 基本异性
  */
-class Abnormity extends CWDMS_Controller{
+class Abnormity extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

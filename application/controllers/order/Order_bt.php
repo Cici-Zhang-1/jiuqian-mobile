@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * bt急的订单
  */
-class Order_bt extends CWDMS_Controller{
+class Order_bt extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

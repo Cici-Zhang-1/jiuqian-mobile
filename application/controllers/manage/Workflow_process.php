@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Workflow_process extends CWDMS_Controller{
+class Workflow_process extends MY_Controller{
 	private $Module = 'manage';
 	
 	private $RelationType = array(

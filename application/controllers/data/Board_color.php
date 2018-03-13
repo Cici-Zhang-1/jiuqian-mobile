@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 板材颜色
  */
-class Board_color extends CWDMS_Controller{
+class Board_color extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

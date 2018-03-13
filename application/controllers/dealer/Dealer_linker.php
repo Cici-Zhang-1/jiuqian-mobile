@@ -7,7 +7,7 @@
 *Author: Zhangcc
 *Date:2015-4-26
 **/
-class Dealer_linker extends CWDMS_Controller{
+class Dealer_linker extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

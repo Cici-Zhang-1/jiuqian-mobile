@@ -97,19 +97,6 @@ if(!function_exists('gh_header_content_type')){
     }
 }
 
-
-
-if(!function_exists('gh_array_empty')){
-	/**
-	 * 是否为空数组
-	 * @param unknown $AParam
-	 */
-	function gh_array_empty($AParam){
-		$String = implode('', $AParam);
-		return empty($String);
-	}
-}
-
 if(!function_exists('isAjax')){
 	function isAjax() {
 		if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) ) {

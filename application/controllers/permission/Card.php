@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: Card管理
  */
 
-class Card extends CWDMS_Controller {
+class Card extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

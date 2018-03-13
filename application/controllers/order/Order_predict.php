@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 销售预计
  */
-class Order_predict extends CWDMS_Controller{
+class Order_predict extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

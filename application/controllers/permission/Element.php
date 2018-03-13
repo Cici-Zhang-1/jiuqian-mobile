@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: Element管理
  */
 
-class Element extends CWDMS_Controller {
+class Element extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

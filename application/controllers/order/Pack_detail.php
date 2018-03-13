@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 包装扫描详情
  */
-class Pack_detail extends CWDMS_Controller{
+class Pack_detail extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

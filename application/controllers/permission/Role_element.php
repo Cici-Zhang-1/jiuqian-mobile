@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Role_element extends CWDMS_Controller {
+class Role_element extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

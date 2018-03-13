@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 等待包装列表
  */
 
-class Pack extends CWDMS_Controller{
+class Pack extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

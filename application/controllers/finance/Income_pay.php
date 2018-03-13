@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Income_pay extends CWDMS_Controller{
+class Income_pay extends MY_Controller{
     private $_Module = 'finance';
     private $_Controller;
     private $_Item ;

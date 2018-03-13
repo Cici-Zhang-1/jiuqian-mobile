@@ -4,92 +4,97 @@
  * @author Cici
  * @version
  * @description
+ * 权限许可视图
  */
 
 ?>
-<div class="page-line" id="{{ title }}">
-    <div class="my-tools col-md-12">
-        <div class="col-md-3">
-            <div class="input-group" id="{{ title }}Search" data-toggle="filter" data-target="#{{ title }}Table">
-                {% if page_searches.length > 0 %}
-                    <span class="input-group-btn">
+<div class="row j-page" id="{{ id }}">
+    <div class="col-md-3 j-page-search">
+        <div class="input-group" id="{{ title }}Search" data-toggle="filter" data-target="#{{ title }}Table">
+            {% if page_searches.length > 0 %}
+                <span class="input-group-btn">
                         <button class="btn btn-default" type="button" data-toggle="modal" data-target="#{{ tittle }}FilterModal"><i class="fa fa-search"></i></button>
                     </span>
-                    {% for item in page_search %}
-                        <input type="{{ item.type }}" class="form-control" name="{{ item.label }}" value="{{ item.dv }}" placeholder="{{ item.label }}"/>
-                    {% endfor %}
-                    <span class="input-group-btn">
+                {% for item in page_search %}
+                    <input type="{{ item.type }}" class="form-control" name="{{ item.label }}" value="{{ item.dv }}" placeholder="{{ item.label }}"/>
+                {% endfor %}
+                <span class="input-group-btn">
                         <button class="btn btn-default" type="submit">Go!</button>
                     </span>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-md-offset-3 col-md-6 text-right" id="{{ title }}Function">
-            {% if func_group.length > 0 %}
-                <div class="btn-groups" role="group">
-                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        共选中<span id="{{ title }}TableSelected" data-num="">0</span>项
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu" data-table="#{{ title }}Table">
-                        {% for item in func_group %}
-                            <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url({{ item.url }});?>" data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
-                            {% if not loop.last %}
-                                <li role="separator" class="divider"></li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
             {% endif %}
-            {% for item in funcs %}
-                {% if item.tag == 'button' %}
-                    <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
-                {% elseif item.tag == 'a' %}
-                    <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple }}>><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
-                {% endif %}
-            {% endfor %}
         </div>
+    </div>
+    <div class="col-md-9 text-right j-func" id="{{ title }}Function">
+        {% if func_group.length > 0 %}
+            <div class="btn-groups" role="group">
+                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    共选中<span id="{{ title }}TableSelected" data-num="">0</span>项
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" data-table="#{{ title }}Table">
+                    {% for item in func_group %}
+                        <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url({{ item.url }});?>" data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
+                        {% if not loop.last %}
+                            <li role="separator" class="divider"></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% for item in funcs %}
+            {% if item.tag == 'button' %}
+                <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
+            {% elseif item.tag == 'a' %}
+                <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple }}>><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
+            {% endif %}
+        {% endfor %}
     </div>
     {% for card in cards %}
         {% set elements = card.elements %}
-    <div class="my-table col-md-12">
-        <table class="table table-bordered table-striped table-hover table-responsive table-condensed" id="{{ title }}Table" data-load="<?php echo site_url({{ card.url }});?>">
-            <thead>
-                <tr>
-                    <th class="td-xs checkall" data-name="selected" data-checkall=false>#</th>
-                    {% for item in elements %}
-                        {% if item.checked %}
-                            <th class="{{ item.classes }}" data-name="{{ item.name }}">{{ item.label }}</th>
-                        {% else %}
-                            <th class="hide {{ item.classes }}" data-name="{{ item.name }}">{{ item.label }}</th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-            <tr class="loading"><td colspan="15">加载中...</td></tr>
-            <tr class="no-data"><td colspan="15">没有数据</td></tr>
-            <tr class="model">
-                <td ><input name="v"  type="checkbox" value=""/></td>
-                {% for item in elements %}
-                    {% if item.checked %}
-                        <td class="{{ item.classes }}" name="{{ item.name }}"></td>
-                    {% else %}
-                        <td class="hide {{ item.classes }}" name="{{ item.name }}"></td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-            </tbody>
-        </table>
-        <div class="hide btn-group pull-right paging">
-            <p class="footnote"></p>
-            <ul class="pagination">
-                <li><a href="1">首页</a></li>
-                <li class=""><a href="javascript:void(0);" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                <li><a href=""></a></li>
-                <li class=""><a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-                <li><a href="">尾页</a></li>
-            </ul>
+    <div class="j-panel col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table table-bordered table-striped table-hover table-responsive table-condensed" id="{{ title }}Table" data-load="<?php echo site_url({{ card.url }});?>">
+                    <thead>
+                        <tr>
+                            <th class="td-xs checkall" data-name="selected" data-checkall=false>#</th>
+                            {% for item in elements %}
+                                {% if item.checked %}
+                                    <th class="{{ item.classes }}" data-name="{{ item.name }}">{{ item.label }}</th>
+                                {% else %}
+                                    <th class="hide {{ item.classes }}" data-name="{{ item.name }}">{{ item.label }}</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="loading"><td colspan="15">加载中...</td></tr>
+                    <tr class="no-data"><td colspan="15">没有数据</td></tr>
+                    <tr class="model">
+                        <td ><input name="v"  type="checkbox" value=""/></td>
+                        {% for item in elements %}
+                            {% if item.checked %}
+                                <td class="{{ item.classes }}" name="{{ item.name }}"></td>
+                            {% else %}
+                                <td class="hide {{ item.classes }}" name="{{ item.name }}"></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-footer">
+                <div class="hide btn-group pull-right paging">
+                    <p class="footnote"></p>
+                    <ul class="pagination">
+                        <li><a href="1">首页</a></li>
+                        <li class=""><a href="javascript:void(0);" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                        <li><a href=""></a></li>
+                        <li class=""><a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+                        <li><a href="">尾页</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
     {% endfor %}

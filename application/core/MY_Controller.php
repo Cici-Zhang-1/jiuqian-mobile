@@ -19,7 +19,7 @@ class MY_Controller extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		log_message('debug','Controller CWDMS_Controller/__construct Start');
+		log_message('debug','Controller MY_Controller/__construct Start');
 		$this->_init();
 	}
 
@@ -69,13 +69,11 @@ class MY_Controller extends CI_Controller
         $Item = $this->_Item.$View . $this->session->userdata('ugid');
         if (!file_exists(VIEWPATH . $Item . '.php') || file_expired(VIEWPATH . $Item . '.php', VIEW_EXPIRED)) {
             $this->load->library('permission');
-            $Data['Func'] = $this->permission->get_allowed_func('name');
-            $Data['Form'] = $this->permission->get_allowed_form('name');
-            $Data['PageSearch'] = $this->permission->get_allowed_page_search('name');
-            $Data['Card'] = $this->permission->get_allowed_card('name');
-            $Data['Element'] = $this->permission->get_allowed_element('name');
-            $this->load->library('template');
-            $this->template->generate($Item, $Data);
+            $Data['funcs'] = $this->permission->get_allowed_func();
+            $Data['page_searches'] = $this->permission->get_allowed_page_search();
+            $Data['cards'] = $this->permission->get_allowed_card();
+            $this->load->library('generate/generate');
+            $this->generate->create_view($Item, $Data);
         }
         $this->load->view($Item);
     }

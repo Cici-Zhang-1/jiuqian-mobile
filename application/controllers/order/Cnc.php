@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 封边
  */
-class Cnc extends CWDMS_Controller{
+class Cnc extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

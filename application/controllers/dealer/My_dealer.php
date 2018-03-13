@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class My_dealer extends CWDMS_Controller{
+class My_dealer extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc: 角色-菜单绑定
  */
-class Role_menu extends CWDMS_Controller {
+class Role_menu extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

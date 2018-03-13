@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc: 用户组管理
  */
-class Usergroup extends CWDMS_Controller{
+class Usergroup extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item ;

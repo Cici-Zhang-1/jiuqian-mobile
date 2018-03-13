@@ -8,13 +8,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Home extends CI_Controller {
 
-    public function __construct() {
+class Home extends MY_Controller{
+    public function __construct(){
         parent::__construct();
+        log_message('debug', 'Controller Home Start !');
     }
 
-    public function index() {
-        $this->load->view('home');
+    public function index(){
+        if ($GLOBALS['MOBILE']) {
+            $this->load->view('mobile/home'); // 加载移动页
+        } else {
+            $this->load->view('home'); // Load Desk Page
+        }
     }
 }

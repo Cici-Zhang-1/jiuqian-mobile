@@ -6,7 +6,7 @@
  * @description  
  * 供应商
  */
-class Supplier extends CWDMS_Controller{
+class Supplier extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

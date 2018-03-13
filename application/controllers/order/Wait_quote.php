@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 等待报价
  */
-class Wait_quote extends CWDMS_Controller{
+class Wait_quote extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

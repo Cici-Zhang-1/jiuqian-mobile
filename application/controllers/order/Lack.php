@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 差板件查询
  */
 
-class Lack extends CWDMS_Controller{
+class Lack extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

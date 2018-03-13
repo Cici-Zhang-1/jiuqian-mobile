@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 登记货号
  */
 
-class Cargo_no extends CWDMS_Controller{
+class Cargo_no extends MY_Controller{
     private $_Module = 'order';
     private $_Item ;
     private $_Cookie ;

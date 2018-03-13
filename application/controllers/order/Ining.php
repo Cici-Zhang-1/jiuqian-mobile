@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 正在入库
  */
-class Ining extends CWDMS_Controller{
+class Ining extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

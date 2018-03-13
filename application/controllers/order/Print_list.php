@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 打印清单
  */
-class Print_list extends CWDMS_Controller{
+class Print_list extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

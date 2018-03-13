@@ -8,7 +8,7 @@ $config['permission/menu_model/insert'] = array(
 	'url' => 'm_url',
 	'displayorder' => 'm_displayorder',
 	'img' => 'm_img',
-	'type' => 'm_type',
+	'page_type' => 'm_page_type',
 	'mobile' => 'm_mobile',
 );
 $config['permission/menu_model/update'] = array(
@@ -19,6 +19,6 @@ $config['permission/menu_model/update'] = array(
 	'url' => 'm_url',
 	'displayorder' => 'm_displayorder',
 	'img' => 'm_img',
-	'type' => 'm_type',
+	'page_type' => 'm_page_type',
 	'mobile' => 'm_mobile',
 );

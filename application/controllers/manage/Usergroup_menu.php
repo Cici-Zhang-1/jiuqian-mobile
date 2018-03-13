@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 用户组菜单权限
  */
-class Usergroup_menu extends CWDMS_Controller{
+class Usergroup_menu extends MY_Controller{
     private $_Module = 'manage';
     private $_Controller;
     private $_Item = '';

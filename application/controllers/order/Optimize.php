@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 优化列表
  */
-class Optimize extends CWDMS_Controller{
+class Optimize extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

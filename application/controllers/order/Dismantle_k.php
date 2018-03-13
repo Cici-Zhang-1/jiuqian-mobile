@@ -5,7 +5,7 @@
  * @version
  * @des
  */
-class Dismantle_k extends CWDMS_Controller{
+class Dismantle_k extends MY_Controller{
     private $_EditParam;
     public function __construct(){
         log_message('debug', 'Controller Order/Dismantle_k eStart!');

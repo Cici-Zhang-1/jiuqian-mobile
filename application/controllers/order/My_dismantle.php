@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 我的拆单(未拆的、正在拆的、已经拆单、已经删的)
  */
-class My_dismantle extends CWDMS_Controller{
+class My_dismantle extends MY_Controller{
     private $Module = 'order';
     private $_Controller;
     private $_Cookie;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 返款
  */
-class Finance_back extends CWDMS_Controller{
+class Finance_back extends MY_Controller{
     private $_Module = 'finance';
     private $_Controller;
     private $_Item ;

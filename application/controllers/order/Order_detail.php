@@ -6,7 +6,7 @@
  * @description  
  * 订单产品详情(产品、主材、面积、金额)
  */
-class Order_detail extends CWDMS_Controller{
+class Order_detail extends MY_Controller{
 	private $_Module = 'order';
 	private $_Controller;
 	private $_Item;

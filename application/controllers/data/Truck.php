@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 货车
  */
-class Truck extends CWDMS_Controller{
+class Truck extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

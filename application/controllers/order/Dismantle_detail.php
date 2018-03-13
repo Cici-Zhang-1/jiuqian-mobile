@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 拆单详情(板材、板块)
  */
-class Dismantle_detail extends CWDMS_Controller{
+class Dismantle_detail extends MY_Controller{
     private $Module = 'order';
 
     public function __construct(){

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_door extends CWDMS_Controller{
+class Order_product_door extends MY_Controller{
     private $Module = 'order';
 
     public function __construct(){

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 到厂付款
  */
-class Money_factory extends CWDMS_Controller{
+class Money_factory extends MY_Controller{
     private $_Module = 'order';
     private $_Item ;
     private $_Cookie ;

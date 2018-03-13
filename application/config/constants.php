@@ -171,3 +171,6 @@ define('MAX_PAGESIZE', 1000);
 
 defined('YES')                              OR define('YES', 1);
 defined('NO')                               OR define('NO', 0);
+
+defined('VIEW_EXPIRED')         OR define('VIEW_EXPIRED', MINUTES); // View file store time
+defined('FILE_FORCE_EXPIRED')   OR define('FILE_FORCE_EXPIRED', false);  // View file force expired

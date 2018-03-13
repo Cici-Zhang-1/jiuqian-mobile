@@ -6,7 +6,7 @@
  * @description  
  * 支付条款
  */
-class Payterms extends CWDMS_Controller{
+class Payterms extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

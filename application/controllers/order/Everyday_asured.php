@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 每日确认
  */
-class Everyday_asured extends CWDMS_Controller{
+class Everyday_asured extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

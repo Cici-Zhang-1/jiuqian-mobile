@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 包装统计
  */
-class Pack_statistics extends CWDMS_Controller{
+class Pack_statistics extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

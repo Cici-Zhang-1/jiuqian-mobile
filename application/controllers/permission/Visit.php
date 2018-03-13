@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Visit extends CWDMS_Controller {
+class Visit extends MY_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('permission/visit_model');

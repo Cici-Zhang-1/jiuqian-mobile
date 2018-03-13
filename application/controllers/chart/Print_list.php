@@ -7,10 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 打印清单
  */
-class Print_list extends CWDMS_Controller{
-    private $_Module = 'chart';
-    private $_Controller;
-    private $_Item;
+class Print_list extends MY_Controller{
+
     private $_Type;
     private $_Id;
     private $_Code;
@@ -23,21 +21,16 @@ class Print_list extends CWDMS_Controller{
 
     public function __construct(){
         parent::__construct();
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-        
         log_message('debug', 'Controller Chart/Print_list Start !');
     }
 
     public function index(){
         $View = $this->uri->segment(4, 'read');
-        if(method_exists(__CLASS__, '_'.$View)){
+        if(method_exists(__CLASS__, '_'.$View)){ // Condition View
             $View = '_'.$View;
             $this->$View();
-        }else{
-            $Item = $this->_Item.$View;
-            $Data['action'] = site_url($Item);
-            $this->load->view($Item, $Data);
+        }else{  // General View
+            $this->_index($View);
         }
     }
 

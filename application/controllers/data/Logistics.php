@@ -7,7 +7,7 @@
 *Author: Zhangcc
 *Date:2015-4-26
 **/
-class Logistics extends CWDMS_Controller{
+class Logistics extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

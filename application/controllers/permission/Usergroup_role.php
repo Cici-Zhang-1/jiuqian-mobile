@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc: 用户组-角色绑定
  */
-class Usergroup_role extends CWDMS_Controller {
+class Usergroup_role extends MY_Controller {
     private $_Module;
     private $_Controller;
     private $_Item ;

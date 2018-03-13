@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 橱柜柜体清单结算
  */
-class Produce_cabinet extends CWDMS_Controller{
+class Produce_cabinet extends MY_Controller{
     private $_Module;
     private $_Controller;
     private $_Item;

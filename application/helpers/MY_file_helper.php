@@ -29,3 +29,25 @@ if(! function_exists('delete_cache_files')){
 		return $return;
 	}
 }
+
+
+if (! function_exists('file_expired')) {
+    /**
+     * FUNCTION: 文件是否过期
+     * @param string $File file_name
+     * @param integer $Ttl time tick
+     * @return bool
+     */
+    function file_expired($File, $Ttl) {
+        if ( ! is_file($File)) {
+            return true;
+        }
+
+        $Time = FILE_FORCE_EXPIRED ? FILE_FORCE_EXPIRED : filemtime($File);
+
+        if ($Ttl > 0 && time() > $Time + $Ttl) {
+            return true;
+        }
+        return false;
+    }
+}

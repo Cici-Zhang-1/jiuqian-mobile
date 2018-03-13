@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Role_page_search extends CWDMS_Controller {
+class Role_page_search extends MY_Controller {
 
     public function __construct() {
         parent::__construct();

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 打印图纸
  */
-class Print_drawing extends CWDMS_Controller{
+class Print_drawing extends MY_Controller{
     private $_Module = 'drawing';
     private $_Controller;
     private $_Item ;

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 等待生产
  */
-class Wait_produce extends CWDMS_Controller{
+class Wait_produce extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item ;

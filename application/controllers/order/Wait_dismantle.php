@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Wait_dismantle extends CWDMS_Controller{
+class Wait_dismantle extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

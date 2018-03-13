@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 11:07
  */
 
-class Producing extends CWDMS_Controller{
+class Producing extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

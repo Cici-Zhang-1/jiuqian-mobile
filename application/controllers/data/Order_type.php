@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Order_type extends CWDMS_Controller{
+class Order_type extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

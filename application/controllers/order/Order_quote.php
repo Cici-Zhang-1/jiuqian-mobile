@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 生成报价单
  */
-class Order_quote extends CWDMS_Controller{
+class Order_quote extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

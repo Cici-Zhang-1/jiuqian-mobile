@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Des: 生产前的预处理,可以重新分类清单,可以一起导出给优化, 也可以重新划分分类
  */
 
-class Produce_prehandle extends CWDMS_Controller{
+class Produce_prehandle extends MY_Controller{
     private $_Module = 'order';
     private $_Controller;
     private $_Item;

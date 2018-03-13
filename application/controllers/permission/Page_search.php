@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: 页面搜索管理
  */
 
-class Page_search extends CWDMS_Controller {
+class Page_search extends MY_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('permission/page_search_model');

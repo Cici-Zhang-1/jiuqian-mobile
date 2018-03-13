@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Train extends CWDMS_Controller{
+class Train extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

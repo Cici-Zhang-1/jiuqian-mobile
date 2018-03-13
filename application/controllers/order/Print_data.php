@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 打印表格
  */
-class Print_data extends CWDMS_Controller{
+class Print_data extends MY_Controller{
     private $Module = 'order';
 
     public function __construct(){

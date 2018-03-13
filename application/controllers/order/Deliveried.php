@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 已发货
  */
-class Deliveried extends CWDMS_Controller{
+class Deliveried extends MY_Controller{
     private $_Module = 'order';
     private $_Item ;
     private $_Cookie ;

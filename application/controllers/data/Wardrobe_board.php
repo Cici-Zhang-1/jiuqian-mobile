@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 衣柜结构-之板材名称
  */
-class Wardrobe_board extends CWDMS_Controller{
+class Wardrobe_board extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;

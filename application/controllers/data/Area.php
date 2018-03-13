@@ -6,7 +6,7 @@
  * @description  
  * 地区列表
  */
-class Area extends CWDMS_Controller{
+class Area extends MY_Controller{
 	private $_Module;
 	private $_Controller;
 	private $_Item;

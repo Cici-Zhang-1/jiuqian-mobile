@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 添加测试数据
  */
-class Test extends CWDMS_Controller{
+class Test extends MY_Controller{
     private $Module = 'data';
     private $Item = '';
     public function __construct(){

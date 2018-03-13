@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 经销商组织结构
  */
-class Dealer_organization extends CWDMS_Controller{
+class Dealer_organization extends MY_Controller{
     private $_Module;
 	private $_Controller;
 	private $_Item;
