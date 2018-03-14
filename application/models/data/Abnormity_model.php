@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Abnormity_model extends Base_Model{
+class Abnormity_model extends MY_Model{
     private $_Module = 'data';
     private $_Model = 'abnormity_model';
     private $_Item;
@@ -21,7 +21,7 @@ class Abnormity_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.(Int)$PrintList.(Int)$Scan;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('abnormity');
             if(false !== $PrintList){
@@ -44,7 +44,7 @@ class Abnormity_model extends Base_Model{
     
     public function insert_abnormity($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('abnormity', $Data)){
             log_message('debug', "Model Abnormity_model/insert_abnormity Success!");
             $this->remove_cache($this->_Cache);
@@ -57,7 +57,7 @@ class Abnormity_model extends Base_Model{
     
     public function update_abnormity($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('a_id', $Where);
         $this->HostDb->update('abnormity', $Data);
         $this->remove_cache($this->_Cache);

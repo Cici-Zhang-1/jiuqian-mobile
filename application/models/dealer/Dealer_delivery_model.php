@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 发货
  */
-class Dealer_delivery_model extends Base_Model{
+class Dealer_delivery_model extends MY_Model{
     /**
      * 主要联系人
      */
@@ -35,7 +35,7 @@ class Dealer_delivery_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Did;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('dealer_delivery');
             $this->HostDb->join('area', 'a_id = dd_area_id', 'left');
@@ -93,7 +93,7 @@ class Dealer_delivery_model extends Base_Model{
      */
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if(!isset($Data['dd_default']) || ($this->_Default == $Data['dd_default'])){
             log_message('debug', '新建时设为默认发货信息');
             $Data['dd_default'] = $this->_Default;
@@ -124,7 +124,7 @@ class Dealer_delivery_model extends Base_Model{
      */
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         
         if($this->_Default == $Data['dd_default']){
             $this->_update_dealer_delivery_undefault($Data['dd_dealer_id']);

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Product_model extends Base_Model{
+class Product_model extends MY_Model{
     private $_Module = 'product';
     private $_Model;
     private $_Item;
@@ -23,7 +23,7 @@ class Product_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Type;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('product');
             
@@ -46,7 +46,7 @@ class Product_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('product');
             $this->HostDb->where('p_delete', 0);
@@ -71,7 +71,7 @@ class Product_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('product');
             $this->HostDb->where('p_name', '配件');
@@ -123,7 +123,7 @@ class Product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode(',', $Ids);
         $Return = array();
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('product')->where_in('p_id', $Ids)->get();
             if($Query->num_rows() > 0){
                 $Return = $Query->result_array();
@@ -136,7 +136,7 @@ class Product_model extends Base_Model{
     
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('product', $Data)){
             log_message('debug', "Model Product_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -149,7 +149,7 @@ class Product_model extends Base_Model{
 
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('p_id', $Where);
         $this->HostDb->update('product', $Data);
         $this->remove_cache($this->_Cache);

@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Logistics_model extends Base_Model{
+class Logistics_model extends MY_Model{
     private $_Module = 'data';
     private $_Model;
     private $_Item;
@@ -25,7 +25,7 @@ class Logistics_model extends Base_Model{
 	    $Item = $this->_Item.__FUNCTION__;
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('logistics');
 	        $this->HostDb->join('area', 'a_id = l_area_id', 'left');
@@ -49,7 +49,7 @@ class Logistics_model extends Base_Model{
 	
 	public function insert($Data){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 	    if($this->HostDb->insert('logistics', $Data)){
 	        log_message('debug', "Model logistics_model/insert Success!");
 	        $this->remove_cache($this->_Cache);
@@ -62,7 +62,7 @@ class Logistics_model extends Base_Model{
 	
 	public function update($Data, $Where){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 	    $this->HostDb->where('l_id', $Where);
 	    $this->HostDb->update('logistics', $Data);
 	    $this->remove_cache($this->_Cache);

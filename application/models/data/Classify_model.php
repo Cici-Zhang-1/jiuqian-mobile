@@ -6,7 +6,7 @@
  * @description  
  * 菜单管理
  */
-class Classify_model extends Base_Model{
+class Classify_model extends MY_Model{
     private $_Module;
     private $_Model;
     private $_Item;
@@ -29,7 +29,7 @@ class Classify_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $Query = $this->HostDb->select($Sql)->from('classify')->get();
 	        if($Query->num_rows() > 0){
 	            $Return = $Query->result_array();
@@ -48,7 +48,7 @@ class Classify_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                 ->from('classify')
                 ->where('c_class', 0)
@@ -71,7 +71,7 @@ class Classify_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $Query = $this->HostDb->select($Sql)
 	                               ->from('classify')
 	                               ->where('c_class > 0')
@@ -93,7 +93,7 @@ class Classify_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $Query = $this->HostDb->select($Sql)
 	                       ->from('classify')
 	                       ->where('c_class', 0)
@@ -113,7 +113,7 @@ class Classify_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $Query = $this->HostDb->select($Sql)
                             	        ->from('classify')
                             	        ->where('c_class', 0)
@@ -163,7 +163,7 @@ class Classify_model extends Base_Model{
 	
 	public function insert($Data){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 		if($this->HostDb->insert('classify', $Data)){
 			$this->remove_cache($this->_Module);
 			return $this->HostDb->insert_id();
@@ -180,7 +180,7 @@ class Classify_model extends Base_Model{
 	 */
 	public function update($Data, $Cid){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 		$this->HostDb->where('c_id', $Cid);
 		$this->HostDb->update('classify', $Data);
 		$this->remove_cache('classify');

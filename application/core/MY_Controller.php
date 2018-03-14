@@ -25,10 +25,15 @@ class MY_Controller extends CI_Controller
 
     private function _init() {
         $this->_Module = $this->router->directory;
+        log_message('debug', 'For Contoller Module is ' . $this->_Module);
         $this->_Controller = $this->router->class;
+        log_message('debug', 'For Contoller _Controller is ' . $this->_Controller);
         $this->_Item = $this->_Module.$this->_Controller.'/';
+        log_message('debug', 'For Contoller _Item is ' . $this->_Item);
         $this->_Validation = 'validation/' . $this->_Module . $this->_Controller . '_validation';
+        log_message('debug', 'For Contoller _Validation is ' . $this->_Validation);
         $this->_Cookie = str_replace('/', '_', $this->_Item);
+        log_message('debug', 'For Contoller _Cookie is ' . $this->_Cookie);
     }
 
     /**
@@ -69,6 +74,7 @@ class MY_Controller extends CI_Controller
         $Item = $this->_Item.$View . $this->session->userdata('ugid');
         if (!file_exists(VIEWPATH . $Item . '.php') || file_expired(VIEWPATH . $Item . '.php', VIEW_EXPIRED)) {
             $this->load->library('permission');
+            $Data['title'] = name_to_id($this->_Controller);
             $Data['funcs'] = $this->permission->get_allowed_func();
             $Data['page_searches'] = $this->permission->get_allowed_page_search();
             $Data['cards'] = $this->permission->get_allowed_card();
@@ -91,9 +97,9 @@ class MY_Controller extends CI_Controller
 	public function _ajax_return($Data = array()) {
 		$this->Message .= isset($GLOBALS['message'])?(is_array($GLOBALS['message'])?implode(',', $GLOBALS['message']):$GLOBALS['message']):'';
 		if (isset($_GET['callback'])) {
-            exit($_GET['callback'] . '(' .json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'contents' => $Data)) . ')');
+            exit($_GET['callback'] . '(' .json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'contents' => $Data)) . ')');
         }else {
-            exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'contents' => $Data)));
+            exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'contents' => $Data)));
         }
 	}
 
@@ -148,5 +154,20 @@ class MY_Controller extends CI_Controller
 	    }
 	    return $Return;
 	}
+
+    /**
+     * 获取配置信息
+     * @return array
+     */
+	protected function _get_configs() {
+        $this->load->model('manage/configs_model');
+        $Configs = array();
+        if (!!($Model = $this->configs_model->select())) {
+            foreach ($Model as $Key => $Value) {
+                $Configs[$Value['name']] = $Value['config'];
+            }
+        }
+        return $Configs;
+    }
 	
 }//end Base_Controller

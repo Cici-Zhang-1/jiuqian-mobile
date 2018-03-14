@@ -11,9 +11,9 @@
 <div class="row j-page" id="{{ title }}">
     <div class="col-md-3 j-page-search">
         <div class="input-group" id="{{ title }}Search" data-toggle="filter" data-target="#{{ title }}Table">
-            {% if page_searches.length > 0 %}
+            {% if page_searches | length > 0 %}
                 <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#{{ tittle }}FilterModal"><i class="fa fa-search"></i></button>
+                        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#{{ title }}FilterModal"><i class="fa fa-search"></i></button>
                     </span>
                 {% for item in page_search %}
                     <input type="{{ item.type }}" class="form-control" name="{{ item.label }}" value="{{ item.dv }}" placeholder="{{ item.label }}"/>
@@ -25,27 +25,51 @@
         </div>
     </div>
     <div class="col-md-9 text-right j-func" id="{{ title }}Function">
-        {% if func_group.length > 0 %}
-            <div class="btn-groups" role="group">
+        {% set flag = false %}
+        {% for item in funcs %}
+            {% if item.group_no is same as(flag) %}
+                    <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url('{{ item.url }}');?>" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
+            {% elseif item.group_no != '' and not(flag is same as(false)) %}
+                </ul>
+            </div>
+            <div class="btn-group" role="group">
                 <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                     共选中<span id="{{ title }}TableSelected" data-num="">0</span>项
                     <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu" role="menu" data-table="#{{ title }}Table">
-                    {% for item in func_group %}
-                        <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url({{ item.url }});?>" data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
-                        {% if not loop.last %}
-                            <li role="separator" class="divider"></li>
-                        {% endif %}
-                    {% endfor %}
+                <ul class="dropdown-menu" role="menu" data-table="{{ item.group_no }}">
+                    <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url('{{ item.url }}');?>" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
+                {% set flag = item.group_no %}
+            {% elseif item.group_no != '' and flag is same as(false) %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    共选中<span id="{{ title }}TableSelected" data-num="">0</span>项
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" data-table="{{ item.group_no }}">
+                    <li><a href="javascript:void(0);" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-action="<?php echo site_url('{{ item.url }}');?>" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a></li>
+                {% set flag = item.group_no %}
+            {% elseif item.group_no == '' and not(flag is same as(false)) %}
                 </ul>
             </div>
-        {% endif %}
-        {% for item in funcs %}
-            {% if item.tag == 'button' %}
-                <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
-            {% elseif item.tag == 'a' %}
-                <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple }}>><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
+                {% if item.tag == 'button' %}
+            <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
+                {% elseif item.tag == 'a' %}
+            <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
+                {% endif %}
+                {% set flag = false %}
+            {% elseif item.group_no == '' and flag is same as(false) %}
+                {% if item.tag == 'button' %}
+            <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
+                {% elseif item.tag == 'a' %}
+            <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
+                {% endif %}
+            {% else %}
+                {% if item.tag == 'button' %}
+            <button type="button" class="btn btn-default" value="{{ item.label }}" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}"  data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</button>
+                {% elseif item.tag == 'a' %}
+            <a class="btn btn-default" href="<?php echo site_url('{{ item.url }}');?>" data-toggle="{{ item.toggle }}" data-target="{{ item.target }}" data-multiple={{ item.multiple ? true : false }}><i class="{{ item.img }}"></i>&nbsp;&nbsp;{{ item.label }}</a>
+                {% endif %}
             {% endif %}
         {% endfor %}
     </div>
@@ -53,8 +77,8 @@
         {% set elements = card.elements %}
     <div class="j-panel col-md-12">
         <div class="panel panel-default">
-            <div class="panel-body">
-                <table class="table table-bordered table-striped table-hover table-responsive table-condensed" id="{{ title }}Table" data-load="<?php echo site_url({{ card.url }});?>">
+            <div class="panel-body table-responsive">
+                <table class="table table-bordered table-striped table-hover table-condensed" id="{{ title }}Table" data-load="<?php echo site_url('{{ card.url }}');?>">
                     <thead>
                         <tr>
                             <th class="td-xs checkall" data-name="selected" data-checkall=false>#</th>
@@ -100,46 +124,46 @@
     {% endfor %}
 </div>
 
-{% for func_group in func_groups %}
-    {% if func_group.forms.length > 0 %}
-<div class="modal fade" id="{{ title }}{{ func_group.name | capitalize }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}{{ func_group.name | capitalize }}ModalLabel" aria-hidden="true">
+{% for func in funcs %}
+    {% if func.forms | length > 0 %}
+<div class="modal fade" id="{{ title }}{{ func.name | capitalize }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}{{ func.name | capitalize }}ModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form class="form-horizontal" id="{{ title }}{{ func_group.name | capitalize }}Form" action="" method="post" role="form">
+            <form class="form-horizontal" id="{{ title }}{{ func.name | capitalize }}Form" action="" method="post" role="form">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="{{ title }}{{ func_group.name | capitalize }}ModalLabel">编辑</h4>
+                    <h4 class="modal-title" id="{{ title }}{{ func.name | capitalize }}ModalLabel">编辑</h4>
                 </div>
                 <div class="modal-body">
-                {% for form in func_group.forms %}
-                    {% if form.type == 'hidden' %}
+                {% for form in func.forms %}
+                    {% if form.form_type == 'hidden' %}
                         <input type="hidden" name="{{ form.name }}" value="" />
-                    {% elseif form.type == 'select' %}
+                    {% elseif form.form_type == 'select' %}
                         <div class="form-group" data-url="{{ form.url }}">
                             <label class="control-label col-md-2" >{{ form.label }}:</label>
                             <div class="col-md-6">
-                                <select class="form-control" name="{{ form.name }}"></select>
+                                <select class="form-control {{ form.classes }}" name="{{ form.name }}" {{ form.multiple ? "multiple" : "" }} data-load="{{ form.url }}"></select>
                             </div>
                         </div>
-                    {% elseif form.type == 'checkbox' %}
-                    {% elseif form.type == 'radio' %}
-                    {% elseif form.type == 'textarea' %}
+                    {% elseif form.form_type == 'checkbox' %}
+                    {% elseif form.form_type == 'radio' %}
+                    {% elseif form.form_type == 'textarea' %}
                         <div class="form-group">
                             <label class="control-label col-md-2" >{{ form.label }}:</label>
                             <div class="col-md-6">
-                                <textarea class="form-control" rows="3" name="{{ form.name }}" ></textarea>
+                                <textarea class="form-control {{ form.classes }}" rows="3" name="{{ form.name }}" ></textarea>
                             </div>
                         </div>
                     {% else %}
                         <div class="form-group">
                             <label class="control-label col-md-2" >{{ form.label }}:</label>
                             <div class="col-md-6">
-                                <input class="form-control" name="{{ form.name }}" type="text" placeholder="{{ form.placeholder }}" value="{{ form.dv }}"/>
+                                <input class="form-control {{ form.classes }}" name="{{ form.name }}" type="text" {{ form.required ? "required" : "" }} {{ form.max ? ["max=\"", form.max, "\""].join : "" }} {{ form.min ? ["min=\"", form.min, "\""].join : ""}} {{ form.maxlength ? ["maxlength=\"", form.maxlength, "\""].join : "" }} {{ form.pattern ? ["pattern=\"", form.pattern, "\""].join : "" }} {{ form.readonly ? "readonly" : "" }} placeholder="{{ form.placeholder }}" value="{{ form.dv }}"/>
                             </div>
                         </div>
                     {% endif %}
-                        <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
                 {% endfor %}
+                    <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -152,8 +176,7 @@
     {% endif %}
 {% endfor %}
 
-{% if page_searches.length > 0 %}
-    {% for page_search in page_searches %}
+{% if page_searches | length > 0 %}
 <div class="modal fade filter" id="{{ title }}FilterModal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}FilterModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -163,35 +186,35 @@
                     <h4 class="modal-title" id="{{ title }}FilterModalLabel">搜索</h4>
                 </div>
                 <div class="modal-body">
-                    {% for form in func_group.forms %}
-                        {% if form.type == 'hidden' %}
-                            <input type="hidden" name="{{ form.name }}" value="" />
-                        {% elseif form.type == 'select' %}
-                            <div class="form-group" data-url="{{ form.url }}">
-                                <label class="control-label col-md-2" >{{ form.label }}:</label>
+                    {% for page_search in page_searches %}
+                        {% if page_search.form_type == 'hidden' %}
+                            <input type="hidden" name="{{ page_search.name }}" value="" />
+                        {% elseif page_search.form_type == 'select' %}
+                            <div class="form-group" data-url="{{ page_search.url }}">
+                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
                                 <div class="col-md-6">
-                                    <select class="form-control" name="{{ form.name }}"></select>
+                                    <select class="form-control" name="{{ page_search.name }}"></select>
                                 </div>
                             </div>
-                        {% elseif form.type == 'checkbox' %}
-                        {% elseif form.type == 'radio' %}
-                        {% elseif form.type == 'textarea' %}
+                        {% elseif page_search.form_type == 'checkbox' %}
+                        {% elseif page_search.form_type == 'radio' %}
+                        {% elseif page_search.form_type == 'textarea' %}
                             <div class="form-group">
-                                <label class="control-label col-md-2" >{{ form.label }}:</label>
+                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
                                 <div class="col-md-6">
-                                    <textarea class="form-control" rows="3" name="{{ form.name }}" ></textarea>
+                                    <textarea class="form-control" rows="3" name="{{ page_search.name }}" ></textarea>
                                 </div>
                             </div>
                         {% else %}
                             <div class="form-group">
-                                <label class="control-label col-md-2" >{{ form.label }}:</label>
+                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
                                 <div class="col-md-6">
-                                    <input class="form-control" name="{{ form.name }}" type="text" placeholder="{{ form.placeholder }}" value="{{ form.dv }}"/>
+                                    <input class="form-control {{ page_search.classes }}" name="{{ page_search.name }}" type="text" {{ page_search.required ? "required" : "" }} {{ page_search.max ? ["max=\"", page_search.max, "\""].join : "" }} {{ page_search.min ? ["min=\"", page_search.min, "\""].join : ""}} {{ page_search.maxlength ? ["maxlength=\"", page_search.maxlength, "\""].join : "" }} {{ page_search.pattern ? ["pattern=\"", page_search.pattern, "\""].join : "" }} {{ page_search.readonly ? "readonly" : "" }} placeholder="{{ page_search.placeholder }}" value="{{ page_search.dv }}"/>
                                 </div>
                             </div>
                         {% endif %}
-                        <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
                     {% endfor %}
+                    <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -201,14 +224,13 @@
         </div>
     </div>
 </div>
-    {% endfor %}
 {% endif %}
 <script>
     (function($){
-        $('div#{{ title }}').handle_page();
+        /*$('div#{{ title }}').handle_page();
         {% for func_group in func_groups %}
             $('div#{{ title }}{{ func_group.name | capitalize }}Modal').handle_modal_000();
         {% endfor %}
-        $('div#{{ title }}FilterModal').handle_modal_000();
+        $('div#{{ title }}FilterModal').handle_modal_000();*/
     })(jQuery);
 </script>

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Board_thick_model extends Base_Model{
+class Board_thick_model extends MY_Model{
     private $_Module = 'data';
     private $_Model;
     private $_Item;
@@ -24,7 +24,7 @@ class Board_thick_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('board_thick');
         
@@ -41,7 +41,7 @@ class Board_thick_model extends Base_Model{
 
     public function insert_board_thick($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('board_thick', $Data)){
             log_message('debug', "Model Board_thick_model/insert_board_thick Success!");
             $this->remove_cache($this->_Cache);
@@ -54,7 +54,7 @@ class Board_thick_model extends Base_Model{
 
     public function update_board_thick($Set, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('bt_id', $Where);
         $this->HostDb->update('board_thick', $Data);
         $this->remove_cache($this->_Cache);

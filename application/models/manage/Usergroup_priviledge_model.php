@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Usergroup_priviledge_model extends Base_Model{
+class Usergroup_priviledge_model extends MY_Model{
     private $_Module;
     private $_Model;
     private $_Item;
@@ -33,7 +33,7 @@ class Usergroup_priviledge_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Ugid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('usergroup_priviledge')
                         ->join('priviledge', 'p_id = up_priviledge_id', 'left')
                         ->join('operation', 'o_id = p_source_id', 'left')
@@ -57,7 +57,7 @@ class Usergroup_priviledge_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Ugid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                                     ->from('usergroup_priviledge')
                                     ->join('priviledge', 'p_id = up_priviledge_id', 'left')
@@ -76,7 +76,7 @@ class Usergroup_priviledge_model extends Base_Model{
     
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('usergroup_priviledge', $Data)){
             log_message('debug', "Model Usergroup_priviledge_model/insert Success!");
             $this->remove_cache($this->_Cache);

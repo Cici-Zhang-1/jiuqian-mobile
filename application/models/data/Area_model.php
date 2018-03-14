@@ -6,7 +6,7 @@
  * @description
  * 地区  
  */
-class Area_model extends Base_Model{
+class Area_model extends MY_Model{
     private $_Module = 'data';
     private $_Model;
     private $_Item;
@@ -23,7 +23,7 @@ class Area_model extends Base_Model{
 	public function select($Con){
 	    $Item = $this->_Item.__FUNCTION__;
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $this->HostDb->select($Sql, FALSE);
 	    $this->HostDb->from('area');
 	     
@@ -120,7 +120,7 @@ class Area_model extends Base_Model{
 
 	public function insert($Data) {
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 	    if($this->HostDb->insert('area', $Data)){
 	        log_message('debug', "Model Area_model/insert Success!");
 	        $this->remove_cache($this->_Cache);
@@ -133,7 +133,7 @@ class Area_model extends Base_Model{
 	
 	public function update($Data, $Where) {
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 	    $this->HostDb->where('a_id', $Where);
 	    $this->HostDb->update('area', $Data);
 	    $this->remove_cache($this->_Cache);

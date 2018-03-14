@@ -8,7 +8,7 @@
  * Desc:
  */
 
-class Position_model extends Base_Model{
+class Position_model extends MY_Model{
     private $_Module = 'position';
     private $_Model;
     private $_Item;
@@ -28,7 +28,7 @@ class Position_model extends Base_Model{
     public function select_position(){
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
 
         if(!($Return = $this->cache->get($Cache))) {
             $Query = $this->HostDb->query("select $Sql from n9_position as b left join 
@@ -47,7 +47,7 @@ class Position_model extends Base_Model{
 
     public function insert_position($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert($this->_Table, $Data)){
             log_message('debug', "Model Position_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -60,7 +60,7 @@ class Position_model extends Base_Model{
 
     public function update_position($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
             $this->HostDb->where_in('p_id', $Where);
         }else {

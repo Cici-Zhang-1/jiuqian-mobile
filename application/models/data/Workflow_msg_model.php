@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Workflow_msg_model extends Base_Model{
+class Workflow_msg_model extends MY_Model{
     private $_Module = 'data';
     private $_Model = 'workflow_msg_model';
     private $_Item;
@@ -23,7 +23,7 @@ class Workflow_msg_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('workflow_msg');
 
@@ -42,7 +42,7 @@ class Workflow_msg_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Oid;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('workflow_msg');
             $this->HostDb->join('user', 'u_id = wm_creator', 'left');
@@ -65,7 +65,7 @@ class Workflow_msg_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.implode(',', $Opids);
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('workflow_msg');
             $this->HostDb->join('user', 'u_id = wm_creator', 'left');
@@ -88,7 +88,7 @@ class Workflow_msg_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.implode(',', $Opcids);
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('workflow_msg');
             $this->HostDb->join('user', 'u_id = wm_creator', 'left');

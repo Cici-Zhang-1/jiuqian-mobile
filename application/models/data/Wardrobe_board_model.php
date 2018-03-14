@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Wardrobe_board_model extends Base_Model{
+class Wardrobe_board_model extends MY_Model{
     private $_Module = 'data';
     private $_Model = 'wardrobe_board_model';
     private $_Item;
@@ -23,7 +23,7 @@ class Wardrobe_board_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('wardrobe_board');
         

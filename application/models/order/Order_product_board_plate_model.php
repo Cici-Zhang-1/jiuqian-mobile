@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_board_plate_model extends Base_Model{
+class Order_product_board_plate_model extends MY_Model{
 	private $_Module = 'order';
 	private $_Model;
 	private $_Item;
@@ -49,7 +49,7 @@ class Order_product_board_plate_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql,false)
                                     ->from('order_product_board_plate')
                                     ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
@@ -77,7 +77,7 @@ class Order_product_board_plate_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql,false)
                 ->from('order_product_board_plate')
                 ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
@@ -105,7 +105,7 @@ class Order_product_board_plate_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql,false)
                 ->from('order_product_board_plate')
                 ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
@@ -171,7 +171,7 @@ class Order_product_board_plate_model extends Base_Model{
         }
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board_plate');
             $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -200,7 +200,7 @@ class Order_product_board_plate_model extends Base_Model{
 
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board_plate');
             $this->HostDb->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left');
@@ -233,7 +233,7 @@ class Order_product_board_plate_model extends Base_Model{
         }
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board_plate');
             $this->HostDb->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left');
@@ -263,7 +263,7 @@ class Order_product_board_plate_model extends Base_Model{
         
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board_plate');
             $this->HostDb->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left');
@@ -324,7 +324,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_qrcode($Oids){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -348,7 +348,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_qrcode_by_opid($Opid){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -373,7 +373,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_scan($Qrcode){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -395,7 +395,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_scan_list($Opid){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('user', 'u_id = opbp_scanner', 'left');
@@ -421,7 +421,7 @@ class Order_product_board_plate_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con).$Opid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product_board_plate');
             $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -453,7 +453,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_scan_lack_detail($Opid){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
@@ -474,7 +474,7 @@ class Order_product_board_plate_model extends Base_Model{
      */
     public function select_produce_prehandled($Opid){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql, false);
         $this->HostDb->from('order_product_board_plate');
         $this->HostDb->join('user', 'u_id = opbp_scanner', 'left');
@@ -501,7 +501,7 @@ class Order_product_board_plate_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Qrcode;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                                     ->from('order_product_board_plate')
                                     ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
@@ -570,7 +570,7 @@ class Order_product_board_plate_model extends Base_Model{
 
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if(is_array($Where)){
             $this->HostDb->where_in('opbp_id', $Where);
         }else{

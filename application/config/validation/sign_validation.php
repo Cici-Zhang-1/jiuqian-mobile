@@ -9,6 +9,6 @@ $config['sign/in'] = array(
 	array(
 		'field' => 'password',
 		'label' => '登录密码',
-		'rules' => 'trim|required|min_length[6]'
+		'rules' => 'trim|required|min_length[6]|max_length[16]'
 	)
 );

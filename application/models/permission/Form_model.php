@@ -36,7 +36,7 @@ class Form_model extends MY_Model{
 
     public function select_allowed($Ugid, $Mid = 0, $Fid = 0) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . $Ugid . $Mid;
+        $Cache = $this->_Cache . __FUNCTION__ . $Ugid . $Mid . $Fid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
             $Sql = $this->_unformat_as($Item);

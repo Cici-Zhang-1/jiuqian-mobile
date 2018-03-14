@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 财务进账
  */
-class Finance_received_model extends Base_Model{
+class Finance_received_model extends MY_Model{
     private $_Module = 'finance';
     private $_Model;
     private $_Item;
@@ -35,7 +35,7 @@ class Finance_received_model extends Base_Model{
                 $Con['pn'] = $this->_page_num($Con);
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql,  FALSE);
                 $this->HostDb->from('finance_received');
                 $this->HostDb->join('finance_account', 'fa_id = fr_finance_account_id', 'left');
@@ -155,7 +155,7 @@ class Finance_received_model extends Base_Model{
                 $Con['pn'] = $this->_page($Con);
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql,  FALSE);
                 $this->HostDb->from('finance_received');
                 $this->HostDb->join('finance_account', 'fa_id = fr_finance_account_id', 'left');
@@ -267,7 +267,7 @@ class Finance_received_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.$StartDatetime.$EndDatetime;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('finance_received');
             $this->HostDb->join('finance_account', 'fa_id = fr_finance_account_id', 'left');
@@ -295,7 +295,7 @@ class Finance_received_model extends Base_Model{
      */
     public function is_valid_finance_received($Id, $Status = 1){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql,  FALSE);
         $this->HostDb->from('finance_received');
         $this->HostDb->join('finance_account', 'fa_id = fr_finance_account_id', 'left');

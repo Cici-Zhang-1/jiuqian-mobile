@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 包装列表
  */
-class Pack_model extends Base_Model{
+class Pack_model extends MY_Model{
     static $Default;
     private $_Module= 'pack';
     private $_Model;

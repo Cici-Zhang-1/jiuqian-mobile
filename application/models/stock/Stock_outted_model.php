@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Stock_outted_model extends Base_Model{
+class Stock_outted_model extends MY_Model{
     private $_Module = 'stock';
     private $_Model;
     private $_Item;
@@ -32,7 +32,7 @@ class Stock_outted_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('stock_outted');
                 $this->HostDb->join('user', 'u_id = so_creator', 'left');
@@ -105,7 +105,7 @@ class Stock_outted_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Id;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('stock_outted');
             $this->HostDb->join('user', 'u_id = so_creator', 'left');
@@ -143,7 +143,7 @@ class Stock_outted_model extends Base_Model{
     
     public function update_stock_outted($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if(is_array($Where)){
             $this->HostDb->where_in('so_id', $Where);
         }else{

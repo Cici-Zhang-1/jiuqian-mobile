@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_board_model extends Base_Model{
+class Order_product_board_model extends MY_Model{
 	private $_Module = 'order';
 	private $_Model;
 	private $_Item;
@@ -37,7 +37,7 @@ class Order_product_board_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('order_product_board');
                 $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
@@ -181,7 +181,7 @@ class Order_product_board_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){ */
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('order_product_board');
                 $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
@@ -307,7 +307,7 @@ class Order_product_board_model extends Base_Model{
             $Cache = $this->_Cache.__FUNCTION__.$Oids;
         }
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board');
             $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
@@ -339,7 +339,7 @@ class Order_product_board_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Id.$Pid;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('order_product_board');
             $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
@@ -367,7 +367,7 @@ class Order_product_board_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
         if(!($Return = $this->cache->get($Cache))){
             $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
     
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product_board');
@@ -407,7 +407,7 @@ class Order_product_board_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
         if(!($Return = $this->cache->get($Cache))){
             $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
 
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product_board');
@@ -451,7 +451,7 @@ class Order_product_board_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
         if(!($Return = $this->cache->get($Cache))){
             $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
 
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product_board');
@@ -495,7 +495,7 @@ class Order_product_board_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Opid.$Board;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                                         ->from('order_product_board')
                                         ->where('opb_order_product_id', $Opid)
@@ -575,7 +575,7 @@ class Order_product_board_model extends Base_Model{
     
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if(is_array($Where)){
             $this->HostDb->where('opb_id', $Where);
         }else{

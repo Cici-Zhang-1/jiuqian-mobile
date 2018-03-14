@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_board_door_model extends Base_Model{
+class Order_product_board_door_model extends MY_Model{
     private $_Module = 'order';
     private $_Model;
     private $_Item;
@@ -33,7 +33,7 @@ class Order_product_board_door_model extends Base_Model{
         }
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_board_door');
             $this->HostDb->join('order_product_board', 'opb_id = opbd_order_product_board_id', 'left');

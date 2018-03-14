@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 图纸库
  */
-class Drawing_model extends Base_Model{
+class Drawing_model extends MY_Model{
     private $_Module = 'drawing';
     private $_Model;
     private $_Item;
@@ -33,7 +33,7 @@ class Drawing_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('drawing');
                 $this->HostDb->join('order_product', 'op_id = d_order_product_id', 'left');
@@ -113,7 +113,7 @@ class Drawing_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Opid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                                 ->from('drawing')
                                 ->where('d_order_product_id', $Opid)

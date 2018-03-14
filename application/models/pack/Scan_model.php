@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 扫描
  */
-class Scan_model extends Base_Model{
+class Scan_model extends MY_Model{
     
     public function __construct(){
         log_message('debug', 'Model Pack/Scan_model Start!');

@@ -6,7 +6,7 @@
  * @description
  * 经销商
  */
-class Dealer_model extends Base_Model{
+class Dealer_model extends MY_Model{
     private $_Module = 'dealer';
     private $_Model;
     private $_Item;
@@ -31,7 +31,7 @@ class Dealer_model extends Base_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('dealer');
     	        $this->HostDb->join('area as d', 'd.a_id = d_area_id', 'left');
@@ -125,7 +125,7 @@ class Dealer_model extends Base_Model{
 	    $Item = $this->_Item.__FUNCTION__;
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('dealer');
 	        $this->HostDb->join('area as d', 'd.a_id = d_area_id', 'left');
@@ -154,7 +154,7 @@ class Dealer_model extends Base_Model{
 	        $CheckerId = $this->dealer_organization_model->select_doid_by_name('设计师');
 	        $PayerId = $this->dealer_organization_model->select_doid_by_name('财务');
 	        
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('dealer');
 	        $this->HostDb->join('area as d', 'd.a_id = d_area_id', 'left');
@@ -312,7 +312,7 @@ class Dealer_model extends Base_Model{
 	 */
 	public function insert($Data){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 	    if($this->HostDb->insert('dealer', $Data)){
 	        log_message('debug', "Model Dealer_model/insert Success!");
 	        $this->remove_cache($this->_Module);
@@ -330,7 +330,7 @@ class Dealer_model extends Base_Model{
 	 */
 	public function update($Data, $Where){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 	    $this->HostDb->where('d_id', $Where);
 	    $this->HostDb->update('dealer', $Data);
 	    $this->remove_cache($this->_Module);

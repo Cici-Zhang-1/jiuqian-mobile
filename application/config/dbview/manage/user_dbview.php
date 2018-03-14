@@ -42,3 +42,9 @@ $config['manage/user_model/select_by_usergroup'] = array(
 	'UG.u_parent' => 'parent',
 	'C.u_truename' => 'creator',
 );
+
+$config['manage/user_model/signed_in'] = array(
+    'u_id' => 'uid',
+    'u_name' => 'name',
+    'u_truename' => 'truename'
+);

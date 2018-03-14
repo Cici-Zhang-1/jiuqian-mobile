@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Supplier_model extends Base_Model{
+class Supplier_model extends MY_Model{
     private $_Module = 'supplier';
     private $_Model;
     private $_Item;
@@ -29,7 +29,7 @@ class Supplier_model extends Base_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('supplier');
 	
@@ -90,7 +90,7 @@ class Supplier_model extends Base_Model{
 	    $Item = $this->_Item.__FUNCTION__;
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('supplier');
     
@@ -112,7 +112,7 @@ class Supplier_model extends Base_Model{
 	 */
 	public function insert($Data){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 	    if($this->HostDb->insert('supplier', $Data)){
 	        log_message('debug', "Model Supplier_model/insert Success!");
 	        $this->remove_cache($this->_Cache);
@@ -130,7 +130,7 @@ class Supplier_model extends Base_Model{
 	 */
 	public function update($Data, $Where){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 	    $this->HostDb->where('s_id', $Where);
 	    $this->HostDb->update('supplier', $Data);
 	    $this->remove_cache($this->_Cache);

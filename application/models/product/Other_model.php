@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 其它模块
  */
-class Other_model extends Base_Model{
+class Other_model extends MY_Model{
     private $_Module = 'product';
     private $_Model = 'other_model';
     private $_Item;
@@ -24,7 +24,7 @@ class Other_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('other');
             $this->HostDb->join('product', 'p_id = o_type_id', 'left');

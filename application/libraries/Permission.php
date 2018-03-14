@@ -30,13 +30,21 @@ class Permission {
         }
     }
 
-    private function _allowed($P) {
+    /**
+     * Allowed
+     * @param $P
+     * @param $Pid Parent Id
+     * @return bool
+     */
+    private function _allowed($P, $Pid = 0) {
         $Model = $P . '_model';
         $Param = '_' . name_to_id($P, true);
         $this->_CI->load->model('permission/' . $Model);
-        echo $this->_Ugid;
-        echo $this->_Mid;
-        return $this->_Mid && $this->$Param = $this->_CI->$Model->select_allowed($this->_Ugid, $this->_Mid);
+        if ($Pid) {
+            return $this->_Mid && $this->$Param = $this->_CI->$Model->select_allowed($this->_Ugid, $this->_Mid, $Pid);
+        } else {
+            return $this->_Mid && $this->$Param = $this->_CI->$Model->select_allowed($this->_Ugid, $this->_Mid);
+        }
     }
 
     /**
@@ -52,7 +60,7 @@ class Permission {
                     if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
                         $Value['img'] = $Matched[1];
                     }
-                    $Value['forms'] = $this->get_allowed_form();
+                    $Value['forms'] = $this->get_allowed_form(false, $Value['fid']);
                     foreach ($Attr as $ivalue) {
                         $Return[$Value['fid']][$ivalue] = $Value[$ivalue];
                     }
@@ -62,7 +70,7 @@ class Permission {
                     if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
                         $Value['img'] = $Matched[1];
                     }
-                    $Value['forms'] = $this->get_allowed_form();
+                    $Value['forms'] = $this->get_allowed_form(false, $Value['fid']);
                     $Return[$Value['fid']] = $Value[$Attr];
                 }
             }else {
@@ -70,7 +78,7 @@ class Permission {
                     if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
                         $Value['img'] = $Matched[1];
                     }
-                    $Value['forms'] = $this->get_allowed_form();
+                    $Value['forms'] = $this->get_allowed_form(false, $Value['fid']);
                     $Return[$Key] = $Value;
                 }
             }
@@ -78,9 +86,9 @@ class Permission {
         return $Return;
     }
 
-    public function get_allowed_form($Attr = false) {
+    public function get_allowed_form($Attr = false, $Pid = 0) {
         $Return = array();
-        if ($this->_allowed('form')) {
+        if ($this->_allowed('form', $Pid)) {
             if (is_array($Attr)) {
                 foreach ($this->_Form as $key => $value) {
                     foreach ($Attr as $ivalue) {
@@ -126,29 +134,29 @@ class Permission {
         if ($this->_allowed('card')) {
             if (is_array($Attr)) {
                 foreach ($this->_Card as $key => $value) {
-                    $value['elements'] = $this->get_allowed_element();
+                    $value['elements'] = $this->get_allowed_element(false, $value['cid']);
                     foreach ($Attr as $ivalue) {
                         $Return[$value['cid']][$ivalue] = $value[$ivalue];
                     }
                 }
             }elseif (is_string($Attr)) {
                 foreach ($this->_Card as $key => $value) {
-                    $value['elements'] = $this->get_allowed_element();
+                    $value['elements'] = $this->get_allowed_element(false, $value['cid']);
                     $Return[$value['cid']] = $value[$Attr];
                 }
             }else {
                 foreach ($this->_Card as $key => $value) {
-                    $value['elements'] = $this->get_allowed_element();
-                    $Return = $this->_Card;
+                    $value['elements'] = $this->get_allowed_element(false, $value['cid']);
+                    $Return[$key] = $value;
                 }
             }
         }
         return $Return;
     }
 
-    public function get_allowed_element($Attr = false) {
+    public function get_allowed_element($Attr = false, $Pid = 0) {
         $Return = array();
-        if ($this->_allowed('element')) {
+        if ($this->_allowed('element', $Pid)) {
             if (is_array($Attr)) {
                 foreach ($this->_Element as $key => $value) {
                     foreach ($Attr as $ivalue) {

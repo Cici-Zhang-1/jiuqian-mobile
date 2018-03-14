@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Face_model extends Base_Model{
+class Face_model extends MY_Model{
     private $_Modular = 'data';
     private $_Model = 'face_model';
     private $_Item;

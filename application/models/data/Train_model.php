@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Train_model extends Base_Model{
+class Train_model extends MY_Model{
     private $_Module = 'data';
     private $_Model = 'train_model';
     private $_Item;
@@ -23,7 +23,7 @@ class Train_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('train');
             $Query = $this->HostDb->get();

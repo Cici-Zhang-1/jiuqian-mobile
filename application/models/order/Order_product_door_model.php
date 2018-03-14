@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_door_model extends Base_Model{
+class Order_product_door_model extends MY_Model{
     private $_Module = 'order';
     private $_Model = 'order_product_door_model';
     private $_Item;

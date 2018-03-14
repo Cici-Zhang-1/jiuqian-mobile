@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Task_level_model extends Base_Model{
+class Task_level_model extends MY_Model{
     private $_Module = 'data';
     private $_Model;
     private $_Item;
@@ -25,7 +25,7 @@ class Task_level_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('task_level');
              
@@ -48,7 +48,7 @@ class Task_level_model extends Base_Model{
 
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('task_level', $Data)){
             log_message('debug', "Model Task_level_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -61,7 +61,7 @@ class Task_level_model extends Base_Model{
 
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('tl_id', $Where);
         $this->HostDb->update('task_level', $Data);
         $this->remove_cache($this->_Cache);

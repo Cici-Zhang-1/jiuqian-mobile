@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Payterms_model extends Base_Model{
+class Payterms_model extends MY_Model{
     private $_Module = 'dealer';
     private $_Model;
     private $_Item;
@@ -24,7 +24,7 @@ class Payterms_model extends Base_Model{
 	    $Item = $this->_Item.__FUNCTION__;
 	    $Cache = $this->_Cache.__FUNCTION__;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('payterms');
 	         
@@ -47,7 +47,7 @@ class Payterms_model extends Base_Model{
 	
 	public function insert($Data) {
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item, $this->_Module);
+	    $Data = $this->_format($Data, $Item);
 	    if($this->HostDb->insert('payterms', $Data)){
 	        log_message('debug', "Model Payterms_model/insert Success!");
 	        $this->remove_cache($this->_Cache);
@@ -60,7 +60,7 @@ class Payterms_model extends Base_Model{
 	
 	public function update($Data, $Where) {
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item, $this->_Module);
+	    $Data = $this->_format_re($Data, $Item);
 	    $this->HostDb->where('p_id', $Where);
 	    $this->HostDb->update('payterms', $Data);
 	    $this->remove_cache($this->_Cache);

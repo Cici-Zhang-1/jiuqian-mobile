@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Dealer_owner_model extends Base_Model{
+class Dealer_owner_model extends MY_Model{
     private $_Module = 'dealer';
     private $_Model;
     private $_Item;
@@ -28,7 +28,7 @@ class Dealer_owner_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Did;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql, FALSE)
                         ->from('dealer_owner')
                         ->join('user', 'u_id = do_owner_id', 'left')
@@ -57,7 +57,7 @@ class Dealer_owner_model extends Base_Model{
             $CheckerId = $this->dealer_organization_model->select_doid_by_name('设计师');
             $PayerId = $this->dealer_organization_model->select_doid_by_name('财务');
              
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('dealer_owner')
                             ->join('dealer', 'd_id = do_dealer_id', 'left')
@@ -90,7 +90,7 @@ class Dealer_owner_model extends Base_Model{
      */
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('dealer_owner', $Data)){
             log_message('debug', "Model Dealer_owner_model/dealer_owner Success!");
             $this->remove_cache($this->_Cache);
@@ -146,7 +146,7 @@ class Dealer_owner_model extends Base_Model{
      */
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('d_id', $Where);
         $this->HostDb->update('dealer', $Data);
         $this->remove_cache($this->_Cache);

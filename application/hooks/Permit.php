@@ -27,8 +27,8 @@ class Permit{
      * 判断用户是否可以执行当前操作
      */
     public function is_permit(){
+        $Return = false;
         if (ENVIRONMENT === 'development') {
-            $Return = false;
             if(!$this->_is_public()){
                 if($this->_get_operation()){
                     if (!!($this->_not_exist()) || !!($this->_is_allowed('menu')) || !!($this->_is_allowed('func')) || !!($this->_is_allowed('visit'))) {
@@ -64,6 +64,7 @@ class Permit{
                 $this->_Operation = $this->_Operation . '/' . '_read';
             }
         }
+        $this->_Operation = '/' . $this->_Operation;
         $GLOBALS['Permission']['Operation'] = $this->_Operation;
         return true;
     }
@@ -83,10 +84,11 @@ class Permit{
     private function _is_allowed($Type) {
         $Model = $Type . '_model';
         $this->_CI->load->model('permission/' . $Model);
+
         if (!!($Query = $this->_CI->$Model->select_is_allowed_operation($this->_Ugid, $this->_Operation))) {
             foreach ($Query as $Key => $Value) {
                 $Key = name_to_id($Key, true);
-                if (!isset($GLOBALS[$Key])) {
+                if (!isset($GLOBALS['Permission'][$Key])) {
                     $GLOBALS['Permission'][$Key] = $Value;
                 }
             }

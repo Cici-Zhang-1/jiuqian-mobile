@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_product_fitting_model extends Base_Model{
+class Order_product_fitting_model extends MY_Model{
 	private $_Module = 'order';
 	private $_Model;
 	private $_Item;
@@ -33,7 +33,7 @@ class Order_product_fitting_model extends Base_Model{
         }
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_fitting');
             $this->HostDb->join('fitting', 'f_id = opf_fitting_id', 'left');
@@ -70,7 +70,7 @@ class Order_product_fitting_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Id.$Pid;
         $Return = array();
         if(!($Return = $this->cache->get($this->_Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false);
             $this->HostDb->from('order_product_fitting');
             $this->HostDb->join('order_product', 'op_id = opf_order_product_id', 'left');

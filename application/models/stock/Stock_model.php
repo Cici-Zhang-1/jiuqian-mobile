@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 成品库
  */
-class Stock_model extends Base_Model{
+class Stock_model extends MY_Model{
     private $_Modular = 'stock';
     private $_Model;
     private $_Item;

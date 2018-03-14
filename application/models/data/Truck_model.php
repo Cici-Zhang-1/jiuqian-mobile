@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Truck_model extends Base_Model{
+class Truck_model extends MY_Model{
     private $_Module = 'data';
     private $_Model = 'truck_model';
     private $_Item;
@@ -23,7 +23,7 @@ class Truck_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('truck');
             $Query = $this->HostDb->get();

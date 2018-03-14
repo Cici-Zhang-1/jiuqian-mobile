@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Order_drawing_model extends Base_Model{
+class Order_drawing_model extends MY_Model{
 
     public function __construct(){
         parent::__construct();

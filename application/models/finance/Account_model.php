@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 财务账户
  */
-class Account_model extends Base_Model{
+class Account_model extends MY_Model{
     private $_Module = 'finance';
     private $_Model;
     private $_Item;
@@ -26,7 +26,7 @@ class Account_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
                                     ->from('finance_account')
                                 ->get();
@@ -46,7 +46,7 @@ class Account_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('finance_account');
             $Query = $this->HostDb->get();
@@ -69,7 +69,7 @@ class Account_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('finance_account');
             $this->HostDb->where('fa_intime', 1);
@@ -94,7 +94,7 @@ class Account_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('finance_account');
             $this->HostDb->where('fa_intime', 0);

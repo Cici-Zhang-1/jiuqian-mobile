@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 包装统计
  */
-class Pack_statistics_model extends Base_Model{
+class Pack_statistics_model extends MY_Model{
     private $_Modular = 'pack';
     private $_Model;
     private $_Item;

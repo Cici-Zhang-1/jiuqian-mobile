@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Role_page_form_model extends Base_Model {
+class Role_page_form_model extends MY_Model {
     private $_Module;
     private $_Model;
     private $_Item;
@@ -31,7 +31,7 @@ class Role_page_form_model extends Base_Model {
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_page_form')
                         ->where('rpf_role_id', $Rid)
                         ->get();
@@ -45,7 +45,7 @@ class Role_page_form_model extends Base_Model {
 
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('role_page_form', $Data)){
             log_message('debug', "Model Role_page_form_model/insert_role_page_form Success!");
             $this->remove_cache($this->_Module);

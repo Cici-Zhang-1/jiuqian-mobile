@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 财政支付
  */
-class Finance_pay_model extends Base_Model{
+class Finance_pay_model extends MY_Model{
     private $_Module = 'finance';
     private $_Model;
     private $_Item;
@@ -36,7 +36,7 @@ class Finance_pay_model extends Base_Model{
                 $Con['pn'] = $this->_page_num($Con);
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql,  FALSE);
                 $this->HostDb->from('finance_pay');
                 $this->HostDb->join('finance_account as a', 'a.fa_id = fp_finance_account_id', 'left');
@@ -131,7 +131,7 @@ class Finance_pay_model extends Base_Model{
      */
     public function is_valid_finance_pay($Id){
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $this->HostDb->select($Sql,  FALSE);
         $this->HostDb->from('finance_pay');
         $this->HostDb->join('finance_account', 'fa_id = fp_finance_account_id', 'left');

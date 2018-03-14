@@ -31,7 +31,7 @@ class Order_model extends MY_Model{
 	        if(!empty($Con['pn'])){
 	            if(empty($Sql)){
                     $Item = $this->_Item.__FUNCTION__;
-                    $Sql = $this->_unformat_as($Item, $this->_Module);
+                    $Sql = $this->_unformat_as($Item);
                 }else{
                     $Sql = $this->_unformat_as($Sql, $this->_Module);
                 }
@@ -134,7 +134,7 @@ class Order_model extends MY_Model{
 	 */
 	public function select_current_workflow($Oid, $Type){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)->from('order')
 	               ->join('workflow', 'w_no = o_status', 'left')
 	               ->where('o_id', $Oid)
@@ -265,7 +265,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order');
             $this->HostDb->join('dealer', 'd_id = o_dealer_id', true);
@@ -297,7 +297,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('order');
 	        $this->HostDb->join('dealer', 'd_id = o_dealer_id', true);
@@ -332,7 +332,7 @@ class Order_model extends MY_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('order');
 	            $this->HostDb->join('stock_outted', 'so_id = o_stock_outted_id', 'left');
@@ -389,7 +389,7 @@ class Order_model extends MY_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('order');
 	            $this->HostDb->join('stock_outted', 'so_id = o_stock_outted_id', 'left');
@@ -446,7 +446,7 @@ class Order_model extends MY_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('order');
 	            $this->HostDb->join('stock_outted', 'so_id = o_stock_outted_id', 'left');
@@ -502,7 +502,7 @@ class Order_model extends MY_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('order');
 	            $this->HostDb->join('stock_outted', 'so_id = o_stock_outted_id', 'left');
@@ -585,7 +585,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order');
             $this->HostDb->join('user', 'u_id = o_creator', 'left');
@@ -642,7 +642,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.$Soid.$Status;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('order');
 	        $this->HostDb->join('dealer', 'd_id = o_dealer_id', true);
@@ -681,7 +681,7 @@ class Order_model extends MY_Model{
 	    }
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order');
             if(is_array($Id)){
@@ -710,7 +710,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.'_'.$Startdate;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('order');
@@ -742,7 +742,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.'_'.$CargoNo.$Startdate;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql,  FALSE);
 	        $this->HostDb->from('order');
 	        
@@ -776,7 +776,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.$StartDatetime.$EndDatetime;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql,  FALSE);
 	        $this->HostDb->from('order');
 	         
@@ -843,7 +843,7 @@ class Order_model extends MY_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Oid;
 	    $Return = FALSE;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $Query = $this->HostDb->select($Sql)
 	                               ->from('order')
 	                               ->join('user', 'u_id = o_creator', 'left')
@@ -868,7 +868,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    if(!($Return = $this->cache->get($Cache))){
             $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order');
@@ -911,7 +911,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    if(!($Return = $this->cache->get($Cache))){
 	        $Item = $this->_Item.__FUNCTION__;
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('order');
@@ -947,7 +947,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    if(!($Return = $this->cache->get($Cache))){
 	        $Item = $this->_Item.__FUNCTION__;
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('order');
@@ -983,7 +983,7 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
 	    if(!($Return = $this->cache->get($Cache))){
 	        $Item = $this->_Item.__FUNCTION__;
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	
 	        $this->HostDb->select($Sql, FALSE);
 	        $this->HostDb->from('order');
@@ -1023,7 +1023,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_dismantlable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                     	    ->from('order')
                     	    ->where_in('o_id', $Ids)
@@ -1046,7 +1046,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_redismantlable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                     	    ->from('order')
                     	    ->where_in('o_id', $Ids)
@@ -1087,7 +1087,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_recheckable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                             	    ->from('order')
                             	    ->where_in('o_id', $Ids)
@@ -1125,7 +1125,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_quotable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                     	    ->from('order')
                     	    ->join('dealer', 'd_id = o_dealer_id', 'left')
@@ -1147,7 +1147,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_asurable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
         	    ->from('order')
         	    ->where_in('o_id', $Ids)
@@ -1171,7 +1171,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	    $Cache = $this->_Cache.__FUNCTION__.$Num;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, false)
                     	        ->from('order')
                 	        ->where('o_num', $Num);
@@ -1199,7 +1199,7 @@ where (bt_name = 18 || bt_name = 25 || bt_name = 36) group by o_id) as Areas', '
 	 */
 	public function is_redeliveriable($Ids, $Status, $StouckOutted = false){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $this->HostDb->select($Sql)->from('order');
 	    if($StouckOutted){
 	        if(is_array($Ids)){

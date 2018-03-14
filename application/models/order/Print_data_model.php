@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Print_data_model extends Base_Model{
+class Print_data_model extends MY_Model{
 
     public function __construct(){
         parent::__construct();

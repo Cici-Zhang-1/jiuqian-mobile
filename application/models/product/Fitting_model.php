@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Fitting_model extends Base_Model{
+class Fitting_model extends MY_Model{
     private $_Module = 'product';
     private $_Model = 'fitting_model';
     private $_Item;
@@ -23,7 +23,7 @@ class Fitting_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('fitting');
             $this->HostDb->join('product', 'p_id = f_type_id', 'left');

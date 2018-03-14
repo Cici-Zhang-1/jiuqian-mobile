@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 订单产品
  */
-class Order_product_model extends Base_Model{
+class Order_product_model extends MY_Model{
     private $_Module = 'order';
     private $_Model;
     private $_Item;
@@ -27,7 +27,7 @@ class Order_product_model extends Base_Model{
     public function select_current_workflow($Opid, $Type){
         log_message('debug', 'Library Order/Order_model select_current_workflow Start On $Oid = '.$Opid.'$Type = '.$Type);
         $Item = $this->_Item.__FUNCTION__;
-        $Sql = $this->_unformat_as($Item, $this->_Module);
+        $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order_product')
             ->join('workflow', 'w_no = op_status', 'left')
             ->where('op_id', $Opid)
@@ -57,7 +57,7 @@ class Order_product_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('order_product');
                 $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -163,7 +163,7 @@ class Order_product_model extends Base_Model{
             if(!empty($Con['pn'])){
                 if(empty($Sql)){
                     $Item = $this->_Item.__FUNCTION__;
-                    $Sql = $this->_unformat_as($Item, $this->_Module);
+                    $Sql = $this->_unformat_as($Item);
                 }else{
                     $Sql = $this->_unformat_as($Sql, $this->_Module);
                 }
@@ -275,7 +275,7 @@ class Order_product_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql,  FALSE);
                 $this->HostDb->from('order_product');
                 $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -387,7 +387,7 @@ class Order_product_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('order_product');
                 $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -499,7 +499,7 @@ class Order_product_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from('order_product');
                 $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -585,7 +585,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode(',', $Opids);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, false)
                                 ->from('order_product')
                             ->where_in('op_id', $Opids);
@@ -614,7 +614,7 @@ class Order_product_model extends Base_Model{
         if(!($Return = $this->cache->get($Cache))){
             if(empty($Sql)){
                 $Item = $this->_Item.__FUNCTION__;
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
             }else{
                 $Sql = $this->_unformat_as($Sql, $this->_Module);
             }
@@ -670,7 +670,7 @@ class Order_product_model extends Base_Model{
         if(!($Return = $this->cache->get($Cache))){
             if(empty($Sql)){
                 $Item = $this->_Item.__FUNCTION__;
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
             }else{
                 $Sql = $this->_unformat_as($Sql, $this->_Module);
             }
@@ -718,7 +718,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -755,7 +755,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -787,7 +787,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Soid.$Status;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -832,7 +832,7 @@ class Order_product_model extends Base_Model{
         
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->join('product', 'p_id = op_product_id', 'left');
@@ -888,7 +888,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.'_'.$Self;
         $Item = $this->_Item.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->like('op_num', $Brothers);
@@ -1023,7 +1023,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Item = $this->_Item.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql);
             $this->HostDb->from('order_product');
             $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -1051,7 +1051,7 @@ class Order_product_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__.$Opid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql,  FALSE);
             $this->HostDb->from('order_product');
             $this->HostDb->join('order', 'o_id = op_order_id', 'left');
@@ -1107,7 +1107,7 @@ class Order_product_model extends Base_Model{
      */
     public function is_dismantlable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
 	                           ->from('order_product')
 	                           ->join('product', 'p_id = op_product_id', 'left')
@@ -1155,7 +1155,7 @@ class Order_product_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.$Num;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, false)
                 	        ->from('order_product')
                 	        ->join('order', 'o_id = op_order_id', 'left')
@@ -1182,7 +1182,7 @@ class Order_product_model extends Base_Model{
 	 */
 	public function is_redismantlable($Ids){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                         	    ->from('order_product')
                         	    ->join('order', 'o_id = op_order_id', 'left')
@@ -1223,7 +1223,7 @@ class Order_product_model extends Base_Model{
 	 */
 	public function is_post_salable($Id){
 	    $Item = $this->_Item.__FUNCTION__;
-	    $Sql = $this->_unformat_as($Item, $this->_Module);
+	    $Sql = $this->_unformat_as($Item);
 	    $Query = $this->HostDb->select($Sql)
                 	    ->from('order_product')
                 	    ->join('product', 'p_id = op_product_id', 'left')
@@ -1250,7 +1250,7 @@ class Order_product_model extends Base_Model{
 	    $Cache = $this->_Cache.__FUNCTION__.$Num;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item, $this->_Module);
+	        $Sql = $this->_unformat_as($Item);
 	        $this->HostDb->select($Sql, false)
                 	        ->from('order_product')
                 	        ->join('order', 'o_id = op_order_id', 'left')

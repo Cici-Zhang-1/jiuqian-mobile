@@ -37,7 +37,7 @@ class Auth {
      * @return void
      */
 
-	public function is_login(){
+	public function is_signed_in(){
 	    if(!$this->_is_sign_page()){ // 如果不是signpage就要判断用户登陆状态
 			$Message = '';
 	        if(is_null(self::$_sign_in)){
@@ -58,11 +58,15 @@ class Auth {
 	        }
 
 	        if(!self::$_sign_in){
-				$Return = array(
-					'code' => EXIT_SIGNIN,
-					'message' => $Message
-				);
-				exit(json_encode($Return));
+                $Return = array(
+                    'code' => EXIT_SIGNIN,
+                    'message' => $Message
+                );
+	            if ($GLOBALS['MOBILE']) {
+                    exit(json_encode($Return));
+                } else {
+                    gh_location($Return['message'],site_url('sign/index/in'));
+                }
 	        }
 	    }
 	}

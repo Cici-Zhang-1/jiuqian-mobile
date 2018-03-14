@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 经销商类别
  */
-class Dealer_category_model extends Base_Model{
+class Dealer_category_model extends MY_Model{
     private $_Module = 'dealer';
     private $_Model;
     private $_Item;
@@ -26,7 +26,7 @@ class Dealer_category_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('dealer_category');
              
@@ -53,7 +53,7 @@ class Dealer_category_model extends Base_Model{
      */
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('dealer_category', $Data)){
             log_message('debug', "Model Dealer_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -71,7 +71,7 @@ class Dealer_category_model extends Base_Model{
      */
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('dc_id', $Where);
         $this->HostDb->update('dealer_category', $Data);
         $this->remove_cache($this->_Cache);

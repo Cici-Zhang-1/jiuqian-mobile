@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Desc:
  */
-class Page_form_model extends Base_Model{
+class Page_form_model extends MY_Model{
     public function __construct(){
         parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model permission/Page_form_model Start!');

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class wardrobe_slot_model extends Base_Model{
+class wardrobe_slot_model extends MY_Model{
     private $_Modular = 'data';
     private $_Model = 'wardrobe_slot_model';
     private $_Item;

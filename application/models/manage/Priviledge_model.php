@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 权限列表
  */
-class Priviledge_model extends Base_Model{
+class Priviledge_model extends MY_Model{
     private $_Module;
     private $_Model;
     private $_Item;
@@ -27,7 +27,7 @@ class Priviledge_model extends Base_Model{
 
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('priviledge', $Data)){
             log_message('debug', "Model Priviledge_model/insert Success!");
             $this->remove_cache($this->_Cache);

@@ -9,7 +9,7 @@
  */
 
 
-class Position_order_product_model extends Base_Model{
+class Position_order_product_model extends MY_Model{
     private $_Module = 'position';
     private $_Model;
     private $_Item;
@@ -42,7 +42,7 @@ class Position_order_product_model extends Base_Model{
                 $this->_Num = $Con['num'];
             }
             if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql, FALSE);
                 $this->HostDb->from($this->_Table);
                 $this->HostDb->join($this->_TableOne, 'op_id = pop_order_product_id', 'left');
@@ -230,7 +230,7 @@ class Position_order_product_model extends Base_Model{
 
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert($this->_Table, $Data)){
             log_message('debug', "Model Position_order_product_model/insert Success!");
             $this->remove_cache($this->_Module);
@@ -243,7 +243,7 @@ class Position_order_product_model extends Base_Model{
 
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
             $this->HostDb->where_in('pop_id', $Where);
         }else {
@@ -262,7 +262,7 @@ class Position_order_product_model extends Base_Model{
      */
     public function update_after_out($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
             $this->HostDb->where_in('pop_order_product_id', $Where);
         }else {

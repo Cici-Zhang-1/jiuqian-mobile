@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Out_method_model extends Base_Model{
+class Out_method_model extends MY_Model{
     private $_Module = 'data';
     private $_Model;
     private $_Item;
@@ -24,7 +24,7 @@ class Out_method_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('out_method');
         
@@ -47,7 +47,7 @@ class Out_method_model extends Base_Model{
     
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('out_method', $Data)){
             log_message('debug', "Model Out_method_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -60,7 +60,7 @@ class Out_method_model extends Base_Model{
     
     public function update($Set, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('om_id', $Where);
         $this->HostDb->update('out_method', $Data);
         $this->remove_cache($this->_Cache);

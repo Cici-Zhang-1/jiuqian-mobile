@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Operation_model extends Base_Model{
+class Operation_model extends MY_Model{
     private $_Module;
     private $_Model;
     private $_Item;
@@ -28,7 +28,7 @@ class Operation_model extends Base_Model{
         $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('operation')->get();
             if($Query->num_rows() > 0){
                 $Return = $Query->result_array();
@@ -50,7 +50,7 @@ class Operation_model extends Base_Model{
 
     public function insert($Data){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('operation', $Data)){
             log_message('debug', "Model Operation_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -63,7 +63,7 @@ class Operation_model extends Base_Model{
 
     public function update($Data, $Where){
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('o_id', $Where);
         $this->HostDb->update('operation', $Data);
         $this->remove_cache($this->_Cache);

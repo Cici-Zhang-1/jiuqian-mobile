@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Order_detail_model extends Base_Model{
+class Order_detail_model extends MY_Model{
 	public static $RowArray;
 	public function __construct(){
 		parent::__construct();

@@ -9,10 +9,14 @@ $config['permission/element_model/select'] = array(
 	'm_name' => 'menu',
 );
 $config['permission/element_model/select_allowed'] = array(
-	'e_id' => 'eid',
-	'e_name' => 'name',
-	'e_checked' => 'checked',
-	'c_name' => 'card',
+    'e_id' => 'eid',
+    'e_name' => 'name',
+    'e_label' => 'label',
+    'e_classes' => 'classes',
+    'e_dv' => 'dv',
+    'e_checked' => 'checked',
+    'e_displayorder' => 'displayorder',
+    'c_name' => 'card'
 );
 $config['permission/element_model/select_by_card_url'] = array(
 	'e_id' => 'eid',

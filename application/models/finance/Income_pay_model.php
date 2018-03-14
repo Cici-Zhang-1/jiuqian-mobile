@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-class Income_pay_model extends Base_Model{
+class Income_pay_model extends MY_Model{
     private $_Module = 'finance';
     private $_Model;
     private $_Item;
@@ -24,7 +24,7 @@ class Income_pay_model extends Base_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.implode(',', $Type);
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql, FALSE);
             $this->HostDb->from('income_pay');
             
@@ -48,7 +48,7 @@ class Income_pay_model extends Base_Model{
 
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->_Module);
+        $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('income_pay', $Data)){
             log_message('debug', "Model Income_pay_model/insert Success!");
             $this->remove_cache($this->_Cache);
@@ -61,11 +61,10 @@ class Income_pay_model extends Base_Model{
 
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
         $this->HostDb->where('ip_id', $Where);
         $this->HostDb->update('income_pay', $Data);
         $this->remove_cache($this->_Cache);
         return TRUE;
     }
 }
- 

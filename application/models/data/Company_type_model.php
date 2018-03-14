@@ -5,7 +5,7 @@
  * @version
  * @description  
  */
-class Company_type_model extends Base_Model{
+class Company_type_model extends MY_Model{
 	public function __construct(){
 		log_message('debug', 'Model Data/Company_type_model Start!');
 		parent::__construct();
