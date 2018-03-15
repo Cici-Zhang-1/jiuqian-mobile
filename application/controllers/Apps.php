@@ -27,7 +27,7 @@ class Apps extends MY_Controller {
         $Apps = array();
         if($this->_Ugid){
             $this->load->model('permission/menu_model');
-            if(!!($this->_Apps = $this->menu_model->select_allowed_by_ugid($this->_Ugid, true))){
+            if(!!($this->_Apps = $this->menu_model->select_allowed_by_ugid($this->_Ugid, false))){
                 $Apps = $this->_apps_format();
             }else{
                 $this->Code = EXIT_ERROR;
