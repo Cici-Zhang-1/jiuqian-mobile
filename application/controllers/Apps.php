@@ -55,7 +55,7 @@ class Apps extends MY_Controller {
                 if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $row['img'], $Matched)) {
                     $row['img'] = $Matched[1];
                 }
-                if ($row['type'] == 'form') {
+                if ($row['page_type'] == 'form') {
                     $row['page_forms'] = $this->_page_form_format($row['mid']);
                 } else {
                     $row['funcs'] = $this->_func_format($row['mid']);

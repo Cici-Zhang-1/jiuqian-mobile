@@ -6,8 +6,6 @@
  * @description  
  */
 class Workflow_node extends MY_Controller{
-	private $Module = 'manage';
-	
 	public function __construct(){
 		log_message('debug', 'Controller Workflow_node Start!');
 		parent::__construct();
@@ -20,7 +18,7 @@ class Workflow_node extends MY_Controller{
 	        $View = '_'.$View;
 	        $this->$View();
 	    }else{
-	        $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+	        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
 	        $this->data['action'] = site_url($Item);
 	        $this->load->view($Item, $this->data);
 	    }
@@ -38,7 +36,7 @@ class Workflow_node extends MY_Controller{
 	
 	public function read_by_name(){
 	    $Name = $this->input->get('name');
-	    $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+	    $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 	    $Cache = $Name.'_workflow_node_read_by_name';
 	    if($Name){
 	        $this->e_cache->open_cache();
@@ -60,7 +58,7 @@ class Workflow_node extends MY_Controller{
 		$Id = intval($_GET['wid']);
 		$Return = array();
 		if($Id){
-			$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+			$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 			$Cache = $Id.'_workflow_node_read_by_id';
 			$this->e_cache->open_cache();
 			if(!($Return = $this->cache->get($Cache))){
@@ -80,7 +78,7 @@ class Workflow_node extends MY_Controller{
 	}
 	
 	public function add(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+		$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 		if($this->form_validation->run($Item)){
 			$PrevNodeId = $this->input->post('prev_node_id', true);
 			if($PrevNodeId !== false && is_array($PrevNodeId)){
@@ -119,7 +117,7 @@ class Workflow_node extends MY_Controller{
 	}
 	
 	public function edit(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+		$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 		if($this->form_validation->run($Item)){
 			$PrevNodeId = $this->input->post('prev_node_id', true);
 			if($PrevNodeId !== false && is_array($PrevNodeId)){
@@ -159,7 +157,7 @@ class Workflow_node extends MY_Controller{
 	}
 	
 	public function remove(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+		$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 		if($this->form_validation->run($Item)){
 			$Where = $this->input->post('selected', true);
 			if($Where !== false && is_array($Where) && count($Where) > 0){

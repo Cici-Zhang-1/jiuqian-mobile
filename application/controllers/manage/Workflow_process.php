@@ -6,8 +6,6 @@
  * @description  
  */
 class Workflow_process extends MY_Controller{
-	private $Module = 'manage';
-	
 	private $RelationType = array(
 			'order' => 'financeReceive,produce',
 			'produce' => 'stockout'
@@ -50,7 +48,7 @@ class Workflow_process extends MY_Controller{
 			$View = '_'.$View;
 			$this->$View();
 		}else{
-			$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+			$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
 			$this->data['action'] = site_url($Item);
 			$this->load->view($Item, $this->data);
 		}

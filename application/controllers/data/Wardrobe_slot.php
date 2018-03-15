@@ -35,7 +35,7 @@ class Wardrobe_slot extends MY_Controller{
 
 
     public function read(){
-        $this->Item = $this->_Item.__FUNCTION__;
+        $this->_Item = $this->_Item.__FUNCTION__;
         $Data = array();
         if(!($Query = $this->wardrobe_slot_model->select_wardrobe_slot())){
             $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有衣柜开槽名称';

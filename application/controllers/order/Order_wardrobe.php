@@ -8,8 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 衣柜柜体
  */
 class Order_wardrobe extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_wardrobe Start !');

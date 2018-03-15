@@ -36,7 +36,7 @@ class Position extends MY_Controller{
     }
 
     public function read(){
-        $this->Item = $this->_Item.__FUNCTION__;
+        $this->_Item = $this->_Item.__FUNCTION__;
 
         $Data = array();
         if(!($Query = $this->position_model->select_position())){

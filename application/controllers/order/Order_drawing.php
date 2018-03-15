@@ -8,8 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 获取相关图纸
  */
 class Order_drawing extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_drawing Start !');
@@ -22,7 +20,7 @@ class Order_drawing extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -32,7 +30,7 @@ class Order_drawing extends MY_Controller{
         $Id = $this->input->get('id', true);
         $Id = intval(trim($Id));
         if($Id){
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
             $this->load->view($Item, array('id' => $Id));
         }else{
             show_404();

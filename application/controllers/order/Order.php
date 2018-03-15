@@ -72,7 +72,7 @@ class Order extends MY_Controller {
 	}
 
 	public function read_wait_position() {
-		$this->Item = $this->_Item.__FUNCTION__;
+		$this->_Item = $this->_Item.__FUNCTION__;
 
 		$Data = array();
 		if(!($Query = $this->position_model->select_wait_position())){

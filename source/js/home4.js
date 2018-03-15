@@ -13,6 +13,10 @@ function getJsonLength(jsonData){
 function isURL(str){
 	return !!str.match(/(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/g);
 }
+
+function isUri (str) {
+	return !!str.match(/(([A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/g);
+}
 /**
  *数组功能扩展, 根据数组下标删除数组元素
  */

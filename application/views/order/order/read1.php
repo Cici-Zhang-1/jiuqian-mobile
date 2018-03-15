@@ -55,7 +55,7 @@
                     <tr class="loading"><td colspan="15">加载中...</td></tr>
                     <tr class="no-data"><td colspan="15">没有数据</td></tr>
                     <tr class="model">
-                        <td ><input name="v"  type="checkbox" value=""/></td>
+                        <td name="selected"><input name="v"  type="checkbox" value=""/></td>
                                                                                     <td class="hide" name="oid"></td>
                                                                                                                 <td class="" name="icon"></td>
                                                                                                                 <td class="" name="order_num"></td>
@@ -66,6 +66,9 @@
                                                                                                                 <td class="" name="creator"></td>
                                                                                                                 <td class="" name="status"></td>
                                                                         </tr>
+                    <tr v-for="(trData, key, index) in card.data.content" :key="index">
+                        <td v-for="(ivalue, ikey, iindex) in elements" :name="ikey" :class="[ ivalue.classes ]" :key="iindex" v-if="ivalue.checked" v-html="trData[ikey]"></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -83,170 +86,198 @@
             </div>
         </div>
     </div>
+    
+                        <div class="modal fade" id="orderEditModal" tabindex="-1" role="dialog" aria-labelledby="orderEditModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <form class="form-horizontal" id="orderEditForm" action="" method="post" role="form">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="orderEditModalLabel">编辑</h4>
+                            </div>
+                            <div class="modal-body">
+                                                                                                            <div class="form-group">
+                                            <label class="control-label col-md-2" >业主:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="owner" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="flag" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="checker" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="checker_phone" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="payer" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="payer_phone" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="payterms" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="out_method" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="logistics" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="delivery_area" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="delivery_address" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="delivery_linker" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="delivery_phone" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="request_outdate" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="remark" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                                                                <div class="form-group">
+                                            <label class="control-label col-md-2" >:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control " name="dealer_remark" type="text"       placeholder="" value=""/>
+                                            </div>
+                                        </div>
+                                                                                                    <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <button type="submit" class="btn btn-primary" data-save="ajax.modal">保存</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+                                                
+        <div class="modal fade filter" id="orderFilterModal" tabindex="-1" role="dialog" aria-labelledby="orderFilterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form  class="form-horizontal" id="orderFilterForm" action="" method="post" role="form">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="orderFilterModalLabel">搜索</h4>
+                    </div>
+                    <div class="modal-body">
+                                                                                    <div class="form-group" data-url="/data/workflow/read/order">
+                                    <label class="control-label col-md-2" >状态:</label>
+                                    <div class="col-md-6">
+                                        <select class="form-control" name="status"  data-load="">
+                                            <option>请选则</option>
+                                            <option v-for="(value, key, index) in status.data.content" :value="value.v" :key="index">{{ value.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                                                                                                <div class="form-group">
+                                    <label class="control-label col-md-2" >开始日期:</label>
+                                    <div class="col-md-6">
+                                        <input class="form-control " name="start_date" type="text"       placeholder="" value=""/>
+                                    </div>
+                                </div>
+                                                                                                                <div class="form-group">
+                                    <label class="control-label col-md-2" >截至日期:</label>
+                                    <div class="col-md-6">
+                                        <input class="form-control " name="end_date" type="text"       placeholder="" value=""/>
+                                    </div>
+                                </div>
+                                                                                                                <div class="form-group">
+                                    <label class="control-label col-md-2" >Search:</label>
+                                    <div class="col-md-6">
+                                        <input class="form-control " name="keyword" type="text"       placeholder="" value=""/>
+                                    </div>
+                                </div>
+                                                                            <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     </div>
 
-    <div class="modal fade" id="orderEditModal" tabindex="-1" role="dialog" aria-labelledby="orderEditModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form class="form-horizontal" id="orderEditForm" action="" method="post" role="form">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="orderEditModalLabel">编辑</h4>
-                </div>
-                <div class="modal-body">
-                                                            <div class="form-group">
-                            <label class="control-label col-md-2" >业主:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="owner" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="flag" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="checker" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="checker_phone" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="payer" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="payer_phone" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="payterms" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="out_method" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="logistics" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="delivery_area" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="delivery_address" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="delivery_linker" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="delivery_phone" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="request_outdate" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="remark" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                                                <div class="form-group">
-                            <label class="control-label col-md-2" >:</label>
-                            <div class="col-md-6">
-                                <input class="form-control " name="dealer_remark" type="text"       placeholder="" value=""/>
-                            </div>
-                        </div>
-                                                        <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="submit" class="btn btn-primary" data-save="ajax.modal">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-                
-<div class="modal fade filter" id="orderFilterModal" tabindex="-1" role="dialog" aria-labelledby="orderFilterModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form  class="form-horizontal" id="orderFilterForm" action="" method="post" role="form">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="orderFilterModalLabel">搜索</h4>
-                </div>
-                <div class="modal-body">
-                                                                        <div class="form-group" data-url="/data/workflow/read/order">
-                                <label class="control-label col-md-2" >状态:</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="status"></select>
-                                </div>
-                            </div>
-                                                                                                <div class="form-group">
-                                <label class="control-label col-md-2" >开始日期:</label>
-                                <div class="col-md-6">
-                                    <input class="form-control " name="start_date" type="text"       placeholder="" value=""/>
-                                </div>
-                            </div>
-                                                                                                <div class="form-group">
-                                <label class="control-label col-md-2" >截至日期:</label>
-                                <div class="col-md-6">
-                                    <input class="form-control " name="end_date" type="text"       placeholder="" value=""/>
-                                </div>
-                            </div>
-                                                                                                <div class="form-group">
-                                <label class="control-label col-md-2" >Search:</label>
-                                <div class="col-md-6">
-                                    <input class="form-control " name="keyword" type="text"       placeholder="" value=""/>
-                                </div>
-                            </div>
-                                                                <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="submit" class="btn btn-primary" data-dismiss="modal">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<script>
+<script type="module">
     (function($){
-        /*$('div#order').handle_page();
-                $('div#orderFilterModal').handle_modal_000();*/
+        new Vue({
+            el: '#order',
+            data: function () {
+                return {}
+            },
+            computed: {
+                                                                                                                                            status: {
+                    get: function () {
+                        return STORE.state.apps.page_searches.status;
+                    }
+                },
+                                                                                            },
+            created: function() {
+                                                                                                                                                                                                                            if (this.status === undefined || JSON.stringify(this.status) === '{}') {
+                            this.$store.dispatch('FETCH_DATA', {
+                                params: {
+                                    uri: '/data/workflow/read/order'
+                                },
+                                target: this.status
+                            });
+                        }
+                                                                                                                                                            },
+            methods: {
+
+            }
+        });
     })(jQuery);
 </script>

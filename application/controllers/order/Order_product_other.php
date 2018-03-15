@@ -80,7 +80,7 @@ class Order_product_other extends MY_Controller{
     }
     
     public function edit(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__);
+        $Item = $this->_Module.'/'.strtolower(__CLASS__);
         $Run = $Item.'/'.__FUNCTION__;
         if($this->form_validation->run($Run)){
             $this->config->load('formview/order');
@@ -107,7 +107,7 @@ class Order_product_other extends MY_Controller{
     }
     
     public function remove(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             $this->config->load('formview/order');

@@ -7,8 +7,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 class Order_product_detail extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_product_detail Start !');
@@ -21,7 +19,7 @@ class Order_product_detail extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -33,7 +31,7 @@ class Order_product_detail extends MY_Controller{
         $Id = intval(trim($Id));
         $Product = trim($Product);
         if($Id && $Product){
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__.'_'.$Product;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__.'_'.$Product;
             $this->load->view($Item, array('id' => $Id, 'product' => $Product));
         }else{
             show_404();

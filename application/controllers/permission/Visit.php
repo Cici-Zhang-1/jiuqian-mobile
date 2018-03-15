@@ -20,14 +20,14 @@ class Visit extends MY_Controller {
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Item.$View;
+            $Item = $this->_Item.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
     }
 
     public function read() {
-        $this->Item = $this->Item.__FUNCTION__;
+        $this->_Item = $this->_Item.__FUNCTION__;
         $Data = array();
         if(!($Query = $this->visit_model->select())){
             $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有访问控制信息';
@@ -38,7 +38,7 @@ class Visit extends MY_Controller {
     }
 
     public function add() {
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Post = gh_escape($_POST);
             if(!!($Id = $this->visit_model->insert($Post))){
@@ -54,7 +54,7 @@ class Visit extends MY_Controller {
         $this->_return();
     }
     public function edit() {
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Post = gh_escape($_POST);
             $Where = $this->input->post('selected');
@@ -69,7 +69,7 @@ class Visit extends MY_Controller {
         $this->_return();
     }
     public function remove() {
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             if($this->visit_model->delete($Where)){

@@ -8,8 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 打印表格
  */
 class Print_data extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_product_board_plate Start !');
@@ -21,7 +19,7 @@ class Print_data extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -34,7 +32,7 @@ class Print_data extends MY_Controller{
         $Product = trim($Product);
         if($Opid && $Product){
             $Return = array();
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
             $this->e_cache->open_cache();
             $Cache = $Opid.'_'.$Product.'_order_print_data_read';
             if(!($Return = $this->cache->get($Cache))){

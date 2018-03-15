@@ -6,8 +6,6 @@
  * @description  
  */
 class Workflow extends MY_Controller{
-	private $Module = 'manage';
-	private $Item = '';
 	public function __construct($Alias = ''){
 		log_message('debug', 'Controller Manage/Workflow Start!');
 		parent::__construct();
@@ -20,7 +18,7 @@ class Workflow extends MY_Controller{
 		    $View = '_'.$View;
 			$this->$View();
 		}else{
-			$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+			$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
 			$this->data['action'] = site_url($Item);
 			$this->load->view($Item, $this->data);
 		}
@@ -28,14 +26,14 @@ class Workflow extends MY_Controller{
 
 	
 	public function read(){
-        $this->Item = $this->Module.'/'.strtolower(__CLASS__).'/read';
+        $this->_Item = $this->_Module.'/'.strtolower(__CLASS__).'/read';
         $Cache = 'manage_workflow';
         $this->e_cache->open_cache();
         $Data = array();
         if(!($Data = $this->cache->get($Cache))){
             if(!!($Query = $this->workflow_model->select_workflow())){
                 $this->config->load('dbview/manage');
-                $Dbview = $this->config->item($this->Item);
+                $Dbview = $this->config->item($this->_Item);
                 $Tmp = array_flip($Dbview);
                 $Id = $Tmp['wid'];
                 foreach ($Query as $key => $value){
@@ -64,7 +62,7 @@ class Workflow extends MY_Controller{
 	}
 	
 	public function add(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__);
+		$Item = $this->_Module.'/'.strtolower(__CLASS__);
 		$Run = $Item.'/'.__FUNCTION__;
 		if($this->form_validation->run($Run)){
 			$this->config->load('formview/manage');
@@ -90,7 +88,7 @@ class Workflow extends MY_Controller{
 	}
 	
 	public function edit(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+		$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 		if($this->form_validation->run($Item)){
 			$this->config->load('formview/manage');
 			$FormView = $this->config->item($Item);
@@ -116,7 +114,7 @@ class Workflow extends MY_Controller{
 	}
 	
 	public function remove(){
-		$Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+		$Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 		if($this->form_validation->run($Item)){
 			$Where = $this->input->post('selected', true);
 			if($Where !== false && is_array($Where) && count($Where) > 0){

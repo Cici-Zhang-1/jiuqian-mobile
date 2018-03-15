@@ -20,7 +20,7 @@ class Role_visit extends MY_Controller {
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Item.$View;
+            $Item = $this->_Item.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -55,11 +55,11 @@ class Role_visit extends MY_Controller {
         }else {
             $Data['Error'] = '请选择需要设置访问控制的角色!';
         }
-        $this->load->view($this->Item.__FUNCTION__, $Data);
+        $this->load->view($this->_Item.__FUNCTION__, $Data);
     }
 
     public function edit(){
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Post = gh_escape($_POST);
             if(!!($this->role_visit_model->delete_by_rid($Post['rid']))){

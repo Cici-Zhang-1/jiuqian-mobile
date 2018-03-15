@@ -57,7 +57,7 @@ class Area_model extends MY_Model{
 	            $this->_Num = $Con['num'];
 	        }
 	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item, $this->_Module);
+	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
 	            $this->HostDb->from('area');
 	    

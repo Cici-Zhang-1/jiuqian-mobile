@@ -95,7 +95,7 @@
                     <tr class="loading"><td colspan="15">加载中...</td></tr>
                     <tr class="no-data"><td colspan="15">没有数据</td></tr>
                     <tr class="model">
-                        <td ><input name="v"  type="checkbox" value=""/></td>
+                        <td name="selected"><input name="v"  type="checkbox" value=""/></td>
                         {% for item in elements %}
                             {% if item.checked %}
                                 <td class="{{ item.classes }}" name="{{ item.name }}"></td>
@@ -103,6 +103,9 @@
                                 <td class="hide {{ item.classes }}" name="{{ item.name }}"></td>
                             {% endif %}
                         {% endfor %}
+                    </tr>
+                    <tr v-for="(trData, key, index) in card{{ card.v }}.data.content" :key="index">
+                        <td v-for="(ivalue, ikey, iindex) in elements" :name="ikey" :class="[ ivalue.classes ]" :key="iindex" v-if="ivalue.checked" v-html="trData[ikey]"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -122,115 +125,178 @@
         </div>
     </div>
     {% endfor %}
-</div>
 
-{% for func in funcs %}
-    {% if func.forms | length > 0 %}
-<div class="modal fade" id="{{ title }}{{ func.name | capitalize }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}{{ func.name | capitalize }}ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form class="form-horizontal" id="{{ title }}{{ func.name | capitalize }}Form" action="" method="post" role="form">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="{{ title }}{{ func.name | capitalize }}ModalLabel">编辑</h4>
-                </div>
-                <div class="modal-body">
-                {% for form in func.forms %}
-                    {% if form.form_type == 'hidden' %}
-                        <input type="hidden" name="{{ form.name }}" value="" />
-                    {% elseif form.form_type == 'select' %}
-                        <div class="form-group" data-url="{{ form.url }}">
-                            <label class="control-label col-md-2" >{{ form.label }}:</label>
-                            <div class="col-md-6">
-                                <select class="form-control {{ form.classes }}" name="{{ form.name }}" {{ form.multiple ? "multiple" : "" }} data-load="{{ form.url }}"></select>
+    {% for func in funcs %}
+        {% if func.forms | length > 0 %}
+            <div class="modal fade" id="{{ title }}{{ func.name | capitalize }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}{{ func.name | capitalize }}ModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <form class="form-horizontal" id="{{ title }}{{ func.name | capitalize }}Form" action="" method="post" role="form">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="{{ title }}{{ func.name | capitalize }}ModalLabel">编辑</h4>
                             </div>
-                        </div>
-                    {% elseif form.form_type == 'checkbox' %}
-                    {% elseif form.form_type == 'radio' %}
-                    {% elseif form.form_type == 'textarea' %}
-                        <div class="form-group">
-                            <label class="control-label col-md-2" >{{ form.label }}:</label>
-                            <div class="col-md-6">
-                                <textarea class="form-control {{ form.classes }}" rows="3" name="{{ form.name }}" ></textarea>
+                            <div class="modal-body">
+                                {% for form in func.forms %}
+                                    {% if form.form_type == 'hidden' %}
+                                        <input type="hidden" name="{{ form.name }}" value="" />
+                                    {% elseif form.form_type == 'select' %}
+                                        <div class="form-group" data-url="{{ form.url }}">
+                                            <label class="control-label col-md-2" >{{ form.label }}:</label>
+                                            <div class="col-md-6">
+                                                <select class="form-control {{ form.classes }}" name="{{ form.name }}" {{ form.multiple ? "multiple" : "" }} data-load="{{ form.url }}">
+                                                    <option value="">请选则</option>
+                                                    <option v-for="(value, key, index) in {{ form.name }}.data.content" :value="value.v" :key="index">{{ '{{' }} value.name {{ '}}' }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    {% elseif form.form_type == 'checkbox' %}
+                                    {% elseif form.form_type == 'radio' %}
+                                    {% elseif form.form_type == 'textarea' %}
+                                        <div class="form-group">
+                                            <label class="control-label col-md-2" >{{ form.label }}:</label>
+                                            <div class="col-md-6">
+                                                <textarea class="form-control {{ form.classes }}" rows="3" name="{{ form.name }}" ></textarea>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-group">
+                                            <label class="control-label col-md-2" >{{ form.label }}:</label>
+                                            <div class="col-md-6">
+                                                <input class="form-control {{ form.classes }}" name="{{ form.name }}" type="text" {{ form.required ? "required" : "" }} {{ form.max ? ["max=\"", form.max, "\""].join : "" }} {{ form.min ? ["min=\"", form.min, "\""].join : ""}} {{ form.maxlength ? ["maxlength=\"", form.maxlength, "\""].join : "" }} {{ form.pattern ? ["pattern=\"", form.pattern, "\""].join : "" }} {{ form.readonly ? "readonly" : "" }} placeholder="{{ form.placeholder }}" value="{{ form.dv }}"/>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
                             </div>
-                        </div>
-                    {% else %}
-                        <div class="form-group">
-                            <label class="control-label col-md-2" >{{ form.label }}:</label>
-                            <div class="col-md-6">
-                                <input class="form-control {{ form.classes }}" name="{{ form.name }}" type="text" {{ form.required ? "required" : "" }} {{ form.max ? ["max=\"", form.max, "\""].join : "" }} {{ form.min ? ["min=\"", form.min, "\""].join : ""}} {{ form.maxlength ? ["maxlength=\"", form.maxlength, "\""].join : "" }} {{ form.pattern ? ["pattern=\"", form.pattern, "\""].join : "" }} {{ form.readonly ? "readonly" : "" }} placeholder="{{ form.placeholder }}" value="{{ form.dv }}"/>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <button type="submit" class="btn btn-primary" data-save="ajax.modal">保存</button>
                             </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                    <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
+                        </form>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="submit" class="btn btn-primary" data-save="ajax.modal">保存</button>
-                </div>
-            </form>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_searches | length > 0 %}
+    <div class="modal fade filter" id="{{ title }}FilterModal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}FilterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form  class="form-horizontal" id="{{ title }}FilterForm" action="" method="post" role="form">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="{{ title }}FilterModalLabel">搜索</h4>
+                    </div>
+                    <div class="modal-body">
+                        {% for page_search in page_searches %}
+                            {% if page_search.form_type == 'hidden' %}
+                                <input type="hidden" name="{{ page_search.name }}" value="" />
+                            {% elseif page_search.form_type == 'select' %}
+                                <div class="form-group" data-url="{{ page_search.url }}">
+                                    <label class="control-label col-md-2" >{{ page_search.label }}:</label>
+                                    <div class="col-md-6">
+                                        <select class="form-control" name="{{ page_search.name }}" {{ form.multiple ? "multiple" : "" }} data-load="{{ form.url }}">
+                                            <option>请选则</option>
+                                            <option v-for="(value, key, index) in {{ page_search.name }}.data.content" :value="value.v" :key="index">{{ '{{' }} value.name {{ '}}' }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            {% elseif page_search.form_type == 'checkbox' %}
+                            {% elseif page_search.form_type == 'radio' %}
+                            {% elseif page_search.form_type == 'textarea' %}
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" >{{ page_search.label }}:</label>
+                                    <div class="col-md-6">
+                                        <textarea class="form-control" rows="3" name="{{ page_search.name }}" ></textarea>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" >{{ page_search.label }}:</label>
+                                    <div class="col-md-6">
+                                        <input class="form-control {{ page_search.classes }}" name="{{ page_search.name }}" type="text" {{ page_search.required ? "required" : "" }} {{ page_search.max ? ["max=\"", page_search.max, "\""].join : "" }} {{ page_search.min ? ["min=\"", page_search.min, "\""].join : ""}} {{ page_search.maxlength ? ["maxlength=\"", page_search.maxlength, "\""].join : "" }} {{ page_search.pattern ? ["pattern=\"", page_search.pattern, "\""].join : "" }} {{ page_search.readonly ? "readonly" : "" }} placeholder="{{ page_search.placeholder }}" value="{{ page_search.dv }}"/>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal">保存</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
     {% endif %}
-{% endfor %}
+</div>
 
-{% if page_searches | length > 0 %}
-<div class="modal fade filter" id="{{ title }}FilterModal" tabindex="-1" role="dialog" aria-labelledby="{{ title }}FilterModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form  class="form-horizontal" id="{{ title }}FilterForm" action="" method="post" role="form">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="{{ title }}FilterModalLabel">搜索</h4>
-                </div>
-                <div class="modal-body">
-                    {% for page_search in page_searches %}
-                        {% if page_search.form_type == 'hidden' %}
-                            <input type="hidden" name="{{ page_search.name }}" value="" />
-                        {% elseif page_search.form_type == 'select' %}
-                            <div class="form-group" data-url="{{ page_search.url }}">
-                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="{{ page_search.name }}"></select>
-                                </div>
-                            </div>
-                        {% elseif page_search.form_type == 'checkbox' %}
-                        {% elseif page_search.form_type == 'radio' %}
-                        {% elseif page_search.form_type == 'textarea' %}
-                            <div class="form-group">
-                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
-                                <div class="col-md-6">
-                                    <textarea class="form-control" rows="3" name="{{ page_search.name }}" ></textarea>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="form-group">
-                                <label class="control-label col-md-2" >{{ page_search.label }}:</label>
-                                <div class="col-md-6">
-                                    <input class="form-control {{ page_search.classes }}" name="{{ page_search.name }}" type="text" {{ page_search.required ? "required" : "" }} {{ page_search.max ? ["max=\"", page_search.max, "\""].join : "" }} {{ page_search.min ? ["min=\"", page_search.min, "\""].join : ""}} {{ page_search.maxlength ? ["maxlength=\"", page_search.maxlength, "\""].join : "" }} {{ page_search.pattern ? ["pattern=\"", page_search.pattern, "\""].join : "" }} {{ page_search.readonly ? "readonly" : "" }} placeholder="{{ page_search.placeholder }}" value="{{ page_search.dv }}"/>
-                                </div>
-                            </div>
+<script type="module">
+    (function($){
+        new Vue({
+            el: '#{{ title }}',
+            data: function () {
+                return {}
+            },
+            computed: {
+        {% for card in cards %}
+        {% endfor %}
+        {% for func in funcs %}
+            {% for form in forms %}
+                {% if form.url | length > 0 %}
+                    {{ form.name }}: {
+                        get: function () {
+                            return STORE.state.apps.funcs.{{ form.name }};
+                        }
+                    },
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        {% for page_search in page_searches %}
+            {% if page_search.url | length > 0 %}
+                {{ page_search.name }}: {
+                    get: function () {
+                        return STORE.state.apps.page_searches.{{ page_search.name }};
+                    }
+                },
+            {% endif %}
+        {% endfor %}
+            },
+            created: function() {
+                {% for func in funcs %}
+                    {% for form in forms %}
+                        {% if form.url | length > 0 %}
+                            if (this.{{ form.name }} === undefined || JSON.stringify(this.{{ form.name }}) === '{}') {
+                                this.$store.dispatch('FETCH_DATA', {
+                                    params: {
+                                        uri: '{{ form.url }}'
+                                    },
+                                    target: this.{{ form.name }}
+                                });
+                            }
                         {% endif %}
                     {% endfor %}
-                    <div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="submit" class="btn btn-primary" data-dismiss="modal">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
-<script>
-    (function($){
-        /*$('div#{{ title }}').handle_page();
-        {% for func_group in func_groups %}
-            $('div#{{ title }}{{ func_group.name | capitalize }}Modal').handle_modal_000();
-        {% endfor %}
-        $('div#{{ title }}FilterModal').handle_modal_000();*/
+                {% endfor %}
+                {% for page_search in page_searches %}
+                    {% if page_search.url | length > 0 %}
+                        if (this.{{ page_search.name }} === undefined || JSON.stringify(this.{{ page_search.name }}) === '{}') {
+                            this.$store.dispatch('FETCH_DATA', {
+                                params: {
+                                    uri: '{{ page_search.url }}'
+                                },
+                                target: this.{{ page_search.name }}
+                            });
+                        }
+                    {% endif %}
+                {% endfor %}
+            },
+            methods: {
+
+            }
+        });
     })(jQuery);
 </script>

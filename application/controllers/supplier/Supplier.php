@@ -109,7 +109,7 @@ class Supplier extends MY_Controller{
 	 * 删除
 	 */
 	public function remove(){
-	    $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+	    $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
 	    if($this->form_validation->run($Item)){
 	        $Where = $this->input->post('selected', true);
 	        if($Where !== false && is_array($Where) && count($Where) > 0){

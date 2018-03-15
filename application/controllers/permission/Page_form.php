@@ -21,7 +21,7 @@ class Page_form extends MY_Controller {
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Item.$View;
+            $Item = $this->_Item.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -42,11 +42,11 @@ class Page_form extends MY_Controller {
         }else {
             $Data['Error'] = '请选择需要设置页面表单的菜单!';
         }
-        $this->load->view($this->Item.__FUNCTION__, $Data);
+        $this->load->view($this->_Item.__FUNCTION__, $Data);
     }
 
     public function add() {
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if ($this->form_validation->run($Item)) {
             $Post = gh_escape($_POST);
             if(!!($Fid = $this->page_form_model->insert($Post))){
@@ -63,7 +63,7 @@ class Page_form extends MY_Controller {
     }
 
     public function edit(){
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Post = gh_escape($_POST);
             $Where = $Post['selected'];
@@ -83,7 +83,7 @@ class Page_form extends MY_Controller {
      * 删除
      */
     public function remove(){
-        $Item = $this->Item.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             if($Where !== false){

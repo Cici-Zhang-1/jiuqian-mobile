@@ -8,8 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 添加测试数据
  */
 class Test extends MY_Controller{
-    private $Module = 'data';
-    private $Item = '';
     public function __construct(){
         log_message('debug', 'Controller Data/Test eStart!');
         parent::__construct();
@@ -21,14 +19,14 @@ class Test extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
     }
 
     public function add(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__);
+        $Item = $this->_Module.'/'.strtolower(__CLASS__);
         $Nums = $this->input->post('num', true);
         $Nums = intval(trim($Nums));
         $Nums = 1;

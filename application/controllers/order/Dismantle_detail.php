@@ -8,8 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 拆单详情(板材、板块)
  */
 class Dismantle_detail extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Dismantle_detail Start !');
@@ -21,7 +19,7 @@ class Dismantle_detail extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }

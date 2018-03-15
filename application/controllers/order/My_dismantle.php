@@ -8,9 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 我的拆单(未拆的、正在拆的、已经拆单、已经删的)
  */
 class My_dismantle extends MY_Controller{
-    private $Module = 'order';
-    private $_Controller;
-    private $_Cookie;
+
     private $Count;
     private $InsertId;
     private $Search = array(
@@ -19,12 +17,9 @@ class My_dismantle extends MY_Controller{
         'keyword' => ''
     );
     public function __construct(){
-        log_message('debug', 'Controller Order/My_dismantle Start!');
         parent::__construct();
+        log_message('debug', 'Controller Order/My_dismantle Start!');
         $this->load->model('order/order_product_model');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->Module.'/'.$this->_Controller.'/';
-        $this->_Cookie = $this->Module.'_'.$this->_Controller.'_'.$this->session->userdata('uid').'_';
     }
 
     public function index(){
@@ -33,7 +28,7 @@ class My_dismantle extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -49,8 +44,8 @@ class My_dismantle extends MY_Controller{
                 $Status = $this->config->item('library/workflow/order_product');
                 foreach ($Data['content'] as $key => $value){
                     $Tmp = json_decode($value['remark'], true);
-                    if(isset($Tmp[$this->Module.'_'.__CLASS__])){
-                        $Data['content'][$key]['remark'] = $Tmp[$this->Module.'_'.__CLASS__];
+                    if(isset($Tmp[$this->_Module.'_'.__CLASS__])){
+                        $Data['content'][$key]['remark'] = $Tmp[$this->_Module.'_'.__CLASS__];
                     }
                     unset($Tmp);
                     $Data['content'][$key]['status'] = $Status[$value['status']]['text'];
@@ -145,8 +140,8 @@ class My_dismantle extends MY_Controller{
                 $Status = $this->config->item('library/workflow/order_product');
                 foreach ($Data['content'] as $key => $value){
                     $Tmp = json_decode($value['remark'], true);
-                    if(isset($Tmp[$this->Module.'_'.__CLASS__])){
-                        $Data['content'][$key]['remark'] = $Tmp[$this->Module.'_'.__CLASS__];
+                    if(isset($Tmp[$this->_Module.'_'.__CLASS__])){
+                        $Data['content'][$key]['remark'] = $Tmp[$this->_Module.'_'.__CLASS__];
                     }
                     unset($Tmp);
                     $Data['content'][$key]['status'] = $Status[$value['status']]['text'];
@@ -162,7 +157,7 @@ class My_dismantle extends MY_Controller{
         $this->_return($Data); */
     }
     public function edit_asure(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             if($Where !== false && is_array($Where) && count($Where) > 0){
@@ -180,7 +175,7 @@ class My_dismantle extends MY_Controller{
     }
     
     public function remove(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             if($Where !== false && is_array($Where) && count($Where) > 0){

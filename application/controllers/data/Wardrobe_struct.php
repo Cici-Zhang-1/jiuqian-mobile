@@ -7,12 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 class Wardrobe_struct extends MY_Controller{
-    private $Module = 'data';
-    private $Item = '';
     public function __construct(){
-        log_message('debug', 'Controller Data/Wardrobe_struct eStart!');
         parent::__construct();
-        //$this->load->model('data/wardrobe_struct_model');
     }
 
     public function index(){
@@ -21,7 +17,7 @@ class Wardrobe_struct extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.$View;
+            $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.$View;
             $this->data['action'] = site_url($Item);
             $this->load->view($Item, $this->data);
         }
@@ -29,14 +25,14 @@ class Wardrobe_struct extends MY_Controller{
 
 
     public function read(){
-        $this->Item = $this->Module.'/'.strtolower(__CLASS__).'/read';
+        $this->_Item = $this->_Module.'/'.strtolower(__CLASS__).'/read';
         $Cache = 'data_wardrobe_struct';
         $this->e_cache->open_cache();
         $Data = array();
         /* if(!($Data = $this->cache->get($Cache))){
             if(!!($Query = $this->wardrobe_struct_model->select_wardrobe_struct())){
                 $this->config->load('dbview/data');
-                $Dbview = $this->config->item($this->Item);
+                $Dbview = $this->config->item($this->_Item);
                 foreach ($Query as $key => $value){
                     foreach ($Dbview as $ikey=>$ivalue){
                         $Return[$key][$ivalue] = isset($value[$ikey])?$value[$ikey]:'';
@@ -151,7 +147,7 @@ class Wardrobe_struct extends MY_Controller{
         $this->_return($Data);
     }
     public function add(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__);
+        $Item = $this->_Module.'/'.strtolower(__CLASS__);
         $Run = $Item.'/'.__FUNCTION__;
         if($this->form_validation->run($Run)){
             $this->config->load('formview/data');
@@ -176,7 +172,7 @@ class Wardrobe_struct extends MY_Controller{
         $this->_return();
     }
     public function edit(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__);
+        $Item = $this->_Module.'/'.strtolower(__CLASS__);
         $Run = $Item.'/'.__FUNCTION__;
         if($this->form_validation->run($Run)){
             $this->config->load('formview/data');
@@ -205,7 +201,7 @@ class Wardrobe_struct extends MY_Controller{
      * 删除
      */
     public function remove(){
-        $Item = $this->Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
+        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
         if($this->form_validation->run($Item)){
             $Where = $this->input->post('selected', true);
             if($Where !== false && is_array($Where) && count($Where) > 0){

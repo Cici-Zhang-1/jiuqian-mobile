@@ -7,8 +7,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 class Order_product_door extends MY_Controller{
-    private $Module = 'order';
-
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_product_door Start !');

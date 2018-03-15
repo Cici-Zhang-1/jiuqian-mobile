@@ -36,7 +36,7 @@ class Role extends MY_Controller {
     }
 
     public function read() {
-        $this->Item = $this->_Item.__FUNCTION__;
+        $this->_Item = $this->_Item.__FUNCTION__;
         $Data = array();
         if(!($Query = $this->role_model->select())){
             $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有用户角色信息';

@@ -33,7 +33,7 @@ class Abnormity extends MY_Controller{
 	}
 
 	public function read(){
-	    $this->Item = $this->_Item.__FUNCTION__;
+	    $this->_Item = $this->_Item.__FUNCTION__;
 	    $PrintList = $this->input->get('print_list');
 	    if(false === $PrintList || is_null($PrintList)){
 	        $PrintList = false;

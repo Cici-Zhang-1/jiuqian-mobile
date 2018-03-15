@@ -15,11 +15,11 @@ class Page_form_model extends MY_Model{
     }
 
     public function select() {
-        $Item = $this->Item.__FUNCTION__;
-        $Cache = $this->Cache . __FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item, $this->Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('page_form')
                             ->join('menu', 'm_id = pf_menu_id', 'left')
                             ->order_by('m_displayorder')
@@ -33,11 +33,11 @@ class Page_form_model extends MY_Model{
     }
 
     public function select_allowed($Ugid, $Mid = 0) {
-        $Item = $this->Item . __FUNCTION__;
-        $Cache = $this->Cache . __FUNCTION__ . $Ugid . $Mid;
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $Ugid . $Mid;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->Module);
+            $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_page_form')
                     ->join('page_form', 'pf_id = rpf_page_form_id');
             if ($Mid) {
@@ -57,11 +57,11 @@ class Page_form_model extends MY_Model{
      * @return bool
      */
     public function select_by_mid($Mid){
-        $Item = $this->Item.__FUNCTION__;
-        $Cache = $this->Cache.__FUNCTION__;
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->Module);
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('page_form')
                 ->where('pf_menu_id', $Mid)
                 ->get();
@@ -74,12 +74,12 @@ class Page_form_model extends MY_Model{
     }
 
     public function insert($Data){
-        $Item = $this->Item.__FUNCTION__;
-        $Data = $this->_format($Data, $Item, $this->Module);
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format($Data, $Item, $this->_Module);
 
         if($this->HostDb->insert('page_form', $Data)){
             log_message('debug', "Model Page_form_model/insert Success!");
-            $this->remove_cache($this->Module);
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
         }else{
             log_message('debug', "Model Page_form_model/insert Error");
@@ -93,12 +93,12 @@ class Page_form_model extends MY_Model{
      * @param unknown $Where
      */
     public function update($Data, $Where){
-        $Item = $this->Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item, $this->Module);
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item, $this->_Module);
 
         $this->HostDb->where('pf_id', $Where);
         $this->HostDb->update('page_form', $Data);
-        $this->remove_cache($this->Module);
+        $this->remove_cache($this->_Module);
         return TRUE;
     }
 
@@ -116,7 +116,7 @@ class Page_form_model extends MY_Model{
         }
 
         $this->HostDb->delete('page_form');
-        $this->remove_cache($this->Module);
+        $this->remove_cache($this->_Module);
         return true;
     }
 
