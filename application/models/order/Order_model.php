@@ -152,11 +152,12 @@ class Order_model extends MY_Model{
 	    $Cache = $this->_Cache.implode('_', $Con).__FUNCTION__;
 	    $Return = false;
 	    if(!($Return = $this->cache->get($Cache))){
-	        if(empty($Con['pn'])){
+	        /* if(empty($Con['pn'])){
 	            $Con['pn'] = $this->_page_num($Con);
 	        }else{
                 $this->_Num = $Con['num'];
-            }
+            } */
+            $Con['pn'] = $this->_page_num($Con);
 	        if(!empty($Con['pn'])){
 	            $Sql = $this->_unformat_as($Item);
 	            $this->HostDb->select($Sql, FALSE);
@@ -202,7 +203,8 @@ class Order_model extends MY_Model{
 	                    'content' => $Result,
 	                    'num' => $this->_Num,
 	                    'p' => $Con['p'],
-	                    'pn' => $Con['pn']
+	                    'pn' => $Con['pn'],
+                        'pagesize' => $Con['pagesize']
 	                );
 	                $this->cache->save($Cache, $Return, HOURS);
 	            }

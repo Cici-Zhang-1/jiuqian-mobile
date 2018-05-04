@@ -49,6 +49,7 @@ class Auth {
 					if (!!($User = $this->_CI->user->signed_in($Uid))) {
 					    log_message('debug', 'Sign In Success By ' . $Uid);
 						self::$_sign_in = true;
+						$this->_global_session_keys();
 					}else {
 						self::$_sign_in = false;
 						$Message = '您的会话已过期，请重新登陆系统!';
@@ -77,6 +78,19 @@ class Auth {
 	private function _is_sign_page(){
 	    return preg_match('/^sign\/|^generate/', uri_string());
 	}
+
+    /**
+     * global session session_keys
+     * @return bool
+     */
+	private function _global_session_keys() {
+        $SessionKeys = explode(' ', $this->_CI->config->item('session_keys'));
+        foreach ($SessionKeys as $SessionKey) {
+            $GLOBALS[$SessionKey] = $this->_CI->session->userdata($SessionKey);
+
+        }
+        return true;
+    }
 }
 
 /* End of file Auth.php */

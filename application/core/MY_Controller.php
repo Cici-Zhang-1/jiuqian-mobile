@@ -12,6 +12,14 @@ class MY_Controller extends CI_Controller
     protected $_Item;
     protected $_Cookie;
     protected $_Validation;
+    protected $_Search = array(
+        'keyword' => '',    // 关键字
+        'p' => 0,   // 第几页
+        // 'pn' => 0,  // 共多少页
+        'pagesize' => MIN_PAGESIZE,    // 每页条数
+        // 'num' => 0, // 总条数
+        'paging' => 1 // 是否分页
+    );
 
 	protected $Code = EXIT_SUCCESS;	// 返回码，默认是成功返回
 	protected $Message = ''; // 返回时，携带的信息
@@ -103,6 +111,32 @@ class MY_Controller extends CI_Controller
         }
 	}
 
+	protected function get_page_search() {
+        $Search = array();
+	    foreach ($this->_Search as $Key => $Value) {
+            $Search[$Key] = $this->input->get($Key, true);
+            $Search[$Key] = trim($Search[$Key]);
+            if(false === $Search[$Key] || '' == $Search[$Key]){
+                $Search[$Key] = $Value;
+            }
+        }
+        /* if(empty($Search['pn'])){
+            $Search['pn'] = 0;
+        } */
+        if ($Search['paging']) {
+            if(empty($Search['pagesize']) || $Search['pagesize'] < MIN_PAGESIZE || $Search['pagesize'] > MAX_PAGESIZE){
+                $Search['pagesize'] = MIN_PAGESIZE;
+            }
+            if(empty($Search['p']) || $Search['p'] < 1){
+                $Search['p'] = 1;
+            }
+        } else {
+	        $Search['p'] = 1;
+	        $Search['pagesize'] = ALL_PAGESIZE;
+        }
+
+        $this->_Search = $Search;
+    }
 	/**
 	 * 获得收索分页条件
 	 * @param unknown $Cookie

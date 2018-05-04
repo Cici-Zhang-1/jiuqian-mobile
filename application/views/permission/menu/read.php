@@ -150,11 +150,31 @@
                             <label class="control-label col-md-2">移动端:</label>
                             <div class="col-md-6">
                                 <select class="form-control" name="mobile">
-                                    <option value="0">否</option>
+                                    <option value="2">否</option>
                                     <option value="1">是</option>
                                 </select>
                             </div>
                         </div>
+                <div class="form-group">
+                  <label class="control-label col-md-2">隐形:</label>
+                  <div class="col-md-6">
+                    <select class="form-control" name="invisible">
+                      <option value="2">否</option>
+                      <option value="1">是</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label col-md-2">页面类型:</label>
+                  <div class="col-md-6">
+                    <select class="form-control" name="page_type">
+                      <option value="1">表格</option>
+                      <option value="2">表单</option>
+                      <option value="3">UL列表</option>
+                      <option value="4">DL列表</option>
+                    </select>
+                  </div>
+                </div>
 			      		<div class="alert alert-danger alert-dismissible fade in serverError" role="alert"></div>
 			      	</div>
 			      	<div class="modal-footer">

@@ -10,8 +10,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Apps extends MY_Controller {
     private $_Apps;
-
     private $_Ugid;
+
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller Apps Start!');

@@ -1,16 +1,16 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['order/order_model/is_asurable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 );
 $config['order/order_model/is_checkable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_dealer_id' => 'did',
 	'o_sum' => 'sum',
 	'o_status' => 'status',
 );
 $config['order/order_model/is_deliveriable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_pack' => 'pack',
 	'o_pack_detail' => 'pack_detail',
@@ -23,18 +23,18 @@ $config['order/order_model/is_deliveriable'] = array(
 	'o_delivery_phone' => 'delivery_phone',
 );
 $config['order/order_model/is_recheckable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_dealer_id' => 'did',
 	'o_sum' => 'sum',
 	'o_status' => 'status',
 );
 $config['order/order_model/is_dismantlable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_status' => 'status',
 	'o_sum' => 'sum',
 );
 $config['order/order_model/is_quotable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_dealer_id' => 'did',
 	'o_sum' => 'sum',
@@ -45,13 +45,13 @@ $config['order/order_model/is_quotable'] = array(
 	'd_balance' => 'balance',
 );
 $config['order/order_model/is_redismantlable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_dealer_id' => 'did',
 	'o_sum' => 'sum',
 	'o_status' => 'status',
 );
 $config['order/order_model/is_redeliveriable'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_sum' => 'sum',
 	'o_dealer_id' => 'did',
 );
@@ -72,7 +72,7 @@ $config['order/order_model/select_order_asured'] = array(
 	'o_status' => 'status',
 );
 $config['order/order_model/select_everyday_asured'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
@@ -94,7 +94,7 @@ $config['order/order_model/select_current_workflow'] = array(
 	'w_file' => 'file',
 );
 $config['order/order_model/select_money_logistics'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer' => 'dealer',
@@ -113,7 +113,7 @@ $config['order/order_model/select_money_logistics'] = array(
 	'u_truename' => 'creator',
 );
 $config['order/order_model/select_money_month'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer' => 'dealer',
@@ -132,7 +132,7 @@ $config['order/order_model/select_money_month'] = array(
 	'u_truename' => 'creator',
 );
 $config['order/order_model/select_money_factory'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer' => 'dealer',
@@ -151,7 +151,7 @@ $config['order/order_model/select_money_factory'] = array(
 	'u_truename' => 'creator',
 );
 $config['order/order_model/select_deliveried'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer' => 'dealer',
@@ -169,7 +169,7 @@ $config['order/order_model/select_deliveried'] = array(
 	'u_truename' => 'creator',
 );
 $config['order/order_model/select_for_debt'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_remark' => 'remark',
 	'o_dealer' => 'dealer',
@@ -180,7 +180,7 @@ $config['order/order_model/select_for_debt'] = array(
 	'o_sum' => 'sum',
 );
 $config['order/order_model/select'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_remark' => 'remark',
 	'o_dealer_remark' => 'dealer_remark',
@@ -210,7 +210,7 @@ $config['order/order_model/select'] = array(
 	'tl_icon' => 'icon',
 );
 $config['order/order_model/select_order'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_remark' => 'remark',
 	'o_dealer_remark' => 'dealer_remark',
@@ -240,7 +240,7 @@ $config['order/order_model/select_order'] = array(
 	'tl_icon' => 'icon',
 );
 $config['order/order_model/select_order_warn'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_remark' => 'remark',
 	'o_dealer_id' => 'did',
@@ -255,7 +255,7 @@ $config['order/order_model/select_order_warn'] = array(
 	'tl_icon' => 'icon',
 );
 $config['order/order_model/select_order_detail'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_dealer_id' => 'did',
 	'o_dealer' => 'dealer',
@@ -286,7 +286,7 @@ $config['order/order_model/select_order_detail'] = array(
 	'w_name' => 'workflow',
 );
 $config['order/order_model/select_wait_delivery'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_owner' => 'owner',
@@ -305,7 +305,7 @@ $config['order/order_model/select_wait_delivery'] = array(
 	'tl_icon' => 'icon',
 );
 $config['order/order_model/select_wait_delivery_by_ids'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer_id' => 'did',
@@ -323,7 +323,7 @@ $config['order/order_model/select_wait_delivery_by_ids'] = array(
 	'd_balance' => 'balance',
 );
 $config['order/order_model/select_by_soid'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer_id' => 'did',
@@ -343,7 +343,7 @@ $config['order/order_model/select_by_soid'] = array(
 	'o_cargo_no' => 'cargo_no',
 );
 $config['order/order_model/select_order_stock_logistics'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_dealer_id' => 'did',
 	'o_dealer' => 'dealer',
@@ -365,7 +365,7 @@ $config['order/order_model/select_order_stock_logistics'] = array(
 	'd_balance' => 'balance',
 );
 $config['order/order_model/select_order_dealer_by_id'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_sum' => 'sum',
 	'o_dealer_id' => 'did',
 );
@@ -375,7 +375,7 @@ $config['order/order_model/select_order_num'] = array(
 	'ifnull(o_payed_datetime, "")' => 'payed_datetime',
 );
 $config['order/order_model/select_order_num_by_cargo_no'] = array(
-	'o_id' => 'oid',
+	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
 	'o_dealer_id' => 'did',

@@ -14,7 +14,8 @@ $config['permission/element_model/select_allowed'] = array(
     'e_label' => 'label',
     'e_classes' => 'classes',
     'e_dv' => 'dv',
-    'e_checked' => 'checked',
+    'e_checked' => 'checked_v',
+    'bt_name' => 'checked_name',
     'e_displayorder' => 'displayorder',
     'c_name' => 'card'
 );

@@ -11,6 +11,8 @@ $config['permission/func_model/insert'] = array(
 	'target' => 'f_target',
 	'tag' => 'f_tag',
 	'multiple' => 'f_multiple',
+    'source' => 'f_source',
+    'modal_type' => 'f_modal_type'
 );
 $config['permission/func_model/update'] = array(
 	'name' => 'f_name',
@@ -23,4 +25,6 @@ $config['permission/func_model/update'] = array(
 	'target' => 'f_target',
 	'tag' => 'f_tag',
 	'multiple' => 'f_multiple',
+    'source' => 'f_source',
+    'modal_type' => 'f_modal_type'
 );

@@ -168,6 +168,7 @@ define('MIN_B_AREA', 0.01);
 
 define('MIN_PAGESIZE', 10);
 define('MAX_PAGESIZE', 1000);
+define('ALL_PAGESIZE', 9999999999);
 
 defined('YES')                              OR define('YES', 1);
 defined('NO')                               OR define('NO', 0);

@@ -61,7 +61,12 @@ class Func_model extends MY_Model{
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql)->from('role_func')->join('func', 'f_id = rf_func_id', 'left');
+            $this->HostDb->select($Sql)->from('role_func')
+                ->join('func', 'f_id = rf_func_id', 'left')
+                ->join('toggle_type AS TOGGLE', 'TOGGLE.tt_id = f_toggle', 'left')
+                ->join('tag_type AS TAG', 'TAG.tt_id = f_tag', 'left')
+                ->join('boolean_type', 'bt_id = f_multiple', 'left')
+                ->join('modal_type', 'mt_id = f_modal_type', 'left');
             if ($Mid) {
                 $this->HostDb->where('f_menu_id', $Mid);
             }

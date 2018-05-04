@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category Model
  */
 class {{ title }} extends MY_Model {
-
+    private $_Num;
     public function __construct(){
         parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model {{ dirs }}/{{ title }} Start!');
@@ -17,21 +17,50 @@ class {{ title }} extends MY_Model {
     /**
      * Select from table {{ table['name'] }}
      */
-    public function select() {
+    public function select($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql)->from('{{ table['name'] }}')->get();
-            if ($Query->num_rows() > 0) {
-            $Return = $Query->result_array();
-                $this->cache->save($Cache, $Return, MONTHS);
-            } else {
-                $GLOBALS['error'] = '没有符合搜索条件的{{ table['comment'] }}';
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $Query = $this->HostDb->select($Sql)->from('{{ table['name'] }}')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                if ($Query->num_rows() > 0) {
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn'],
+                        'pagesize' => $Search['pagesize']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的{{ table['comment'] }}';
+                }
             }
         }
         return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count({{ table['v'] }}) as num', FALSE);
+        $this->HostDb->from('{{ table['name'] }}');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
     }
 
     /**

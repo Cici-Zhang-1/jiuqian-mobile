@@ -90,6 +90,9 @@ class Menu_model extends MY_Model{
             $this->db->select($Sql);
             $this->db->from('role_menu')
                 ->join('menu', 'm_id = rm_menu_id', 'left')
+                ->join('page_type', 'pt_id = m_page_type', 'left')
+                ->join('boolean_type AS MOBILE', 'MOBILE.bt_id = m_mobile', 'left')
+                ->join('boolean_type AS INVISIBLE', 'INVISIBLE.bt_id = m_invisible', 'left')
                 ->where("rm_role_id in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = $Ugid)");
             if ($Mobile) {
                 $this->db->where('m_mobile', 1);

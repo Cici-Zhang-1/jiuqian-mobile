@@ -7,6 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 13:26
  *
  * Desc:
+ * php index.php generate create false/controller/view/modal/dbview/dbtable/validation data-page_type
  */
 class Generate extends MY_Controller {
     private $_Name = '';

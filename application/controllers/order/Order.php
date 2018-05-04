@@ -32,7 +32,10 @@ class Order extends MY_Controller {
 	
 	public function read(){
 		$Cookie = $this->_Cookie.__FUNCTION__;
-        $this->Search = $this->get_page_conditions($Cookie, $this->Search);
+		$this->_Search = array_merge($this->_Search, $this->Search);
+        $this->get_page_search();
+        // $this->Search = $this->get_page_conditions($Cookie, $this->Search);
+        $this->Search = $this->_Search;
 		$Data = array();
 		if(!empty($this->Search)){
 		    $this->load->library('permission');

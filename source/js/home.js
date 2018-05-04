@@ -4,7 +4,7 @@
             return v.toLowerCase().replace(/( |^)[a-z]/g, function(iv) {
                 return iv.toUpperCase();
             });
-        }).join('').replace(/( |^)[a-z]/g, function(iv) {
+        }).join('').replace(/( |^)[A-Z]/g, function(iv) {
             return iv.toLowerCase();
         });
     };
