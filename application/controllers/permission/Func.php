@@ -37,12 +37,11 @@ class Func extends MY_Controller {
     }
 
     private function _read() {
-        $Id = $this->input->get('id', true);
+        $Id = $this->input->get('v', true);
         $Id = intval(trim($Id));
 
         if ($Id > 0) {
             $Data['Id'] = $Id;
-
             if (!!($Query = $this->func_model->select_by_mid($Id))) {
                 $Data['content'] = $Query;
             }else {
