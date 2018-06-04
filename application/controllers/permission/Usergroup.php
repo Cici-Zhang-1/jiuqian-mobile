@@ -9,18 +9,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc: 用户组管理
  */
 class Usergroup extends MY_Controller{
-    private $_Module;
-    private $_Controller;
-    private $_Item ;
+    private $__Search = array(
+        'paging' => 0,
+        'usergroup_v' => array()
+    );
     public function __construct(){
         parent::__construct();
-        $this->load->model('permission/usergroup_model');
-        $this->_Module = $this->router->directory;
-        $this->_Controller = $this->router->class;
-        $this->_Item = $this->_Module.$this->_Controller.'/';
-        $this->_Cookie = str_replace('/', '_', $this->_Item).'_';
-
         log_message('debug', 'Controller permission/Usergroup Start!');
+        $this->load->model('permission/usergroup_model');
     }
 
     public function index(){
@@ -29,42 +25,36 @@ class Usergroup extends MY_Controller{
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $this->data['action'] = site_url($Item);
-            $this->load->view($Item, $this->data);
+            $this->_index($View);
         }
     }
 
     public function read(){
-        $Parent = $this->input->get('parent', true);
-        $Parent = trim($Parent);
-        if(preg_match('/\d{1,10}/', $Parent)){
-            $Pid = $Parent;
-        }elseif(is_string($Parent) && !empty($Parent)){
-            if(!($Pid = $this->usergroup_model->select_usergroup_id($Parent))){
-                $this->Failue = '您要查找的用户组不存在';
-            }
-        }else{
-            $Pid = $this->session->userdata('ugid');
-        }
-        if(empty($this->Failue)){
-            if(!!($Query = $this->usergroup_model->select())){
-                foreach ($Query as $key => $value){
-                    $Data[$value['uid']] = $value;
-                    $Child[$value['parent']][] = $value['uid'];
+        array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if(!($Data = $this->usergroup_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        } else {
+            $TmpSource = array();
+            $TmpDes = array();
+            foreach ($Data['content'] as $key => $value){
+                $ClassAlien = '|';
+                for ($I = 0; $I < $value['class']; $I++) {
+                    $ClassAlien .= '---';
                 }
-                ksort($Child);
-                $Child = gh_infinity_category($Child, $Pid);
-                while(list($key, $value) = each($Child)){
-                    $Return['content'][] = $Data[$value];
-                }
-                $Return['id'] = $Pid;
-                $Return['class'] = $Data[$Pid]['class'];
-            }else{
-                $this->Failue = '没有用户组!';
+                $value['class_alien'] = $ClassAlien;
+                $TmpSource[$value['v']] = $value;
+                $Child[$value['parent']][] = $value['v'];
             }
+            ksort($Child);
+            $Child = gh_infinity_category($Child, $this->session->userdata('ugid'));
+            while(list($key, $value) = each($Child)){
+                $TmpDes['content'][] = $TmpSource[$value];
+            }
+            $Data['content'] = $TmpSource;
         }
-        $this->_return($Return);
+        $this->_ajax_return($Data);
     }
 
     public function add(){

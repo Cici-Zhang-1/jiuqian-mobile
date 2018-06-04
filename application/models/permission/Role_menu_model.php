@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Role_menu_model extends MY_Model {
     public function __construct() {
-        parent::__construct();
+        parent::__construct(__DIR__, __CLASS__);
 
         log_message('debug', 'Model permission/Role_menu_model Start!');
     }
@@ -27,6 +27,49 @@ class Role_menu_model extends MY_Model {
             if($Query->num_rows() > 0){
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
+            }
+        }
+        return $Return;
+    }
+
+    public function select_by_usergroup_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_menu')
+                ->join('menu', 'm_id = rm_menu_id', 'left')
+                ->join('role', 'r_id = rm_role_id', 'left')
+                ->join('usergroup_role', 'ur_role_id = r_id', 'left')
+                ->where('ur_usergroup_id', $V)
+                ->order_by('m_displayorder')
+                ->group_by('m_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的用户组';
+            }
+        }
+        return $Return;
+    }
+
+    public function select_by_role_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_menu')
+                ->join('menu', 'm_id = rm_menu_id', 'left')
+                ->where('rm_role_id', $V)
+                ->group_by('m_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的用户组';
             }
         }
         return $Return;

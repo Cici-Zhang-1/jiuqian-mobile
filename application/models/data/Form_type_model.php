@@ -47,7 +47,7 @@ class Form_type_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(ft_id) as num', FALSE);
+        $this->HostDb->select('count(ft_name) as num', FALSE);
         $this->HostDb->from('form_type');
 
         $Query = $this->HostDb->get();
@@ -110,9 +110,9 @@ class Form_type_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
-            $this->HostDb->where_in('ft_id', $Where);
+            $this->HostDb->where_in('ft_name', $Where);
         } else {
-            $this->HostDb->where('ft_id', $Where);
+            $this->HostDb->where('ft_name', $Where);
         }
         $this->HostDb->update('form_type', $Data);
         $this->remove_cache($this->_Module);
@@ -127,7 +127,7 @@ class Form_type_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('form_type', $Data, 'ft_id');
+        $this->HostDb->update_batch('form_type', $Data, 'ft_name');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -139,9 +139,9 @@ class Form_type_model extends MY_Model {
      */
     public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('ft_id', $Where);
+            $this->HostDb->where_in('ft_name', $Where);
         } else {
-            $this->HostDb->where('ft_id', $Where);
+            $this->HostDb->where('ft_name', $Where);
         }
 
         $this->HostDb->delete('form_type');

@@ -46,8 +46,8 @@ class Card_model extends MY_Model{
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_card')
                 ->join('card', 'c_id = rc_card_id')
-                ->join('card_type', 'ct_id = c_card_type', 'left')
-                ->join('card_setting', 'cs_id = c_card_setting', 'left');
+                ->join('card_type', 'ct_name = c_card_type', 'left')
+                ->join('card_setting', 'cs_name = c_card_setting', 'left');
             if ($Mid) {
                 $this->HostDb->where('c_menu_id', $Mid);
             }

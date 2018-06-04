@@ -9,18 +9,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc:
  */
 class Role_card extends MY_Controller {
-    private $_Module;
-    private $_Controller;
-    private $_Item ;
-
     public function __construct() {
         parent::__construct();
+        log_message('debug', 'Controller permission/Role_card Start!');
         $this->load->model('permission/role_card_model');
-        $this->_Module = $this->router->directory;
-        $this->_Controller = $this->router->class;
-        $this->_Item = $this->_Module.$this->_Controller.'/';
-        $this->_Cookie = str_replace('/', '_', $this->_Item).'_';
-
+        $this->load->model('permission/role_model');
+        $this->load->model('permission/usergroup_role_model');
     }
 
     public function index(){
@@ -29,42 +23,45 @@ class Role_card extends MY_Controller {
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $this->data['action'] = site_url($Item);
-            $this->load->view($Item, $this->data);
+            $this->_index($View);
         }
     }
 
-    private function _read() {
-        $Id = $this->input->get('id', true);
-        $Id = intval(trim($Id));
+    public function read() {
+        $V = $this->input->get('v', true);
+        $V = intval(trim($V));
 
-        if ($Id > 0) {
-            $Data['Id'] = $Id;
-            $this->load->model('permission/card_model');
-            if (!!($Card = $this->card_model->select())) {
-                if (!!($Query = $this->role_card_model->select_by_rid($Id))) {
-                    foreach ($Query as $key => $value) {
-                        $Query[$key] = $value['cid'];
+        $Data = array();
+        if ($V > 0) {
+            if (!!($Role = $this->role_model->is_exist($V))) {
+                if (!!($ParentRoleCard = $this->role_card_model->select_by_usergroup_v($this->session->userdata('ugid')))) {
+                    if (!!($RoleCard = $this->role_card_model->select_by_role_v($Role['v']))) {
+                        $Tmp = array();
+                        foreach ($RoleCard as $Key => $Value) {
+                            array_push($Tmp, $Value['v']);
+                        }
+                        foreach ($ParentRoleCard as $Key => $Value) {
+                            if (in_array($Value['v'], $Tmp)) {
+                                $Value['checked'] = 1;
+                                $ParentRoleCard[$Key] = $Value;
+                            }
+                        }
                     }
-                }else {
-                    $Query = array();
+                    $Data['role_v'] = $Role['v'];
+                    $Data['content'] = $ParentRoleCard;
+                    $Data['num'] = count($ParentRoleCard);
+                    $Data['p'] = ONE;
+                    $Data['pn'] = ONE;
+                } else {
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'您无权设置角色卡片权限, 请联系管理员';
                 }
-                foreach ($Card as $key => $value) {
-                    if (in_array($value['cid'], $Query)) {
-                        $Card[$key]['checked'] = 1;
-                    }else {
-                        $Card[$key]['checked'] = 0;
-                    }
-                }
-                $Data['content'] = $Card;
-            }else {
-                $Data['Error'] = '您无权设置角色卡片功能!';
+            } else {
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色不存在, 请联系管理员';
             }
         }else {
-            $Data['Error'] = '请选择需要设置卡片的角色!';
+            $this->Message = '请选择需要设置的角色!';
         }
-        $this->load->view($this->_Item.__FUNCTION__, $Data);
+        $this->_ajax_return($Data);
     }
 
     public function edit(){

@@ -47,7 +47,7 @@ class Page_type_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(pt_id) as num', FALSE);
+        $this->HostDb->select('count(pt_name) as num', FALSE);
         $this->HostDb->from('page_type');
 
         $Query = $this->HostDb->get();
@@ -110,9 +110,9 @@ class Page_type_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
-            $this->HostDb->where_in('pt_id', $Where);
+            $this->HostDb->where_in('pt_name', $Where);
         } else {
-            $this->HostDb->where('pt_id', $Where);
+            $this->HostDb->where('pt_name', $Where);
         }
         $this->HostDb->update('page_type', $Data);
         $this->remove_cache($this->_Module);
@@ -127,7 +127,7 @@ class Page_type_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('page_type', $Data, 'pt_id');
+        $this->HostDb->update_batch('page_type', $Data, 'pt_name');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -139,9 +139,9 @@ class Page_type_model extends MY_Model {
      */
     public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('pt_id', $Where);
+            $this->HostDb->where_in('pt_name', $Where);
         } else {
-            $this->HostDb->where('pt_id', $Where);
+            $this->HostDb->where('pt_name', $Where);
         }
 
         $this->HostDb->delete('page_type');

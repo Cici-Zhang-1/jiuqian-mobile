@@ -175,3 +175,5 @@ defined('NO')                               OR define('NO', 0);
 
 defined('VIEW_EXPIRED')         OR define('VIEW_EXPIRED', MINUTES); // View file store time
 defined('FILE_FORCE_EXPIRED')   OR define('FILE_FORCE_EXPIRED', false);  // View file force expired
+
+defined('ONE')  OR define('ONE', 1);

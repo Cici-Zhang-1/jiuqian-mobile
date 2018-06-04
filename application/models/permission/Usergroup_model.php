@@ -13,19 +13,53 @@ class Usergroup_model extends MY_Model{
         log_message('debug', 'Model permission/Usergroup_model Start!');
     }
 
-    public function select(){
-        $Item = $this->_Item.__FUNCTION__;
-	    $Cache = $this->_Cache.__FUNCTION__;
-	    $Return = false;
-	    if(!($Return = $this->cache->get($Cache))){
-	        $Sql = $this->_unformat_as($Item);
-	        $Query = $this->HostDb->select($Sql)->from('usergroup')->get();
-	        if($Query->num_rows() > 0){
-	            $Return = $Query->result_array();
-	            $this->cache->save($Cache, $Return, MONTHS);
-	        }
-	    }
-	    return $Return;
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            if(empty($Search['pn'])){
+                $Search['pn'] = $this->_page_num($Search);
+            }else{
+                $this->_Num = $Search['num'];
+            }
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $Query = $this->HostDb->select($Sql)->from('usergroup')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                if ($Query->num_rows() > 0) {
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的用户组';
+                }
+            }
+        }
+        return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(u_id) as num', FALSE);
+        $this->HostDb->from('usergroup');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
     }
 
     public function select_usergroup_id($Name){
@@ -36,6 +70,24 @@ class Usergroup_model extends MY_Model{
         }else{
             return false;
         }
+    }
+
+    public function is_exist($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('usergroup')
+                ->where('u_id', $V)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的用户组';
+            }
+        }
+        return $Return;
     }
 
     public function insert($Data){

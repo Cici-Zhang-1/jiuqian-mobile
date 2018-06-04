@@ -13,8 +13,10 @@ $config['permission/menu_model/select_allowed_by_ugid'] = array(
 	'MOBILE.bt_name' => 'mobile_name',
     'm_invisible' => 'invisible_v',
     'INVISIBLE.bt_name' => 'invisible_name',
-    'pt_name' => 'page_type_name',
-    'pt_id' => 'page_type_v'
+    'pt_name' => array(
+        'page_type_name',
+        'page_type_v'
+    )
 );
 $config['permission/menu_model/select_by_uid'] = array(
 	'm_id' => 'v',

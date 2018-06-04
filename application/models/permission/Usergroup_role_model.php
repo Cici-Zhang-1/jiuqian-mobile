@@ -7,64 +7,30 @@
  */
 class Usergroup_role_model extends MY_Model{
 	public function __construct(){
-		parent::__construct();
+		parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model permission/Usergroup_role_model Start!');
 	}
 
-	public function select(){
-		$Query = $this->HostDb->get('usergroup_role');
-		if($Query->num_rows() > 0){
-			return $Query->result_array();
-		}else{
-			return false;
-		}
-	}
+	public function select_by_usergroup_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('usergroup_role')
+                ->join('role', 'r_id = ur_role_id', 'left')
+                ->where('ur_usergroup_id', $V)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的用户组';
+            }
+        }
+        return $Return;
+    }
 
-	/**
-	 * 获取父角色
-	 * @param $Child
-	 * @return bool
-	 */
-	public function select_by_child($Child) {
-		$Item = $this->_Item.__FUNCTION__;
-		$Cache = $this->_Cache.__FUNCTION__;
-		$Return = false;
-		if(!($Return = $this->cache->get($Cache))){
-			$Sql = $this->_unformat_as($Item);
-			$Query = $this->HostDb->select($Sql)->from('usergroup_role')
-				->join('usergroup', 'u_parent = ur_usergroup_id', 'left')
-				->join('role', 'r_id = ur_role_id', 'left')
-				->where('u_id', $Child)
-				->get();
-			if($Query->num_rows() > 0){
-				$Return = $Query->result_array();
-				$this->cache->save($Cache, $Return, MONTHS);
-			}
-		}
-		return $Return;
-	}
 
-	/**
-	 * 通过用户组id获取数据
-	 * @param $Uid
-	 * @return bool
-	 */
-	public function select_by_uid($Uid){
-		$Item = $this->_Item.__FUNCTION__;
-		$Cache = $this->_Cache.__FUNCTION__;
-		$Return = false;
-		if(!($Return = $this->cache->get($Cache))){
-			$Sql = $this->_unformat_as($Item);
-			$Query = $this->HostDb->select($Sql)->from('usergroup_role')
-				->where('ur_usergroup_id', $Uid)
-				->get();
-			if($Query->num_rows() > 0){
-				$Return = $Query->result_array();
-				$this->cache->save($Cache, $Return, MONTHS);
-			}
-		}
-		return $Return;
-	}
 
 	public function insert($Data){
 		$Item = $this->_Item.__FUNCTION__;

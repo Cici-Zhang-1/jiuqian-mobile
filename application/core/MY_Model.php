@@ -73,9 +73,20 @@ class MY_Model extends CI_Model
                 return in_array($val, $this->_Element);
             });
         }
-        foreach ($Dbview as $key => $value){
-            $Return[] = $key.' as '.$value;
+        if (is_array($Dbview) && count($Dbview) > 0) {
+            foreach ($Dbview as $key => $value){
+                if (is_array($value)) {
+                    foreach ($value as $ivalue) {
+                        $Return[] = $key.' as '.$ivalue;
+                    }
+                } else {
+                    $Return[] = $key.' as '.$value;
+                }
+            }
+        } else {
+            log_message('ERROR', $Item . 'is not exist');
         }
+
         return implode(',', $Return);
 	}
 

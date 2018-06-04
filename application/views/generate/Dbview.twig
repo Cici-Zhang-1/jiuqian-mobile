@@ -6,10 +6,17 @@ $config['{{ key }}'] = array(
     {% set i = 0 %}
     {% set num = config | length %}
     {% for ikey, value in config %}
-        {% if i < num %}
-            '{{ ikey }}' => '{{ value }}',
+        {% if value is iterable %}
+            '{{ ikey }}' => array(
+                {% set j = 0 %}
+                {% set inum = value | length %}
+                {% for iikey, ivalue in value %}
+                    '{{ ivalue }}'{% if j < inum - 1 %},{% endif %}
+                    {% set j = j + 1 %}
+                {% endfor %}
+            ){% if i < num %},{% endif %}
         {% else %}
-            '{{ ikey }}' => '{{ value }}'
+            '{{ ikey }}' => '{{ value }}'{% if i < num - 1 %},{% endif %}
         {% endif %}
         {%  set i = i + 1 %}
     {% endfor %}

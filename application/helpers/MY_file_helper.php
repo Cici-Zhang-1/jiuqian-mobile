@@ -7,7 +7,7 @@
  */
 /**
  * 删除指定缓存文件
- * @param unknown $SCacheFile
+ * @param string $SCacheFile
  */
 if(! function_exists('delete_cache_files')){
 	function delete_cache_files($SCacheFile){
@@ -15,13 +15,15 @@ if(! function_exists('delete_cache_files')){
 		$cachePath = APPPATH.'cache/';
 		if(strstr($SCacheFile, '*')){
 			$filenames =  get_filenames($cachePath);
-			foreach ($filenames as $value){
-				preg_match($SCacheFile, $value, $match);
-				if (!empty($match[0])) {
-					if(file_exists($cachePath.$match[0]))
-						$return = unlink($cachePath.$match[0])&&$return;
-				}
-			}
+			if (is_array($filenames) && !empty($filenames)) {
+                foreach ($filenames as $value){
+                    preg_match($SCacheFile, $value, $match);
+                    if (!empty($match[0])) {
+                        if(file_exists($cachePath.$match[0]))
+                            $return = unlink($cachePath.$match[0])&&$return;
+                    }
+                }
+            }
 		}else{
 			if(file_exists($cachePath.$SCacheFile))
 				$return = unlink($cachePath.$SCacheFile);

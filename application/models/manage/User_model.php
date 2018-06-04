@@ -14,6 +14,55 @@ class User_model extends MY_Model{
         log_message('debug', 'Model Manage/User_model Start');
     }
 
+    function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            if(empty($Search['pn'])){
+                $Search['pn'] = $this->_page_num($Search);
+            }else{
+                $this->_Num = $Search['num'];
+            }
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $Query = $this->HostDb->select($Sql)->from('user AS U')
+                    ->join('usergroup AS UG', 'UG.u_id = U.usergroup_id', 'left')
+                    ->join('user AS UC', 'UC.u_id = U.u_id', 'left')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                if ($Query->num_rows() > 0) {
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的用户';
+                }
+            }
+        }
+        return $Return;
+    }
+    private function _page_num($Search){
+        $this->HostDb->select('count(u_id) as num', FALSE);
+        $this->HostDb->from('user');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
     /**
      * 检测用户名是否存在
      * @param $username

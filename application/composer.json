@@ -1,4 +1,11 @@
 {
+    "name": "jiuqian/application",
+    "authors": [
+        {
+            "name": "mrzhangcc",
+            "email": "cczhang1987@hotmail.com"
+        }
+    ],
     "require": {
         "twig/twig": "^1.35"
     }

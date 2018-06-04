@@ -6,66 +6,109 @@
  * @description  
  */
 class User extends MY_Controller{
-	private $_Module = 'manage';
-	private $_Controller;
-	private $_Item;
+    private $__Search = array(
+        'paging' => 0,
+        'usergroup_v' => array()
+    );
 	public function __construct(){
 		parent::__construct();
+        log_message('debug', 'Controller Manage/User Start!');
 		$this->load->model('manage/user_model');
-	    $this->_Controller = strtolower(__CLASS__);
-	    $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-	    
-		log_message('debug', 'Controller Manage/User Start!');
+        $this->load->model('permission/usergroup_model');
 	}
 	
 	public function index(){
-		$View = $this->uri->segment(4, 'read');
-		if(method_exists(__CLASS__, '_'.$View)){
-		    $View = '_'.$View;
-			$this->$View();
-		}else{
-			$Item = $this->_Item.$View;
-			$Data['action'] = site_url($Item);
-			$this->load->view($Item, $Data);
-		}
+        $View = $this->uri->segment(4, 'read');
+        if(method_exists(__CLASS__, '_'.$View)){
+            $View = '_'.$View;
+            $this->$View();
+        }else{
+            $this->_index($View);
+        }
 	}
 	
 	public function read(){
-		$Parent = $this->input->get('parent', true);
-		$Parent = trim($Parent);
-		if(preg_match('/\d{1,10}/', $Parent)){
-			$Pid = $Parent;
-		}elseif(is_string($Parent) && !empty($Parent)){
-		    $this->load->model('manage/usergroup_model');
-		    if(!($Pid = $this->usergroup_model->select_usergroup_id($Parent))){
-		        $this->Failue = '用户组不存在';
-		    }
-		}else{
-			$Pid = $this->session->userdata('ugid');
-		}
-		if(empty($this->Failue)){
-			$Item = $this->_Item.__FUNCTION__;
-			$Return = array();
-			if(!!($Ugids = $this->_read_usergroup($Pid)) 
-			    && !!($Query = $this->user_model->select_by_usergroup($Ugids))){
-			    
-		        foreach ($Query as $key => $value){
-		            $Data[$value['uid']] = $value;
-		            $Child[$value['parent']][] = array('ugid' => $value['ugid'], 'uid' => $value['uid']);
-		        }
-		        ksort($Child);
-		        $Child = $this->_infinity_category($Child, $Pid);
-		        $Child = array_unique($Child);
-		        while(list($key, $value) = each($Child)){
-		            $Return['content'][] = $Data[$value];
-		        }
-			}else{
-				$this->Failue = '没有其他用户';
-			}
-		}
-		
-		$this->_return($Return);
+	    $this->__Search['paging'] = 0;
+	    $this->__Search['usergroup_v'] = $this->__read_child_usergroup();$this->session->userdata('ugid');
+	    array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Data = array();
+        if(!($Data = $this->user_model->select($this->_Search))){
+            // $Content = $Data['content'];
+            $TmpSource = array();
+            $TmpDes = array();
+            foreach ($Data['content'] as $key => $value){
+                $TmpSource[$value['uid']] = $value;
+                $Child[$value['parent']][] = array('ugid' => $value['ugid'], 'uid' => $value['uid']);
+            }
+            ksort($Child);
+            $Child = $this->_infinity_category($Child);
+            $Child = array_unique($Child);
+
+            while(list($key, $value) = each($Child)){
+                $TmpDes[] = $TmpSource[$value];
+            }
+            $Data['content'] = $TmpDes;
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+
+        $Parent = $this->input->get('parent', true);
+        $Parent = trim($Parent);
+        if(preg_match('/\d{1,10}/', $Parent)){
+            $Pid = $Parent;
+        }elseif(is_string($Parent) && !empty($Parent)){
+            $this->load->model('permission/usergroup_model');
+            if(!($Pid = $this->usergroup_model->select_usergroup_id($Parent))){
+                $this->Failue = '用户组不存在';
+            }
+        }else{
+            $Pid = $this->session->userdata('ugid');
+        }
+        if(empty($this->Failue)){
+            $Item = $this->_Item.__FUNCTION__;
+            $Return = array();
+            if(!!($Ugids = $this->_read_usergroup($Pid))
+                && !!($Query = $this->user_model->select_by_usergroup($Ugids))){
+
+                foreach ($Query as $key => $value){
+                    $Data[$value['uid']] = $value;
+                    $Child[$value['parent']][] = array('ugid' => $value['ugid'], 'uid' => $value['uid']);
+                }
+                ksort($Child);
+                $Child = $this->_infinity_category($Child, $Pid);
+                $Child = array_unique($Child);
+                while(list($key, $value) = each($Child)){
+                    $Return['content'][] = $Data[$value];
+                }
+            }else{
+                $this->Failue = '没有其他用户';
+            }
+        }
+
+        $this->_return($Return);
 	}
+
+    /**
+     * 获取子用户组
+     * @return array|bool
+     */
+	private function __read_child_usergroup() {
+	    $Pid = $this->session->usergroup('ugid');
+        if(!!($Query = $this->usergroup_model->select())){
+            foreach ($Query as $key => $value){
+                $Return[$value['parent']][] = $value['v'];
+            }
+            ksort($Return);
+            $Return = gh_infinity_category($Return, $Pid);
+        }else{
+            $this->Failue = '没有用户组!';
+            $Return = false;
+        }
+
+        return $Return;
+    }
 	
 	public function read_all(){
 	    $Data = array();

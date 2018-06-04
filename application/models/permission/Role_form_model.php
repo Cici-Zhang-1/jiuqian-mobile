@@ -32,6 +32,51 @@ class Role_form_model extends MY_Model {
         return $Return;
     }
 
+    public function select_by_usergroup_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_form')
+                ->join('form AS FORM', 'FORM.f_id = rf_form_id', 'left')
+                ->join('func AS FUNC', 'FUNC.f_id = FORM.f_func_id', 'left')
+                ->join('menu', 'm_id = FUNC.f_menu_id', 'left')
+                ->join('role', 'r_id = rf_role_id', 'left')
+                ->join('usergroup_role', 'ur_role_id = r_id', 'left')
+                ->where('ur_usergroup_id', $V)
+                ->order_by('m_displayorder')
+                ->group_by('FORM.f_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的角色表单';
+            }
+        }
+        return $Return;
+    }
+
+    public function select_by_role_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_form')
+                ->join('form', 'f_id = rf_form_id', 'left')
+                ->where('rf_role_id', $V)
+                ->group_by('f_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的表单';
+            }
+        }
+        return $Return;
+    }
+    
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);

@@ -6,7 +6,7 @@ $config['{{ key }}'] = array(
     {% set i = 0 %}
     {% set num = config | length %}
     {% for ikey, value in config %}
-        {% if i < num %}
+        {% if i < num - 1 %}
             '{{ ikey }}' => '{{ value }}',
 {% else %}
     '{{ ikey }}' => '{{ value }}'

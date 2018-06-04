@@ -40,11 +40,11 @@ class Page_search_model extends MY_Model{
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_page_search')
                     ->join('page_search', 'ps_id = rps_page_search_id')
-                    ->join('form_type as FORMTYPE', 'FORMTYPE.ft_id = ps_form_type', 'left')
-                    ->join('form_type as TYPE', 'TYPE.ft_id = ps_type', 'left')
-                    ->join('boolean_type AS READONLY', 'READONLY.bt_id = ps_readonly', 'left')
-                    ->join('boolean_type AS REQUIRED', 'REQUIRED.bt_id = ps_required', 'left')
-                    ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_id = ps_multiple', 'left');
+                    ->join('form_type as FORMTYPE', 'FORMTYPE.ft_name = ps_form_type', 'left')
+                    ->join('form_type as TYPE', 'TYPE.ft_name = ps_type', 'left')
+                    ->join('boolean_type AS READONLY', 'READONLY.bt_name = ps_readonly', 'left')
+                    ->join('boolean_type AS REQUIRED', 'REQUIRED.bt_name = ps_required', 'left')
+                    ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_name = ps_multiple', 'left');
             if ($Mid) {
                 $this->HostDb->where('ps_menu_id', $Mid);
             }

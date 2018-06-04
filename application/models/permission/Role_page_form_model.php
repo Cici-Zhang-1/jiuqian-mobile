@@ -9,21 +9,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Desc:
  */
 class Role_page_form_model extends MY_Model {
-    private $_Module;
-    private $_Model;
-    private $_Item;
-    private $_Cache;
-
     public function __construct() {
-        parent::__construct();
+        parent::__construct(__DIR__, __CLASS__);
 
-        log_message('debug', 'Model permission/Role_page_form_model Start!');
-
-        $this->_Module = str_replace("\\", "/", dirname(__FILE__));
-        $this->_Module = substr($this->_Module, strrpos($this->_Module, '/')+1);
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = str_replace('/', '_', $this->_Item);
+        log_message('debug', 'Model permission/Role_card_model Start!');
     }
 
     public function select_by_rid($Rid) {
@@ -42,6 +31,50 @@ class Role_page_form_model extends MY_Model {
         }
         return $Return;
     }
+
+    public function select_by_usergroup_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_page_form')
+                ->join('page_form', 'pf_id = rpf_page_form_id', 'left')
+                ->join('menu', 'm_id = pf_menu_id', 'left')
+                ->join('role', 'r_id = rpf_role_id', 'left')
+                ->join('usergroup_role', 'ur_role_id = r_id', 'left')
+                ->where('ur_usergroup_id', $V)
+                ->group_by('pf_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的角色页面表单';
+            }
+        }
+        return $Return;
+    }
+
+    public function select_by_role_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_page_form')
+                ->join('page_form', 'pf_id = rpf_page_form_id', 'left')
+                ->where('rpf_role_id', $V)
+                ->group_by('pf_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的页面表单';
+            }
+        }
+        return $Return;
+    }
+
 
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;

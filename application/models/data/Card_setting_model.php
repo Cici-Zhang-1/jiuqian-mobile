@@ -47,7 +47,7 @@ class Card_setting_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(cs_id) as num', FALSE);
+        $this->HostDb->select('count(cs_name) as num', FALSE);
         $this->HostDb->from('card_setting');
 
         $Query = $this->HostDb->get();
@@ -110,9 +110,9 @@ class Card_setting_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
-            $this->HostDb->where_in('cs_id', $Where);
+            $this->HostDb->where_in('cs_name', $Where);
         } else {
-            $this->HostDb->where('cs_id', $Where);
+            $this->HostDb->where('cs_name', $Where);
         }
         $this->HostDb->update('card_setting', $Data);
         $this->remove_cache($this->_Module);
@@ -127,7 +127,7 @@ class Card_setting_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('card_setting', $Data, 'cs_id');
+        $this->HostDb->update_batch('card_setting', $Data, 'cs_name');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -139,9 +139,9 @@ class Card_setting_model extends MY_Model {
      */
     public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('cs_id', $Where);
+            $this->HostDb->where_in('cs_name', $Where);
         } else {
-            $this->HostDb->where('cs_id', $Where);
+            $this->HostDb->where('cs_name', $Where);
         }
 
         $this->HostDb->delete('card_setting');

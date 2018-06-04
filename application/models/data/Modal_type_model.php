@@ -47,7 +47,7 @@ class Modal_type_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(mt_id) as num', FALSE);
+        $this->HostDb->select('count(mt_name) as num', FALSE);
         $this->HostDb->from('modal_type');
 
         $Query = $this->HostDb->get();
@@ -110,9 +110,9 @@ class Modal_type_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
-            $this->HostDb->where_in('mt_id', $Where);
+            $this->HostDb->where_in('mt_name', $Where);
         } else {
-            $this->HostDb->where('mt_id', $Where);
+            $this->HostDb->where('mt_name', $Where);
         }
         $this->HostDb->update('modal_type', $Data);
         $this->remove_cache($this->_Module);
@@ -127,7 +127,7 @@ class Modal_type_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('modal_type', $Data, 'mt_id');
+        $this->HostDb->update_batch('modal_type', $Data, 'mt_name');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -139,9 +139,9 @@ class Modal_type_model extends MY_Model {
      */
     public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('mt_id', $Where);
+            $this->HostDb->where_in('mt_name', $Where);
         } else {
-            $this->HostDb->where('mt_id', $Where);
+            $this->HostDb->where('mt_name', $Where);
         }
 
         $this->HostDb->delete('modal_type');

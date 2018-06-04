@@ -64,8 +64,8 @@ class {{ title | capitalize }} extends MY_Controller {
     public function edit() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Where = $Post['selected'];
-            unset($Post['selected']);
+            $Where = $Post['v'];
+            unset($Post['v']);
             if(!!($this->{{ model }}->update($Post, $Where))){
                 $this->Message = '内容修改成功, 刷新后生效!';
             }else{
@@ -83,7 +83,7 @@ class {{ title | capitalize }} extends MY_Controller {
      */
     public function remove() {
         if ($this->_do_form_validation()) {
-            $Where = $this->input->post('selected', true);
+            $Where = $this->input->post('v', true);
             if ($this->{{ model }}->delete($Where)) {
                 $this->Message = '删除成功，刷新后生效!';
             } else {

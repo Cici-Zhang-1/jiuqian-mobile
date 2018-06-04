@@ -40,10 +40,10 @@ class Page_form_model extends MY_Model{
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_page_form')
                     ->join('page_form', 'pf_id = rpf_page_form_id')
-                    ->join('form_type', 'ft_id = pf_form_type', 'left')
-                    ->join('boolean_type AS READONLY', 'READONLY.bt_id = pf_readonly', 'left')
-                    ->join('boolean_type AS REQUIRED', 'REQUIRED.bt_id = pf_required', 'left')
-                    ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_id = pf_multiple', 'left');
+                    ->join('form_type', 'ft_name = pf_form_type', 'left')
+                    ->join('boolean_type AS READONLY', 'READONLY.bt_name = pf_readonly', 'left')
+                    ->join('boolean_type AS REQUIRED', 'REQUIRED.bt_name = pf_required', 'left')
+                    ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_name = pf_multiple', 'left');
             if ($Mid) {
                 $this->HostDb->where('pf_menu_id', $Mid);
             }

@@ -31,6 +31,48 @@ class Role_visit_model extends MY_Model {
         return $Return;
     }
 
+    public function select_by_usergroup_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_visit')
+                ->join('visit', 'v_id = rv_visit_id', 'left')
+                ->join('role', 'r_id = rv_role_id', 'left')
+                ->join('usergroup_role', 'ur_role_id = r_id', 'left')
+                ->where('ur_usergroup_id', $V)
+                ->group_by('v_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的角色访问';
+            }
+        }
+        return $Return;
+    }
+
+    public function select_by_role_v($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('role_visit')
+                ->join('visit', 'v_id = rv_visit_id', 'left')
+                ->where('rv_role_id', $V)
+                ->group_by('v_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的访问';
+            }
+        }
+        return $Return;
+    }
+
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);

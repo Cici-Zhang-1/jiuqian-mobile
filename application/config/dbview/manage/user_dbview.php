@@ -1,5 +1,17 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+$config['manage/user_model/select'] = array(
+    'U.u_id' => 'v',
+    'U.u_name' => 'name',
+    'U.u_mobilephone' => 'mobilephone',
+    'U.u_truename' => 'truename',
+    'UG.u_id' => 'usergroup_v',
+    'UG.u_name' => 'usergroup_name',
+    'UG.u_class' => 'usergroup_class',
+    'UG.u_parent' => 'usergroup_parent',
+    'UC.u_name' => 'creator',
+    'U.u_create_datetime' => 'create_datetime'
+);
 $config['manage/user_model/select_self'] = array(
 	'u_id' => 'uid',
 	'u_mobilephone' => 'mobilephone',

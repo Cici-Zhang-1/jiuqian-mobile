@@ -14,7 +14,72 @@ class Func_model extends MY_Model{
         log_message('debug', 'Model permission/Func_model Start!');
     }
 
-    public function select() {
+    public function select($Search){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.implode('_', $Search).__FUNCTION__;
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('func')
+                        ->join('menu', 'm_id = f_menu_id', 'left');
+                if (isset($Search['v']) && $Search['v'] != '') {
+                    $this->HostDb->where('f_menu_id', $Search['v']);
+                }
+                if(!empty($Con['keyword'])){
+                    $this->HostDb->group_start()
+                            ->like('f_name', $Search['keyword'])
+                        ->group_end();
+                }
+                $this->HostDb->order_by('m_displayorder')
+                    ->order_by('f_displayorder');
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            }else{
+                $GLOBALS['error'] = '没有符合搜索条件的功能页';
+            }
+        }
+        return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(f_id) as num', FALSE);
+        $this->HostDb->from('func');
+        if (isset($Search['v']) && $Search['v'] != '') {
+            $this->HostDb->where('f_menu_id', $Search['v']);
+        }
+
+        if(!empty($Con['keyword'])){
+            $this->HostDb->group_start()
+                    ->like('f_name', $Search['keyword'])
+                ->group_end();
+        }
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
+    /* public function select() {
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache . __FUNCTION__;
         $Return = false;
@@ -31,7 +96,7 @@ class Func_model extends MY_Model{
             }
         }
         return $Return;
-    }
+    } */
     /**
      * 通过用户组id获取数据
      * @param $Uid
@@ -63,10 +128,10 @@ class Func_model extends MY_Model{
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_func')
                 ->join('func', 'f_id = rf_func_id', 'left')
-                ->join('toggle_type AS TOGGLE', 'TOGGLE.tt_id = f_toggle', 'left')
-                ->join('tag_type AS TAG', 'TAG.tt_id = f_tag', 'left')
-                ->join('boolean_type', 'bt_id = f_multiple', 'left')
-                ->join('modal_type', 'mt_id = f_modal_type', 'left');
+                ->join('toggle_type AS TOGGLE', 'TOGGLE.tt_name = f_toggle', 'left')
+                ->join('tag_type AS TAG', 'TAG.tt_name = f_tag', 'left')
+                ->join('boolean_type', 'bt_name = f_multiple', 'left')
+                ->join('modal_type', 'mt_name = f_modal_type', 'left');
             if ($Mid) {
                 $this->HostDb->where('f_menu_id', $Mid);
             }

@@ -26,18 +26,16 @@ class {{ title }} extends MY_Model {
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
                 $Query = $this->HostDb->select($Sql)->from('{{ table['name'] }}')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
-                if ($Query->num_rows() > 0) {
-                    $Return = array(
-                        'content' => $Query->result_array(),
-                        'num' => $this->_Num,
-                        'p' => $Search['p'],
-                        'pn' => $Search['pn'],
-                        'pagesize' => $Search['pagesize']
-                    );
-                    $this->cache->save($Cache, $Return, MONTHS);
-                } else {
-                    $GLOBALS['error'] = '没有符合搜索条件的{{ table['comment'] }}';
-                }
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的{{ table['comment'] }}';
             }
         }
         return $Return;

@@ -166,8 +166,8 @@ class Generate extends MY_Controller {
 
         $Dbview = array_pop($Names);
         $Data['module'] = implode('/', $Names);
-        $Data['title'] = $Dbview . '_dbview';
-        $Data['table'] = $this->_get_table($Dbview);
+        $Data['title'] = $Dbview . '_dbview'; // FileName
+        $Data['table'] = $this->_get_table($Dbview); // TableInformation
         if (!empty($Data['table'])) {
             $Data['dirs'] = implode('/', $Names);
             if (count($Names) > 0) {
@@ -205,9 +205,17 @@ class Generate extends MY_Controller {
             array_shift($I);
             $NewKey = implode('_', $I);
             if ($Value['primary_key']) {
-                $NewKey = 'v';
+                if ($Value['auto_increment']) {
+                    $Config[$Key] = 'v';
+                } else {
+                    $Config[$Key] = array(
+                        $NewKey,
+                        'v'
+                    );
+                }
+            } else {
+                $Config[$Key] = $NewKey;
             }
-            $Config[$Key] = $NewKey;
         }
         foreach ($Keys as $Key => $Value) {
             $Value = $Module . '/' . $Dbview . '_model/' . $Value;
@@ -269,7 +277,7 @@ class Generate extends MY_Controller {
         $Configs = array();
         $Config = array();
         foreach ($Table as $Key => $Value) {
-            if ($Value['primary_key']) {
+            if ($Value['primary_key'] && $Value['auto_increment']) {
                 continue;
             }
             $I = explode('_', $Key);
@@ -313,7 +321,7 @@ class Generate extends MY_Controller {
                 }
             }
 
-            $Data['configs'] = $this->_create_validation($Data['table']['field_data']);
+            $Data['configs'] = $this->_create_validation($Data['table']['field_data'], $Data['table']['name']);
 
             $Template = $this->_Twig->load('Validation.twig');
             $String = $Template->render($Data);
@@ -330,13 +338,13 @@ class Generate extends MY_Controller {
         echo "End create _validation...\n";
     }
 
-    private function _create_validation($Table) {
+    private function _create_validation($Table, $TableName) {
         $Configs = array();
-        array (
+        /*array (
             'field' => '{{ config.name }}',
             'label' => '{{ config.comment }}',
             'rules' => 'trim|{{ config.rules | join('|') }}'
-        );
+        );*/
         $Numeric = array(
             'int',
             'smallint',
@@ -346,6 +354,7 @@ class Generate extends MY_Controller {
             $Config = array();
             if ($Value['primary_key']) {
                 $Config['name'] = 'v';
+                $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
                 if (in_array($Value['type'], $Numeric)) {
                     $Config['rules']['required'] = 'required';
                     $Config['rules']['numeric'] = 'numeric';
@@ -355,13 +364,18 @@ class Generate extends MY_Controller {
                     $Config['rules']['max_length'] = 'max_length[' . $Value['max_length'] . ']';
                 }
                 $Configs[] = $Config;
-                continue;
+                if ($Value['auto_increment']) {
+                    continue;
+                }
             }
             $I = explode('_', $Key);
             array_shift($I);
             $NewKey = implode('_', $I);
             $Config['name'] = $NewKey;
             $Config['comment']  = $NewKey;
+            if ($Value['unique']) {
+                $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
+            }
             if (in_array($Value['type'], $Numeric)) {
                 $Config['rules']['numeric'] = 'numeric';
             }
@@ -390,7 +404,9 @@ class Generate extends MY_Controller {
                     'type' => $Value->type,
                     'max_length' => $Value->max_length,
                     'comment' => $Value->comment,
-                    'primary_key' => $Value->primary_key
+                    'auto_increment' => $Value->auto_increment,
+                    'primary_key' => $Value->primary_key,
+                    'unique' => $Value->unique
                 );
                 if ($Value->primary_key) {
                     $Table['v'] = $Value->name;

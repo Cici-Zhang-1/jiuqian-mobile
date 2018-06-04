@@ -503,6 +503,8 @@ class CI_DB_mysqli_driver extends CI_DB {
 			$retval[$i]->default		= $query[$i]->Default;
 			$retval[$i]->null           = $query[$i]->Null === 'NO' ? NO : YES;
 			$retval[$i]->primary_key	= (int) ($query[$i]->Key === 'PRI');
+			$retval[$i]->auto_increment = (boolean) preg_match('/auto_increment/', $query[$i]->Extra); // Extend By Cici 20180602
+            $retval[$i]->unique         = (boolean) ($query[$i]->Key === 'UNI');
 			$retval[$i]->comment        = $query[$i]->Comment;   // Extend By Cici 20180305
 		}
 
