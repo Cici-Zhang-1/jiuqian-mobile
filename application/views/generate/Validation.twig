@@ -26,13 +26,13 @@ $config['{{ module }}/{{ title }}/edit'] = array(
     {% if config.name == 'v' %}
         {% if loop.last %}
         array(
-            'field' => 'selected',
+            'field' => 'v',
             'label' => '编号',
             'rules' => 'trim|{{ config.rules | join('|') }}'
         )
         {% else %}
         array(
-            'field' => 'selected',
+            'field' => 'v',
             'label' => '编号',
             'rules' => 'trim|{{ config.rules | join('|') }}'
         ),
@@ -59,7 +59,7 @@ $config['{{ module }}/{{ title }}/remove'] = array(
 {% for key, config in configs %}
     {% if config.name == 'v' %}
         array(
-            'field' => 'selected[]',
+            'field' => 'v[]',
             'label' => '选择项',
             'rules' => 'trim|{{ config.rules | join('|') }}'
         )
