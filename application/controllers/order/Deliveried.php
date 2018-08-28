@@ -42,7 +42,7 @@ class Deliveried extends MY_Controller{
         $Data = array();
         if(!empty($this->Search)){
             $this->load->model('order/order_model');
-            if(!!($Data = $this->order_model->select_deliveried($this->Search))){
+            if(!!($Data = $this->order_model->select_delivered($this->Search))){
                 $this->Search['pn'] = $Data['pn'];
                 $this->Search['num'] = $Data['num'];
                 $this->Search['p'] = $Data['p'];

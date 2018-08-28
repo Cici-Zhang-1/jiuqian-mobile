@@ -34,6 +34,21 @@ class Role_func extends MY_Controller {
         $Data = array();
         if ($V > 0) {
             if (!!($Role = $this->role_model->is_exist($V))) {
+                if (!!($Query = $this->role_func_model->select_by_role_v($Role['v']))) {
+                    foreach ($Query as $Key => $Value) {
+                        $Query[$Key]['checked'] = intval($Value['checked']);
+                    }
+                    $Data['query']['role_v'] = $Role['v'];
+                    $Data['content'] = $Query;
+                    $Data['num'] = count($Query);
+                    $Data['p'] = ONE;
+                    $Data['pn'] = ONE;
+                } else {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = '请先开通菜单权限!';
+                }
+
+                /*$this->load->model('permission/role_menu_model');
                 if (!!($ParentRoleFunc = $this->role_func_model->select_by_usergroup_v($this->session->userdata('ugid')))) {
                     if (!!($RoleFunc = $this->role_func_model->select_by_role_v($Role['v']))) {
                         $Tmp = array();
@@ -47,7 +62,7 @@ class Role_func extends MY_Controller {
                             }
                         }
                     }
-                    $Data['role_v'] = $Role['v'];
+                    $Data['query']['role_v'] = $Role['v'];
                     $Data['content'] = $ParentRoleFunc;
                     $Data['num'] = count($ParentRoleFunc);
                     $Data['p'] = ONE;
@@ -55,7 +70,7 @@ class Role_func extends MY_Controller {
                 } else {
                     $this->Code = EXIT_ERROR;
                     $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'您无权设置角色功能权限, 请联系管理员';
-                }
+                }*/
             } else {
                 $this->Code = EXIT_ERROR;
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色不存在, 请联系管理员';
@@ -68,49 +83,22 @@ class Role_func extends MY_Controller {
     }
 
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($this->role_func_model->delete_by_rid($Post['rid']))){
-                if (isset($Post['fid'])) {
-                    $Data = array();
-                    foreach ($Post['fid'] as $key => $value) {
-                        $Data[] = array(
-                            'fid' => $value,
-                            'rid' => $Post['rid']
-                        );
-                    }
-                    $this->role_func_model->insert_batch($Data);
-                }
-                $this->Success .= '角色-菜单权限修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色-菜单修改失败';
+            $this->role_func_model->delete_by_role_v($Post['role_v']);
+            foreach ($Post['v'] as $Key => $Value) {
+                $Data[] = array(
+                    'func_v' => $Value,
+                    'role_v' =>$Post['role_v']
+                );
             }
-        }else{
-            $this->Failue .= validation_errors();
+            $this->role_func_model->insert_batch($Data);
+            $this->Message = '内容修改成功, 刷新后生效!';
         }
-        $this->_return();
-    }
-
-    /**
-     * 删除
-     */
-    public function remove(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            if($Where !== false && is_array($Where) && count($Where) > 0){
-                if($this->role_func_model->delete($Where)){
-                    $this->Success .= '用户组-角色删除成功, 刷新后生效!';
-                }else {
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组-角色删除失败';
-                }
-            }else{
-                $this->Failue .= '没有可删除项!';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
+        $this->_ajax_return();
     }
 }

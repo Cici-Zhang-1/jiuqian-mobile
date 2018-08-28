@@ -81,22 +81,22 @@ class Menu_model extends MY_Model{
      * @param boolean $Mobile 是否是移动端
      */
 	public function select_allowed_by_ugid($Ugid, $Mobile = false) {
+	    return $this->select_by_usergroup_v($Ugid);
+    }
+
+    public function select_by_usergroup_v($UsergroupV) {
         $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__ . $Ugid . $Mobile;
+        $Cache = $this->_Cache.__FUNCTION__ . $UsergroupV;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
             $Sql = $this->_unformat_as($Item);
-            $this->db->select($Sql);
-            $this->db->from('role_menu')
+            $Query = $this->db->select($Sql)->from('role_menu')
                 ->join('menu', 'm_id = rm_menu_id', 'left')
                 ->join('page_type', 'pt_name = m_page_type', 'left')
                 ->join('boolean_type AS MOBILE', 'MOBILE.bt_name = m_mobile', 'left')
                 ->join('boolean_type AS INVISIBLE', 'INVISIBLE.bt_name = m_invisible', 'left')
-                ->where("rm_role_id in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = $Ugid)");
-            if ($Mobile) {
-                $this->db->where('m_mobile', 1);
-            }
-            $Query = $this->db->group_by('m_id')
+                ->where("rm_role_id in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = $UsergroupV)")
+                ->group_by('m_id')
                 ->order_by('m_displayorder')
                 ->get();
             if ($Query->num_rows() > 0) {
@@ -182,11 +182,33 @@ class Menu_model extends MY_Model{
                 ->where("rm_role_id in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = $Ugid)")
                 ->where('m_url', $Operation)
                 ->group_by('m_id')
-                ->order_by('m_displayorder')
                 ->get();
             if ($Query->num_rows() > 0) {
                 $Return = $Query->row_array();
                 $this->cache->save($Cache, $Return, MONTHS);
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 判断是否存在
+     * @param $V
+     * @return bool
+     */
+    public function is_exist($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('menu')
+                ->where('m_id', $V)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的菜单';
             }
         }
         return $Return;
@@ -305,6 +327,7 @@ class Menu_model extends MY_Model{
 		}else{
 		    $this->HostDb->where('m_id', $Where);
 		}
+        $this->remove_cache('menu');
 		return $this->HostDb->delete('menu');
 	}
 	

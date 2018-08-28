@@ -17,7 +17,7 @@ $config['dealer/my_dealer/read'] = array(
 	'p_name' => 'payterms',
 	'd_debt1' => 'debt1',
 	'd_debt2' => 'debt2',
-	'd_deliveried' => 'deliveried',
+	'd_delivered' => 'delivered',
 	'd_received' => 'received',
 	'd_balance' => 'balance',
 );

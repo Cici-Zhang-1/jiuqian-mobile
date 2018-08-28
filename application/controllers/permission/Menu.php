@@ -6,6 +6,10 @@
  * @description  
  */
 class Menu extends MY_Controller {
+    private $__Search = array(
+        'paging' => 1,
+        'usergroup_v' => 0
+    );
 	public function __construct(){
 		parent::__construct();
         log_message('debug', 'Controller permission/Menu Start!');
@@ -15,96 +19,75 @@ class Menu extends MY_Controller {
     /**
      * @param int $V Menu Id
      */
-	public function read ($V = 0) {
-	    $Pid = $this->input->get('parent', false);
-	    $Full = $this->input->get('full', true); // 是否读取整个Menu数据
-
-        $Return = array();
-	    if ($Pid !== false) {
-	        if (is_string($Pid) && !empty($Pid) && !preg_match('/[1-9]\d{0, 10}/', $Pid)) {
-                if(!($Pid = $this->menu_model->select_menu_id(gh_mysql_string($Pid)))){
-                    $this->Code = EXIT_ERROR;
-                }
-            }
-        }
-        if (!($Query = $this->menu_model->select_allowed_by_ugid($GLOBALS['ugid'], $GLOBALS['MOBILE']))){
+    public function read() {
+        $Data = array();
+        if(!($Menu = $this->menu_model->select_by_usergroup_v($this->session->userdata('ugid')))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         } else {
-	        $Query = $this->_menu_format($Query);
-	        if ($Full) {
-	            $Query = $this->_menu_full($Query);
+            $TmpSource = array();
+            $TmpDes = array();
+            foreach ($Menu as $key => $value){
+                $value = $this->__menu_format($value);
+                $TmpSource[$value['v']] = $value;
+                $Child[$value['parent']][] = $value['v'];
             }
-            if ($Pid) {
-                foreach ($Query as $key => $value){
-                    $Data[$value['v']] = $value;
-                    $Child[$value['parent']][] = $value['v'];
-                }
-                ksort($Child);
-                $Child = gh_infinity_category($Child, $Pid);
-                while(list($key, $value) = each($Child)){
-                    $Return['content'][] = $Data[$value];
-                }
-            } else {
-	            // $Return = $Query;
-	            $Return = array(
-	                'content' => $Query,
-                    'p' => 1,
-                    'pn' => 1,
-                    'num' => count($Query),
-                    'pagesize' => count($Query)
-                );
+            ksort($Child);
+            $Child = gh_infinity_category($Child);
+            while(list($key, $value) = each($Child)){
+                $TmpDes[] = $TmpSource[$value];
             }
+            $Data = array(
+                'content' => $TmpDes,
+                'num' => count($TmpDes),
+                'p' => ONE,
+                'pn' => ONE
+            );
         }
-        $this->_ajax_return($Return);
+        $this->_ajax_return($Data);
     }
 
-    /**
-     * 格式化menu
-     * @param $Menu
-     */
-    private function _menu_format ($Menu) {
-        foreach ($Menu as $Key => $Row){
-            $Row['class_alien'] = '|';
-            for ($I = 0; $I < $Row['class']; $I++) {
-                $Row['class_alien'] .= '---';
-            }
-            $Menu[$Key] = $Row;
+	private function __menu_format($Menu) {
+        $Menu['class_alien'] = '|';
+	    for($I = 0; $I < $Menu['class']; $I++) {
+            $Menu['class_alien'] .= '---';
         }
+        if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Menu['img'], $Matched)) {
+            $Menu['img'] = $Matched[1];
+        }
+        $Menu['funcs'] = $this->_func_format($Menu['v']);
+        if ($Menu['page_type_name'] == 'form') {
+            $Menu['form_pages'] = $this->_form_page_format($Menu['v']);
+            // $Menu['form_pages'] = $this->_page_form_format($Menu['v']);
+        } else {
+            $Menu['page_search'] = $this->_page_search_format($Menu['v']);
+        }
+        $Menu['cards'] = $this->_card_format($Menu['v']);
 
         return $Menu;
     }
-    private function _menu_full ($Menu) {
+
+    private function _form_page_format($Mid) {
+        $this->load->model('permission/form_page_model');
         $Return = array();
-        foreach ($Menu as $Key => $Row){
-            if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Row['img'], $Matched)) {
-                $Row['img'] = $Matched[1];
+        if (!!($Query = $this->form_page_model->select_allowed($GLOBALS['ugid'], $Mid))) {
+            foreach ($Query as $Key => $Value) {
+                $Value['page_forms'] = $this->_page_form_format($Mid, $Value['v']);
+                $Return[$Key] = $Value;
             }
-            if ($Row['page_type_name'] == 'form') {
-                $Row['page_forms'] = $this->_page_form_format($Row['v']);
-            } else {
-                $Row['funcs'] = $this->_func_format($Row['v']);
-                $Row['page_search'] = $this->_page_search_format($Row['v']);
-                $Row['cards'] = $this->_card_format($Row['v']);
-            }
-            $Return[$Key] = $Row;
-            /*if ($Row['label'] != false) {
-                $Return[$Row['label']] = $Row;
-            } else {
-                $Return[$Key] = $Row;
-            }*/
-
         }
-
         return $Return;
     }
 
-    private function _page_form_format($Mid) {
+    private function _page_form_format($Mid, $Pfid) {
         $this->load->model('permission/page_form_model');
         $Return = array();
-        if (!!($Query = $this->page_form_model->select_allowed($GLOBALS['ugid'], $Mid))) {
+        if (!!($Query = $this->page_form_model->select_allowed($GLOBALS['ugid'], $Mid, $Pfid))) {
             foreach ($Query as $Key => $Value) {
-                $Value['value'] = '';
-                $Return[$Value['name']] = $Value;
+                foreach ($Query as $Key => $Value) {
+                    // $Value['dv'] = '';
+                    $Return[$Value['name']] = $Value;
+                }
             }
         }
         return $Return;
@@ -118,7 +101,7 @@ class Menu extends MY_Controller {
                 if (preg_match('/^<i\s+class=\"(.*)\"><\/i>$/', $Value['img'], $Matched)) {
                     $Value['img'] = $Matched[1];
                 }
-                $Value['forms'] = $this->_form_format($Mid, $Value['fid']);
+                $Value['forms'] = $this->_form_format($Mid, $Value['v']);
                 $Return[$Key] = $Value;
             }
         }
@@ -144,7 +127,7 @@ class Menu extends MY_Controller {
         if (!!($Query = $this->card_model->select_allowed($GLOBALS['ugid'], $Mid))) {
             foreach ($Query as $Key => $Value) {
                 $Value['data'] = array();
-                $Value['elements'] = $this->_element_format($Mid, $Value['cid']);
+                $Value['elements'] = $this->_element_format($Mid, $Value['v']);
                 $Return[$Key] = $Value;
             }
         }
@@ -173,95 +156,70 @@ class Menu extends MY_Controller {
         }
         return $Return;
     }
-	
-	/*public function read(){
-	    $Parent = $this->input->get('parent', true);
-	    $Parent = trim($Parent);
-	    if(preg_match('/\d{1,10}/', $Parent)){
-	        $Pid = $Parent;
-	    }elseif(is_string($Parent) && !empty($Parent)){
-	        if(!($Pid = $this->menu_model->select_menu_id(gh_mysql_string($Parent)))){
-	            $this->Failue = '您要查找的菜单不存在';
-	        }
-	    }else{
-	        $Pid = 0;
-	    }
-	    $Return = array();
-	    if(empty($this->Failue)){
-	        if(!!($Query = $this->menu_model->select_menu())){
-	            foreach ($Query as $key => $value){
-	                $Data[$value['mid']] = $value;
-	                $Child[$value['parent']][] = $value['mid'];
-	            }
-	            ksort($Child);
-	            $Child = gh_infinity_category($Child, $Pid);
-	            while(list($key, $value) = each($Child)){
-	                $Return['content'][] = $Data[$value];
-	            }
-	        }else{
-	            $this->Failue = '没有菜单内容';
-	        }
-	    }
-	    $this->_ajax_return($Return);
-	}*/
 
 	public function add(){
-	    $Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-		    $Post = gh_escape($_POST);
-		    $Post['img'] = $this->input->post('img');
-			if(!!($Mid = $this->menu_model->insert($Post))){
-			    $this->load->model('permission/role_menu_model');
-			    $Pid = $this->role_menu_model->insert(array('role_id' => SUPER_NO, 'menu_id' => $Mid)); // 新建菜单都是关联超级管理员
-			    $this->Success .= '菜单新增成功, 刷新后生效!';
-			}else{
-				$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'菜单新增失败!';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        $Parent = $this->input->post('parent');
+        $_POST['parent'] = $Parent ? $Parent : 0;
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if ($Post['parent'] == 0) {
+                $Post['class'] = 0;
+            } elseif ($Parent = $this->menu_model->is_exist($Post['parent'])) {
+                $Post['class'] = $Parent['class'] + 1;
+            } else {
+                $Post['class'] = 0;
+            }
+            if(!!($Fid = $this->menu_model->insert($Post))) {
+                $this->load->model('permission/role_menu_model');
+                $this->role_menu_model->insert(array('role_v' => SUPER_NO, 'menu_v' => $Fid));
+                $this->Message = '新建成功, 刷新后生效!';
+            }else{
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
+            }
+        }
+        $this->_ajax_return();
 	}
 	
 	public function edit(){
-		$Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-		    $Post = gh_escape($_POST);
-		    $Post['img'] = $this->input->post('img');
-		    $Where = $Post['selected'];
-		    unset($Post['selected']);
-			if(!!($this->menu_model->update($Post, $Where))){
-				$this->Success .= '菜单信息修改成功, 刷新后生效!';
-			}else{
-				$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'菜单信息修改失败!';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        $Parent = $this->input->post('parent');
+        $_POST['parent'] = $Parent ? $Parent : 0;
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if ($Post['parent'] == 0) {
+                $Post['class'] = 0;
+            } elseif ($Parent = $this->menu_model->is_exist($Post['parent'])) {
+                $Post['class'] = $Parent['class'] + 1;
+            } else {
+                $Post['class'] = 0;
+            }
+            $Post['img'] = $this->input->post('img');
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->menu_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
 	}
 	
 	public function remove(){
-		$Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-			$Where = $this->input->post('selected', true);
-			if($Where !== false){
-			    $this->load->model('permission/role_menu_model');
-				if (!!($this->menu_model->delete($Where)) && !!($this->role_menu_model->delete_by_mid($Where))) {
-					$this->load->model('permission/func_model');
-					$this->func_model->delete_by_mid($Where);
-					$this->load->model('permission/card_model');
-					$this->card_model->delete_by_mid($Where);
-					$this->Success .= '菜单信息删除成功，刷新后生效！';
-				}else {
-					$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'菜单信息删除失败';
-				}
-			}else{
-				$this->Failue .= '没有可删除项!';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->menu_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
 	}
 }

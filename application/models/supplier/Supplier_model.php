@@ -1,154 +1,183 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- *  2015-4-25
- * @author ZhangCC
- * @version
- * @description  
+ * Supplier_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Supplier_model extends MY_Model{
-    private $_Module = 'supplier';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
+class Supplier_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-		parent::__construct();
-		
-		$this->_Model = strtolower(__CLASS__);
-		$this->_Item = $this->_Module.'/'.$this->_Model.'/';
-		$this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-		log_message('debug', 'Model Supplier/Supplier_model Start!');
-	}
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model supplier/Supplier_model Start!');
+    }
 
-	public function select($Con){
-	    $Item = $this->_Item.__FUNCTION__;
-	    $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
-	    if(!($Return = $this->cache->get($Cache))){
-	        if(empty($Con['pn'])){
-	            $Con['pn'] = $this->_page($Con);
-	        }else{
-	            $this->_Num = $Con['num'];
-	        }
-	        if(!empty($Con['pn'])){
-	            $Sql = $this->_unformat_as($Item);
-	            $this->HostDb->select($Sql, FALSE);
-	            $this->HostDb->from('supplier');
-	
-	            if(!empty($Con['keyword'])){
-	                $this->HostDb->like('s_name', $Con['keyword']);
-	            }
-	             
-	            $this->HostDb->limit($Con['pagesize'], ($Con['p']-1)*$Con['pagesize']);
-	             
-	            $Query = $this->HostDb->get();
-	            if($Query->num_rows() > 0){
-	                $Result = $Query->result_array();
-	                $Return = array(
-	                    'content' => $Result,
-	                    'num' => $this->_Num,
-	                    'p' => $Con['p'],
-	                    'pn' => $Con['pn']
-	                );
-	                $this->cache->save($Cache, $Return, HOURS);
-	            }
-	        }else{
-	            $GLOBALS['error'] = '没有符合要求的供应商!';
-	        }
-	    }
-	    return $Return;
-	}
-
-	public function _page($Con){
-	    $this->HostDb->select('count(s_id) as num', FALSE);
-	    $this->HostDb->from('supplier');
-	     
-	    if(!empty($Con['keyword'])){
-	        $this->HostDb->like('s_name', $Con['keyword']);
-	    }
-	     
-	    $Query = $this->HostDb->get();
-	    if($Query->num_rows() > 0){
-	        $Row = $Query->row_array();
-	        $Query->free_result();
-	        $this->_Num = $Row['num'];
-	        if(intval($Row['num']%$Con['pagesize']) == 0){
-	            $Pn = intval($Row['num']/$Con['pagesize']);
-	        }else{
-	            $Pn = intval($Row['num']/$Con['pagesize'])+1;
-	        }
-	        log_message('debug', 'Num is '.$Row['num'].' and Pagesize is'.$Con['pagesize'].' and Page Nums is'.$Pn);
-	        return $Pn;
-	    }else{
-	        return false;
-	    }
-	}
-	
-	/**
-	 * 获得所有供应商信息
-	 * @return multitype:NULL
-	 */
-	public function select_all(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    $Cache = $this->_Cache.__FUNCTION__;
-	    if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('supplier');
-    
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
+    /**
+     * Select from table supplier
+     */
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('supplier')
+                    ->join('user', 'u_id = s_creator', 'creator');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->group_start()
+                        ->like('s_name', $Search['keyword'])
+                        ->group_end();
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
-                    'content' => $Query->result_array()
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
                 );
-                $Query->free_result();
                 $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的供应商';
             }
-	    }
-	    return $Return;
-	}
+        }
+        return $Return;
+    }
 
-	/**
-	 * 插入供应商
-	 * @param unknown $Data
-	 */
-	public function insert($Data){
-	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format($Data, $Item);
-	    if($this->HostDb->insert('supplier', $Data)){
-	        log_message('debug', "Model Supplier_model/insert Success!");
-	        $this->remove_cache($this->_Cache);
-	        return $this->HostDb->insert_id();
-	    }else{
-	        log_message('debug', "Model Supplier_model/insert Error");
-	        return false;
-	    }
-	}
-	
-	/**
-	 * 更新供应商信息
-	 * @param unknown $Data
-	 * @param unknown $Where
-	 */
-	public function update($Data, $Where){
-	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = $this->_format_re($Data, $Item);
-	    $this->HostDb->where('s_id', $Where);
-	    $this->HostDb->update('supplier', $Data);
-	    $this->remove_cache($this->_Cache);
-	    return TRUE;
-	}
-	
-	/**
-	 * 删除供应商
-	 * @param unknown $Where
-	 */
-	public function delete($Where){
-	    if(is_array($Where)){
-	        $this->HostDb->where_in('s_id', $Where);
-	    }else{
-	        $this->HostDb->where('s_id', $Where);
-	    }
-	    $this->HostDb->delete('supplier');
-	    $this->remove_cache($this->_Cache);
-		return true;
-	}
+    private function _page_num($Search){
+        $this->HostDb->select('count(s_id) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->group_start()
+                ->like('s_name', $Search['keyword'])
+                ->group_end();
+        }
+        $this->HostDb->from('supplier');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
+    public function is_exist ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)
+            ->from('supplier')
+            ->where('s_id', $V)
+            ->limit(ONE)
+            ->get();
+        return $Query->row_array();
+    }
+    private function _is_exist ($Data, $Where) {
+        $Query = $this->HostDb->select('s_id')
+            ->from('supplier')
+            ->group_start()
+            ->where('s_name', $Data['s_name'])
+            ->or_where('s_code', $Data['s_code'])
+            ->group_end()
+            ->where_not_in('s_id', is_array($Where) ? $Where : array($Where))
+            ->get();
+        return $Query->num_rows() > 0;
+    }
+    /**
+     * Insert data to table supplier
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('supplier', $Data)){
+            $this->remove_cache($this->_Module);
+            return $this->HostDb->insert_id();
+        } else {
+            $GLOBALS['error'] = '插入供应商数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Insert batch data to table supplier
+     */
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+        }
+        if($this->HostDb->insert_batch('supplier', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入供应商数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table supplier
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if ($this->_is_exist($Data, $Where)) {
+            $GLOBALS['error'] = $Data['s_name'] . $Data['s_code'] . '已经存在!';
+            return false;
+        }
+        if (is_array($Where)) {
+            $this->HostDb->where_in('s_id', $Where);
+        } else {
+            $this->HostDb->where('s_id', $Where);
+        }
+        $this->HostDb->update('supplier', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 批量更新table supplier
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('supplier', $Data, 's_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table supplier
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('s_id', $Where);
+        } else {
+            $this->HostDb->where('s_id', $Where);
+        }
+
+        $this->HostDb->delete('supplier');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
 }

@@ -106,7 +106,7 @@ class Role_visit_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_vid($Id){
+    public function delete_by_visit_v($Id){
         if(is_array($Id)){
             $this->HostDb->where_in('rv_visit_id', $Id);
         }else{
@@ -122,7 +122,7 @@ class Role_visit_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Id) {
+    public function delete_by_role_v($Id) {
         if(is_array($Id)){
             $this->HostDb->where_in('rv_role_id', $Id);
         }else{

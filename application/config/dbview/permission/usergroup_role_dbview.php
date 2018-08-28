@@ -1,10 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['permission/usergroup_role_model/select'] = array(
-	'ur_id' => 'id',
-	'ur_usergroup_id' => 'usergroup_id',
+	'ur_id' => 'v',
+	'ur_usergroup_id' => 'usergroup_v',
 	'u_name' => 'usergroup',
-	'ur_role_id' => 'role_id',
+	'ur_role_id' => 'role_v',
 	'r_name' => 'role',
 );
 

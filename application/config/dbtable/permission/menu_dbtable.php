@@ -8,8 +8,10 @@ $config['permission/menu_model/insert'] = array(
 	'url' => 'm_url',
 	'displayorder' => 'm_displayorder',
 	'img' => 'm_img',
-	'page_type' => 'm_page_type',
-	'mobile' => 'm_mobile',
+	'page_type_v' => 'm_page_type',
+	'mobile_v' => 'm_mobile',
+	'invisible_v' => 'm_invisible',
+    'home' => 'm_home'
 );
 $config['permission/menu_model/update'] = array(
 	'name' => 'm_name',
@@ -19,6 +21,8 @@ $config['permission/menu_model/update'] = array(
 	'url' => 'm_url',
 	'displayorder' => 'm_displayorder',
 	'img' => 'm_img',
-	'page_type' => 'm_page_type',
-	'mobile' => 'm_mobile',
+    'page_type_v' => 'm_page_type',
+    'mobile_v' => 'm_mobile',
+    'invisible_v' => 'm_invisible',
+    'home' => 'm_home'
 );

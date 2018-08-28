@@ -2,17 +2,23 @@
 
 $config['permission/element_model/insert'] = array(
 	'name' => 'e_name',
-	'cid' => 'e_card_id',
+	'card_v' => 'e_card_id',
 	'classes' => 'e_classes',
 	'label' => 'e_label',
-	'checked' => 'e_checked',
+	'checked_v' => 'e_checked',
+	'dv' => 'e_dv',
 	'displayorder' => 'e_displayorder',
+    'url' => 'e_url',
+    'query' => 'e_query'
 );
 $config['permission/element_model/update'] = array(
 	'name' => 'e_name',
-	'cid' => 'e_card_id',
+	'card_id' => 'e_card_id',
 	'classes' => 'e_classes',
 	'label' => 'e_label',
-	'checked' => 'e_checked',
+	'checked_v' => 'e_checked',
+	'dv'=> 'e_dv',
 	'displayorder' => 'e_displayorder',
+    'url' => 'e_url',
+    'query' => 'e_query'
 );

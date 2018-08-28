@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['order/order_model/insert_order'] = array(
+$config['order/order_model/insert'] = array(
 	'dealer_id' => 'o_dealer_id',
 	'dealer' => 'o_dealer',
 	'checker' => 'o_checker',
@@ -18,11 +18,19 @@ $config['order/order_model/insert_order'] = array(
 	'remark' => 'o_remark',
 	'dealer_remark' => 'o_dealer_remark',
 	'request_outdate' => 'o_request_outdate',
-	'creator' => 'o_creator',
-	'create_datetime' => 'o_create_datetime',
-	'flag' => 'o_flag',
+	'task_level' => 'o_task_level',
+    'down_payment' => 'o_down_payment'
 );
-$config['order/order_model/update_order'] = array(
+
+$config['order/order_model/_insert_datetime'] = array(
+    'order_id' => 'od_order_id',
+    'creator' => 'od_creator',
+    'create_datetime' => 'od_create_datetime'
+);
+$config['order/order_model/update'] = array(
+    'dealer_id' => 'o_dealer_id',
+	'shop_id' => 'o_shop_id',
+	'dealer' => 'o_dealer',
 	'owner' => 'o_owner',
 	'checker' => 'o_checker',
 	'checker_phone' => 'o_checker_phone',
@@ -35,41 +43,57 @@ $config['order/order_model/update_order'] = array(
 	'delivery_address' => 'o_delivery_address',
 	'delivery_linker' => 'o_delivery_linker',
 	'delivery_phone' => 'o_delivery_phone',
-	'remark' => 'o_remark',
-	'dealer_remark' => 'o_dealer_remark',
 	'sum' => 'o_sum',
 	'sum_detail' => 'o_sum_detail',
 	'sum_diff' => 'o_sum_diff',
-	'asure_datetime' => 'o_asure_datetime',
 	'request_outdate' => 'o_request_outdate',
-	'payed_datetime' => 'o_payed_datetime',
-	'end_datetime' => 'o_end_datetime',
 	'stock_outted_id' => 'o_stock_outted_id',
-	'flag' => 'o_flag',
+	'task_level' => 'o_task_level',
 	'cargo_no' => 'o_cargo_no',
+    'warehouse_v' => 'o_warehouse_num',
+    'remark' => 'o_remark',
+    'dealer_remark' => 'o_dealer_remark',
+    'pay_status' => 'o_pay_status',
+    'status' => 'o_status',
+    'down_payment' => 'o_down_payment',
+    'pack' => 'o_pack',
+    'pack_detail' => 'o_pack_detail'
 );
 $config['order/order_model/update_workflow'] = array(
 	'status' => 'o_status',
-	'dismantled_datetime' => 'o_dismantled_datetime',
-	'checked_datetime' => 'o_checked_datetime',
-	'quoted_datetime' => 'o_quoted_datetime',
-	'asure_datetime' => 'o_asure_datetime',
-	'payed_datetime' => 'o_payed_datetime',
 	'sum' => 'o_sum',
 	'sum_detail' => 'o_sum_detail',
 	'pack' => 'o_pack',
 	'pack_detail' => 'o_pack_detail',
+    'pay_status' => 'o_pay_status'
 );
 $config['order/order_model/update_batch'] = array(
-	'oid' => 'o_id',
-	'asure_datetime' => 'o_asure_datetime',
-	'request_outdate' => 'o_request_outdate',
-	'payed_datetime' => 'o_payed_datetime',
+	'v' => 'o_id',
 	'pack' => 'o_pack',
 	'pack_detail' => 'o_pack_detail',
 	'cargo_no' => 'o_cargo_no',
+    'warehouse_v' => 'o_warehouse_num'
 );
 $config['order/order_model/update_status'] = array(
 	'id' => 'o_id',
 	'status' => 'o_status',
+);
+
+$config['order/order_model/update_datetime'] = array(
+    'creator' => 'od_creator',
+    'create_datetime' => 'od_create_datetime',
+    'dismantle' => 'od_dismantle',
+    'dismantle_datetime' => 'od_dismantle_datetime',
+    'valuate' => 'od_valuate',
+    'valuate_datetime' => 'od_valuate_datetime',
+    'check' => 'od_check',
+    'check_datetime' => 'od_check_datetime',
+    'sure' => 'od_sure',
+    'sure_datetime' => 'od_sure_datetime',
+    'producing' => 'od_producing',
+    'producing_datetime' => 'od_producing_datetime',
+    'inned' => 'od_inned',
+    'inned_datetime' => 'od_inned_datetime',
+    'delivery' => 'od_delivery',
+    'delivery_datetime' => 'od_delivery_datetime'
 );

@@ -22,10 +22,20 @@ class Warehouse_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $Search['status'] = explode(',', $Search['status']);
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)->from('warehouse')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $this->HostDb->select($Sql)->from('warehouse')
+                    ->join('warehouse_status', 'ws_name = w_status', 'left')
+                    ->where_in('w_status', $Search['status']);
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->group_start()
+                            ->like('w_num', $Search['keyword'])
+                        ->group_end();
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->
+                    order_by('w_num')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -42,7 +52,12 @@ class Warehouse_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(w_num) as num', FALSE);
+        $this->HostDb->select('count(w_num) as num', FALSE)->where_in('w_status', $Search['status']);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->group_start()
+                ->like('w_num', $Search['keyword'])
+                ->group_end();
+        }
         $this->HostDb->from('warehouse');
 
         $Query = $this->HostDb->get();
@@ -61,6 +76,67 @@ class Warehouse_model extends MY_Model {
         }
     }
 
+    /**
+     * 判断是否存在
+     * @param $V
+     * @return bool
+     */
+    public function is_exist($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        if (is_array($V)) {
+            $Cache = $this->_Cache . __FUNCTION__ . implode(',', $V);
+        } else {
+            $Cache = $this->_Cache . __FUNCTION__ . $V;
+        }
+
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('warehouse');
+            if (is_array($V)) {
+                $Query = $this->HostDb->where_in('w_num', $V)->get();
+                $Return = $Query->result_array();
+            } else {
+                $Query = $this->HostDb->where('w_num', $V)->get();
+                $Return = $Query->row_array();
+            }
+            $this->cache->save($Cache, $Return, MONTHS);
+        }
+        return $Return;
+    }
+
+    public function select_height($Height, $Limit) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode(',', $Height) . $Limit;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('warehouse')
+                    ->where_in('w_height', $Height)
+                    ->where('w_status', 1)
+                    ->order_by('w_num')
+                    ->limit($Limit)
+                ->get();
+            $Return = $Query->result_array();
+            $this->cache->save($Cache, $Return, MONTHS);
+        }
+        return $Return;
+    }
+
+    /**
+     * 最大面积和
+     * @param $V
+     */
+    public function select_sum_max_area ($Vs) {
+        $Query = $this->HostDb->select_sum('w_max')->from('warehouse')
+            ->where_in('w_num', $Vs)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->row_array();
+            return $Return['w_max'];
+        }
+        return false;
+    }
     /**
      * Insert data to table warehouse
      * @param $Data
@@ -108,6 +184,48 @@ class Warehouse_model extends MY_Model {
             $this->HostDb->where_in('w_num', $Where);
         } else {
             $this->HostDb->where('w_num', $Where);
+        }
+        $this->HostDb->update('warehouse', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 通过warehouse_area_num改变货位
+     * @param $Data
+     * @param $Where
+     * @return bool
+     */
+    public function update_by_warehouse_area_num($Data, $Where) {
+        $this->HostDb->select('ws_num');
+        if (is_array($Where)) {
+            $this->HostDb->where_in('ws_warehouse_area_num', $Where);
+        } else {
+            $this->HostDb->where('ws_warehouse_area_num', $Where);
+        }
+        $Query = $this->HostDb->get_compiled_select('warehouse_shelve');
+
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        $this->HostDb->where('w_warehouse_shelve_num in', '(' . $Query . ')', false);
+        $this->HostDb->update('warehouse', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 通过warehouse_shelve_num改变货位
+     * @param $Data
+     * @param $Where
+     * @return bool
+     */
+    public function update_by_warehouse_shelve_num($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('w_warehouse_shelve_num', $Where);
+        } else {
+            $this->HostDb->where('w_warehouse_shelve_num', $Where);
         }
         $this->HostDb->update('warehouse', $Data);
         $this->remove_cache($this->_Module);

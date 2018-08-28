@@ -37,9 +37,6 @@ class Apps extends MY_Controller {
             $this->Code = EXIT_SIGNIN;
             $this->Message = '无法获取您的信息，请重新登陆';
         }
-        /*header('Access-Control-Allow-Origin: http://localhost:8080/');
-        header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
-        header('Access-Control-Allow-Methods: GET,POST,PUT,DELETE,PATCH,OPTIONS');*/
         $this->_ajax_return($Apps);
     }
 

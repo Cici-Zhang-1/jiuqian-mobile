@@ -71,7 +71,7 @@ class Warehouse_shelve_model extends MY_Model {
         $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('warehouse_shelve', $Data)){
             $this->remove_cache($this->_Module);
-            return $this->HostDb->insert_id();
+            return true;
         } else {
             $GLOBALS['error'] = '插入货架数据失败!';
             return false;
@@ -123,6 +123,25 @@ class Warehouse_shelve_model extends MY_Model {
             $Data[$key] = $this->_format_re($value, $Item);
         }
         $this->HostDb->update_batch('warehouse_shelve', $Data, 'ws_num');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 通过warehouse_area_num批量修改
+     * @param $Data
+     * @param $Where
+     * @return bool
+     */
+    public function update_by_warehouse_area_num($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('ws_warehouse_area_num', $Where);
+        } else {
+            $this->HostDb->where('ws_warehouse_area_num', $Where);
+        }
+        $this->HostDb->update('warehouse_shelve', $Data);
         $this->remove_cache($this->_Module);
         return true;
     }

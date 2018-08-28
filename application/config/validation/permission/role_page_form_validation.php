@@ -2,13 +2,13 @@
 
 $config['permission/role_page_form/edit'] = array(
 	array(
-		'field' => 'rid',
+		'field' => 'role_v',
 		'label' => '角色',
-		'rules' => 'trim|required|min_length[1]|max_length[4]'
+		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
 	array(
-		'field' => 'pfid[]',
+		'field' => 'v[]',
 		'label' => '页面表单权限',
-		'rules' => 'trim|min_length[1]|max_length[4]'
+		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	)
 );

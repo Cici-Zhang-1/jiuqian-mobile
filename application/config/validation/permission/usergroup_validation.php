@@ -7,11 +7,6 @@ $config['permission/usergroup/add'] = array(
 		'rules' => 'trim|required|min_length[1]|max_length[128]'
 	),
 	array(
-		'field' => 'class',
-		'label' => '别名',
-		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
-	),
-	array(
 		'field' => 'parent',
 		'label' => '名称',
 		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
@@ -20,7 +15,7 @@ $config['permission/usergroup/add'] = array(
 
 $config['permission/usergroup/edit'] = array(
 	array(
-		'field' => 'selected',
+		'field' => 'v',
 		'label' => '用户组编号',
 		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
@@ -28,11 +23,6 @@ $config['permission/usergroup/edit'] = array(
 		'field' => 'name',
 		'label' => '名称',
 		'rules' => 'trim|required|min_length[1]|max_length[128]'
-	),
-	array(
-		'field' => 'class',
-		'label' => '别名',
-		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
 	array(
 		'field' => 'parent',
@@ -43,7 +33,7 @@ $config['permission/usergroup/edit'] = array(
 
 $config['permission/usergroup/remove'] = array(
 	array(
-		'field' => 'selected[]',
+		'field' => 'v[]',
 		'label' => '选择项',
 		'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
 	)

@@ -22,6 +22,7 @@ class Mobile {
         $this->_CI->load->library('user_agent');
 
         $GLOBALS['MOBILE'] = $this->_CI->agent->is_mobile();
+        // $GLOBALS['MOBILE'] = TRUE;
         /* if (ENVIRONMENT === 'production' && !$this->_CI->agent->is_mobile()) {
             redirect($this->_CI->config->item('desktop_url'));
         } */

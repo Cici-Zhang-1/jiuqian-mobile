@@ -8,66 +8,243 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 封边
  */
 class Edge extends MY_Controller{
-    private $_Module = 'order';
-    private $_Controller;
-    private $_Item ;
-    private $_Cookie;
-    private $_Classify;
-
-    private $Search = array(
-        'status' => '5',
-        'keyword' => ''
+    private $__Search = array(
+        'edge' => 0,
+        'start_date' => '',
+        'end_date' => '',
+        'status' => WP_EDGE
     );
+    private $_EdgeAutoGet;
+    private $_User;
     public function __construct(){
         parent::__construct();
-        $this->load->model('order/order_product_classify_model');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-        $this->_Cookie = $this->_Module.'_'.$this->_Controller.'_';
-
-        log_message('debug', 'Controller Order/Edge Start!');
+        log_message('debug', 'Controller order/Edge __construct Start!');
+        $this->load->model('order/edge_model');
+        $this->load->model('data/configs_model');
+        $this->_EdgeAutoGet = intval($this->configs_model->select_by_name('edge_auto_get')); // 分组方法
     }
 
     public function index(){
         $View = $this->uri->segment(4, 'read');
-        if(method_exists(__CLASS__, '_'.$View)){
-            $View = '_'.$View;
+        if(method_exists(__CLASS__, '_' . $View)){
+            $View = '_' . $View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $Data['action'] = site_url($Item);
-            $this->load->view($Item, $Data);
+            $this->_index($View);
         }
     }
 
     public function read(){
-        $Cookie = $this->_Cookie.__FUNCTION__;
-        $this->Search = $this->get_page_conditions($Cookie, $this->Search);
-        $Data = array();
-        if(!empty($this->Search)){
-            if(!!($Data = $this->order_product_classify_model->select($this->Search))){
-                $this->input->set_cookie(array('name' => $Cookie, 'value' => json_encode($this->Search), 'expire' => HOURS));
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有需要报价的订单';
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if (empty($this->_Search['edger'])) {
+            if ($this->_is_edge_group()) {
+                $this->_Search['edger'] = $this->session->userdata('uid');
             }
-        }else{
-            $this->Failue = '对不起, 没有符合条件的内容!';
+        }
+        $Data = array();
+        if(!($Data = $this->edge_model->select($this->_Search))){
+            if ($this->_Search['status'] == WP_EDGING && $this->_EdgeAutoGet) {
+                if(!($this->_next()) || !($Data = $this->edge_model->select($this->_Search))){
+                    $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                    $this->Code = EXIT_ERROR;
+                }
+            } else {
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            }
         }
         $this->_return($Data);
     }
 
-    public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Selected = $this->input->post('selected', true);
-            $this->load->library('workflow/workflow');
-            foreach ($Selected as $key => $value){
-                $this->workflow->initialize('order_product_classify', $value);
-                $this->workflow->edge();
+    /**
+     * 获得下一次封边
+     */
+    private function _next() {
+        $this->load->model('permission/usergroup_model');
+        $this->load->model('manage/user_model');
+        $User = $this->user_model->is_exist($this->session->userdata('uid'));
+        if ($User['status']) {
+            if ($this->_is_edge_group()) {
+                if(!($Data = $this->edge_model->select_next_edge())) {
+                    $this->Message = '读取信息失败';
+                } else {
+                    $Workflow = array();
+                    $Type = ZERO;
+                    foreach ($Data as $Key => $Value) {
+                        array_push($Workflow, $Value['v']);
+                        $Type = $Value['type'];
+                    }
+                    if ($Type == ZERO) {
+                        $W = $this->_workflow_order_product_classify();
+                    } else {
+                        $W = $this->_workflow_order_product_board();
+                    }
+                    if ($W->initialize($Workflow)) {
+                        $W->edging();
+                        return true;
+                    } else {
+                        $this->Message = $W->get_failue();
+                    }
+                }
+            } else {
+                $this->Message = '当前登录用户不属于封边组';
             }
-        }else{
-            $this->Failue = validation_errors();
+        } else {
+            $this->Message = '当前用户不在工作状态!';
         }
-        $this->_return();
+        return false;
+    }
+    private function _workflow_order_product_classify () {
+        $this->load->library('workflow/workflow');
+        return $this->workflow->initialize('order_product_classify');
+    }
+    private function _workflow_order_product_board () {
+        $this->load->library('workflow/workflow');
+        return $this->workflow->initialize('order_product_board');
+    }
+
+    public function edit(){
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Type = $this->input->post('type', true);
+            if ($Type == ZERO) {
+                $this->_edit_order_product_classify();
+            } else {
+                $this->_edit_order_product_board();
+            }
+
+        }
+        $this->_ajax_return();
+    }
+    private function _edit_order_product_classify () {
+        $Post = gh_escape($_POST);
+        $this->load->model('order/order_product_classify_model');
+        if (!!($Edge = $this->order_product_classify_model->is_status_and_brothers($Post['v'], $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE))) {
+            $GLOBALS['workflow_msg'] = '';
+            foreach ($Edge as $Key => $Value) {
+                $GLOBALS['workflow_msg'] .= $Value['board'];
+                $Edge[$Key] = $Value['v'];
+            }
+            $W = $this->_workflow_order_product_classify();
+            if(!!($W->initialize($Edge))) {
+                $W->edged();
+                $this->Message = '确认封边成功, 刷新后生效!';
+                return true;
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = $W->get_failue();
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '您选择确认的已经确认封边，不能重复确认';
+        }
+        return false;
+    }
+    private function _edit_order_product_board () {
+        $Post = gh_escape($_POST);
+        $this->load->model('order/order_product_board_model');
+        if (!!($Edge = $this->order_product_board_model->is_status_and_brothers($Post['v'], $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE))) {
+            $GLOBALS['workflow_msg'] = '';
+            foreach ($Edge as $Key => $Value) {
+                $GLOBALS['workflow_msg'] .= $Value['board'];
+                $Edge[$Key] = $Value['v'];
+            }
+            $W = $this->_workflow_order_product_board();
+            if(!!($W->initialize($Edge))) {
+                $W->edged();
+                $this->Message = '确认封边成功, 刷新后生效!';
+                return true;
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = $W->get_failue();
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '您选择确认的已经确认封边，不能重复确认';
+        }
+        return false;
+    }
+
+    public function correct () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            if ($this->_is_user()) {
+                $Type = $this->input->post('type', true);
+                if ($Type == ZERO) {
+                    $this->_correct_order_product_classify();
+                } else {
+                    $this->_correct_order_product_board();
+                }
+            }
+        }
+        $this->_ajax_return();
+    }
+    private function _is_user () {
+        $Edge = gh_escape($_POST['edge']);
+        $this->load->model('manage/user_model');
+        if (!!($this->_User = $this->user_model->is_exist($Edge))) {
+            return true;
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '用户不存在!';
+            return false;
+        }
+    }
+
+    private function _correct_order_product_classify () {
+        $Post = gh_escape($_POST);
+        $this->load->model('order/order_product_classify_model');
+        if (!!($Edge = $this->order_product_classify_model->are_edged_and_brothers($Post['v'], WP_EDGED))) {
+            foreach ($Edge as $Key => $Value) {
+                $Edge[$Key] = $Value['v'];
+            }
+            $W = $this->_workflow_order_product_classify();
+            if ($W->initialize($Edge)) {
+                $W->set_data(array('edge' => $Post['edge']));
+                $W->store_message('封边矫正到' . $this->_User['truename']);
+                $this->Message = '封边矫正成功, 刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '封边矫正失败!';
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '您选择封边校正的订单还未确认封边，不能校正';
+        }
+    }
+    private function _correct_order_product_board () {
+        $Post = gh_escape($_POST);
+        $this->load->model('order/order_product_board_model');
+        if (!!($Edge = $this->order_product_board_model->are_edged_and_brothers($Post['v'], WP_EDGED))) {
+            foreach ($Edge as $Key => $Value) {
+                $Edge[$Key] = $Value['v'];
+            }
+            $W = $this->_workflow_order_product_board();
+            if ($W->initialize($Edge)) {
+                $W->set_data(array('edge' => $Post['edge']));
+                $W->store_message('封边矫正到' . $this->_User['truename']);
+                $this->Message = '封边矫正成功, 刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '封边矫正失败!';
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '您选择封边校正的订单还未确认封边，不能校正';
+        }
+    }
+    private function _is_edge_group () {
+        $this->load->model('permission/usergroup_model');
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('封边'))) {
+            return $this->session->userdata('ugid') == $UsergroupV;
+        }
+        return false;
     }
 }

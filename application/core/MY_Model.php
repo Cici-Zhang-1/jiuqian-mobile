@@ -9,6 +9,7 @@
 class MY_Model extends CI_Model
 {
     public $HostDb;
+    public $X;
 
     protected $_Module;
     protected $_Model;
@@ -32,6 +33,7 @@ class MY_Model extends CI_Model
 
     private function _init() {
 	    $this->HostDb = $this->db;
+        $this->X = $this->load->database('x', true);
 
         $this->_Module = str_replace("\\", "/", $this->_Module);
         $this->_Module = substr($this->_Module, strrpos($this->_Module, '/')+1);
@@ -105,19 +107,25 @@ class MY_Model extends CI_Model
 	protected function _format($Data, $Item){
 	    $this->config->load($this->_DbtableFile);
 	    $FormView = $this->config->item($Item);
-	    foreach ($FormView as $key=>$value){
-	        if(isset($Data[$key])){
-	            if(is_array($Data[$key])){
-	                $Set[$value] = implode(',', $Data[$key]);
-	            }else{
-	                $Set[$value] = $Data[$key];
-	            }
-	        }elseif(array_key_exists($key, $Data) && is_null($Data[$key])){
-	            $Set[$value] = $this->_default($key, null);
-	        }else{
-	            $Set[$value] = $this->_default($key);
-	        }
-	    }
+	    if (!(is_array($FormView) && count($FormView) > 0)) {
+	        $FormView = $this->config->item(trim($this->_Item,'/'));
+        }
+        $Set = array();
+	    if (is_array($FormView) && count($FormView) > 0) {
+            foreach ($FormView as $key=>$value){
+                if(isset($Data[$key])){
+                    if(is_array($Data[$key])){
+                        $Set[$value] = implode(',', $Data[$key]);
+                    }else{
+                        $Set[$value] = $Data[$key];
+                    }
+                }elseif(array_key_exists($key, $Data) && is_null($Data[$key])){
+                    $Set[$value] = $this->_default($key, null);
+                }else{
+                    $Set[$value] = $this->_default($key);
+                }
+            }
+        }
 	    return $Set;
 	}
 	
@@ -149,9 +157,23 @@ class MY_Model extends CI_Model
 	        case 'create_datetime':
 	            $Return = date('Y-m-d H:i:s');
 	            break;
+            case 'timestamp':
+                list($U, $S) = explode(' ', microtime());
+                $Return = number_format($S + $U, TEN, '.', '');
+                break;
 	        default:
 	            $Return = $tmp;
 	    }
 	    return $Return;
 	}
+
+	public function trans_start () {
+        $this->HostDb->trans_start();
+    }
+    public function trans_complete () {
+        $this->HostDb->trans_complete();
+    }
+    public function trans_status () {
+	    return $this->HostDb->trans_status();
+    }
 }//end Base_Model

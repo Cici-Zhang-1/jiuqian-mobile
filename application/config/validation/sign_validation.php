@@ -2,7 +2,7 @@
 
 $config['sign/in'] = array(
 	array(
-		'field' => 'username',
+		'field' => 'name',
 		'label' => '用户名',
 		'rules' => 'trim|required|min_length[1]|max_length[64]'
 	),

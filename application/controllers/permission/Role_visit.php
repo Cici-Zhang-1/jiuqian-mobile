@@ -47,7 +47,7 @@ class Role_visit extends MY_Controller {
                             }
                         }
                     }
-                    $Data['role_v'] = $Role['v'];
+                    $Data['query']['role_v'] = $Role['v'];
                     $Data['content'] = $ParentRoleCard;
                     $Data['num'] = count($ParentRoleCard);
                     $Data['p'] = ONE;
@@ -65,27 +65,22 @@ class Role_visit extends MY_Controller {
     }
 
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Post = gh_escape($_POST);
-            if(!!($this->role_visit_model->delete_by_rid($Post['rid']))){
-                if (isset($Post['vid'])) {
-                    $Data = array();
-                    foreach ($Post['vid'] as $key => $value) {
-                        $Data[] = array(
-                            'vid' => $value,
-                            'rid' => $Post['rid']
-                        );
-                    }
-                    $this->role_visit_model->insert_batch($Data);
-                }
-                $this->Success .= '角色-访问控制权限修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色-访问控制修改失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
         }
-        $this->_return();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $this->role_visit_model->delete_by_role_v($Post['role_v']);
+            foreach ($Post['v'] as $Key => $Value) {
+                $Data[] = array(
+                    'visit_v' => $Value,
+                    'role_v' =>$Post['role_v']
+                );
+            }
+            $this->role_visit_model->insert_batch($Data);
+            $this->Message = '内容修改成功, 刷新后生效!';
+        }
+        $this->_ajax_return();
     }
 }

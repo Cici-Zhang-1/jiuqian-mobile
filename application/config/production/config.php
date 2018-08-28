@@ -23,9 +23,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = '';
+$config['base_url'] = 'https://www.365huijia.com';
 
 $config['desktop_url'] = 'http://test.365huijia.com';
+$config['pub_url'] = 'http://pub.365huijia.com';
 /*
 |--------------------------------------------------------------------------
 | Index File

@@ -1,231 +1,252 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- *  2015-4-25
- * @author ZhangCC
- * @version
- * @description
- * 经销商
+ * Dealer Controller
+ *
+ * @package  CodeIgniter
+ * @category Controller
  */
-class Dealer extends MY_Controller{
-	private $_Module;
-	private $_Controller;
-	private $_Item;
-	private $_Cookie;
-	
-	private $_InsertId;
-	
-	private $Search = array(
-	    'keyword' => ''
-	);
-	
-	public function __construct(){
-		parent::__construct();
-		$this->load->model('dealer/dealer_model');
-		$this->load->model('dealer/dealer_linker_model');
-		$this->_Module = $this->router->directory;
-		$this->_Controller = $this->router->class;
-		$this->_Item = $this->_Module.$this->_Controller.'/';
-		$this->_Cookie = str_replace('/', '_', $this->_Item).'_';
-		
-		log_message('debug', 'Controller Dealer/dealer Start!');
-	}
+class Dealer extends MY_Controller {
+    private $_NewDealerV;
+    private $_NewShopV;
+    private $__Search = array(
+        'owner' => ZERO,
+        'status' => ONE,
+        'public' => YES
+    );
+    public function __construct() {
+        parent::__construct();
+        log_message('debug', 'Controller dealer/Dealer __construct Start!');
+        $this->load->model('dealer/dealer_model');
+    }
 
-    public function index(){
-		$View = $this->uri->segment(4, 'read');
-		if(method_exists(__CLASS__, '_'.$View)){
-		    $View = '_'.$View;
-			$this->$View();
-		}else{
-			$Item = $this->_Item.$View;
-			$Data['action'] = site_url($Item);
-			$this->load->view($Item, $Data);
-		}
-	}
-	
-	public function read($All=''){
-	    $All = trim($All);
-	    if('all' != $All){
-	        $Cookie = $this->_Cookie.__FUNCTION__;
-	        $this->Search = $this->get_page_conditions($Cookie, $this->Search);
-	        $Data = array();
-	        if(!empty($this->Search)){
-	            if(!!($Data = $this->dealer_model->select_dealer($this->Search))){
-	                $this->Search['pn'] = $Data['pn'];
-	                $this->Search['num'] = $Data['num'];
-	                $this->Search['p'] = $Data['p'];
-	                $this->input->set_cookie(array('name' => $Cookie, 'value' => json_encode($this->Search), 'expire' => HOURS));
-	            }else{
-	                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合搜索条件的经销商';
-	            }
-	        }else{
-	            $this->Failue = '对不起, 没有符合条件的内容!';
-	        }
-	        $this->_return($Data);
-	    }else{
-	        $this->_read_all();
-	    }
-	}
-	
-	public function _read_all(){
-	    if(!!($Data = $this->dealer_model->select_all())){
-	        $Content = array();
-	        foreach ($Data['content'] as $key => $value){
-	            $Content[$key] = $value;
-	            if(empty($value['checker'])){
-	                $Content[$key]['checker'] = $value['dealer_linker'];
-	            }
-	            if(empty($value['payer'])){
-	                $Content[$key]['payer'] = $value['dealer_linker'];
-	            }
-	            if(empty($value['checker_phone'])){
-	                $Content[$key]['checker_phone'] = $value['dealer_phone'];
-	            }
-	            if(empty($value['payer_phone'])){
-	                $Content[$key]['payer_phone'] = $value['dealer_phone'];
-	            }
-	        }
-	        $Data['content'] = $Content;
-	        $this->Success = '获取所有供应商信息成功!';
-	    }else{
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合条件的供应商';
-	    }
-	    $this->_return($Data);
-	}
+    /**
+    *
+    * @return void
+    */
+    public function index() {
+        $View = $this->uri->segment(4, 'read');
+        if(method_exists(__CLASS__, '_'.$View)){
+            $View = '_'.$View;
+            $this->$View();
+        }else{
+            $this->_index($View);
+        }
+    }
 
-	public function add(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    if($this->form_validation->run($Item)){
-	        $Mobilephone = $this->input->post('mobilephone');
-	        if($this->dealer_linker_model->is_registed($Mobilephone)){
-	            $this->Failue = '手机号码已经注册';
-	        }else{
-	            if(!!($this->_add_dealer()) && !!($this->_add_dealer_delivery()) && !!($this->_add_dealer_linker())){
-	                $this->Success .= '经销商新增成功, 刷新后生效!';
-	            }else{
-	                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商新增失败!';
-	            }
-	        }
-	    }else{
-	        $this->Failue .= validation_errors();
-	    }
-	    $this->_return();
-	}
-	private function _add_dealer(){
-	    $Set = array(
-	        'des' => $this->input->post('des'),
-	        'shop' => $this->input->post('shop'),
-	        'dcid' => $this->input->post('dcid'),
-	        'aid' => $this->input->post('aid'),
-	        'pid' => $this->input->post('pid'),
-	        'remark' => $this->input->post('remark'),
-	        'address' => $this->input->post('address'),
-			'name' => $this->input->post('mobilephone')
-	    );
-	    $Set['password'] = md5($Set['name']);
-	    $Set = gh_escape($Set);
-	    if(!!($this->_InsertId = $this->dealer_model->insert($Set))){
-	        $this->Success .= '经销商信息新增成功, 刷新后生效!';
-	        return true;
-	    }else{
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商信息新增失败';
-	        return false;
-	    }
-	}
-	
-	private function _add_dealer_delivery(){
-	    $Set = array(
-	        'dealer_id' => $this->_InsertId,
-	        'delivery_linker' => $this->input->post('delivery_linker'),
-	        'delivery_phone' => $this->input->post('delivery_phone'),
-	        'daid' => $this->input->post('daid'),
-	        'lid' => $this->input->post('lid'),
-	        'omid' => $this->input->post('omid'),
-	        'delivery_address' => $this->input->post('delivery_address')
-	    );
-	    $Set = gh_escape($Set);
-	    $this->load->model('dealer/dealer_delivery_model');
-	    if(empty($Set['delivery_linker'])){
-	        return TRUE;
-	    }
-	    if(!!($this->dealer_delivery_model->insert($Set))){
-	        $this->Success .= '经销商发货信息新增成功, 刷新后生效!';
-	        return true;
-	    }else{
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商发货信息新增失败';
-	        return false;
-	    }
-	}
-	
-	private function _add_dealer_linker(){
-	    $Set = array(
-	        'dealer_id' => $this->_InsertId,
-	        'name' => $this->input->post('name'),
-	        'mobilephone' => $this->input->post('mobilephone'),
-	        'telephone' => $this->input->post('telephone'),
-	        'email' => $this->input->post('email'),
-	        'qq' => $this->input->post('type'),
-	        'fax' => $this->input->post('fax'),
-	        'remark' => $this->input->post('remark'),
-	        'doid' => $this->input->post('doid')
-	    );
-	    $Set = gh_escape($Set);
-	    if(empty($Set['name'])){
-	        return true;
-	    }
-	    if(!!($this->dealer_linker_model->insert($Set))){
-	        $this->Success .= '经销商联系人新增成功, 刷新后生效!';
-	        return true;
-	    }else{
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商联系人新增失败';
-	        return false;
-	    }
-	}
-	
-	public function edit(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    if($this->form_validation->run($Item)){
-	        $Post = gh_escape($_POST);
-	        $Where = $Post['selected'];
-	        unset($Post['selected']);
-			if (isset($Post['password']) && '' != $Post['password']) {
-				$Post['password'] = md5($Post['password']);
-			}else {
-				unset($Post['password']);
-			}
-	        if(!!($this->dealer_model->update($Post, $Where))){
-	            $this->Success .= '经销商信息修改成功, 刷新后生效!';
-	        }else{
-	            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商信息修改失败!';
-	        }
-	    }else{
-	        $this->Failue .= validation_errors();
-	    }
-	    $this->_return();
-	}
-	
-	/**
-	 * 删除
-	 */
-	public function remove(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    if($this->form_validation->run($Item)){
-	        $Where = $this->input->post('selected', true);
-	        if($Where !== false && is_array($Where) && count($Where) > 0){
-	            $this->load->model('dealer/dealer_delivery_model');
-	            $this->load->model('dealer/dealer_linker_model');
-	            if($this->dealer_model->delete_dealer($Where)
-	                && $this->dealer_delivery_model->delete_by_did($Where)
-	                && $this->dealer_linker_model->delete_by_did($Where)){
-	                $this->Success .= '经销商信息删除成功, 刷新后生效!';
-	            }else {
-	                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商信息删除失败';
-	            }
-	        }else{
-	            $this->Failue .= '没有可删除项!';
-	        }
-	    }else{
-	        $this->Failue .= validation_errors();
-	    }
-	    $this->_return();
-	}
+    public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if ($this->_Search['public'] == NO) {
+            $this->_Search['owner'] = $this->session->userdata('uid');
+        }
+        $Data = array();
+        if(!($Data = $this->dealer_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+
+    /**
+     *
+     * @return void
+     */
+    public function add() {
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if(!!($this->_NewDealerV = $this->dealer_model->insert($Post))) {
+                $this->_add_shop();
+                $this->_add_dealer_delivery();
+                $this->_add_dealer_linker();
+                if (empty($Post['public'])) {
+                    $this->_add_owner();
+                }
+                $this->Message = '新建成功, 刷新后生效!';
+            }else{
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    private function _add_shop () {
+        $Shop = $this->input->post('shop');
+        $Set = array(
+            'num' => ONE,
+            'dealer_id' => $this->_NewDealerV,
+            'name' => $Shop != '' ? $Shop : $this->input->post('name'),
+            'area_id' => $this->input->post('area_id'),
+            'address' => $this->input->post('address')
+        );
+        $Set = gh_escape($Set);
+        $this->load->model('dealer/shop_model');
+
+        if(!!($this->_NewShopV = $this->shop_model->insert($Set))){
+            $this->Message .= '经销商店面信息新增成功, 刷新后生效!';
+        }else{
+            $this->Code = EXIT_ERROR;
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商信息新增失败';
+        }
+        return $this->_NewShopV;
+    }
+    private function _add_dealer_delivery(){
+        $DealerDeliveryLinker = $this->input->post('dealer_delivery_linker');
+        $DealerDeliveryPhone = $this->input->post('dealer_delivery_phone');
+        $DealerDeliveryArea = $this->input->post('dealer_delivery_area_id');
+        $DealerDeliveryArea = intval($DealerDeliveryArea);
+        $DealerDeliveryAddress = $this->input->post('dealer_delivery_address');
+        $Set = array(
+            'dealer_id' => $this->_NewDealerV,
+            'shop_id' => $this->_NewShopV,
+            'linker' => $DealerDeliveryLinker != '' ? $DealerDeliveryLinker : $this->input->post('dealer_linker_truename'),
+            'phone' => $DealerDeliveryPhone != '' ? $DealerDeliveryPhone : $this->input->post('dealer_linker_mobilephone'),
+            'area_id' => ($DealerDeliveryArea != 0 || $DealerDeliveryAddress != '') ? $DealerDeliveryArea : $this->input->post('area_id'),
+            'address' => ($DealerDeliveryArea != 0 || $DealerDeliveryAddress != '') ? $DealerDeliveryAddress : $this->input->post('address'),
+            'out_method' => $this->input->post('dealer_delivery_out_method')
+        );
+        $Set = gh_escape($Set);
+        $this->load->model('dealer/dealer_delivery_model');
+        if(!!($NewId = $this->dealer_delivery_model->insert($Set))){
+            $Set = array(
+                'dealer_delivery_id' => $NewId,
+                'shop_id' => $this->_NewShopV
+            );
+            $this->load->model('dealer/dealer_delivery_shop_model');
+            $this->dealer_delivery_shop_model->insert($Set);
+            $this->Message .= '经销商发货信息新增成功, 刷新后生效!';
+        }else{
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商发货信息新增失败';
+        }
+        return true;
+    }
+
+    private function _add_dealer_linker(){
+        $Set = array(
+            'dealer_id' => $this->_NewDealerV,
+            'shop_id' => $this->_NewShopV,
+            'name' => $this->input->post('dealer_linker_name'),
+            'truename' => $this->input->post('dealer_linker_truename'),
+            'password' => '90009000',
+            'mobilephone' => $this->input->post('dealer_linker_mobilephone'),
+            'telephone' => $this->input->post('dealer_linker_telephone'),
+            'email' => $this->input->post('dealer_linker_email'),
+            'qq' => $this->input->post('dealer_linker_qq'),
+            'fax' => $this->input->post('dealer_linker_fax'),
+            'position' => $this->input->post('dealer_linker_position')
+        );
+        $Set = gh_escape($Set);
+        $this->load->model('dealer/dealer_linker_model');
+        if (!!($NewId = $this->dealer_linker_model->insert($Set))) {
+            $Set = array(
+                'dealer_linker_id' => $NewId,
+                'shop_id' => $this->_NewShopV
+            );
+            $this->load->model('dealer/dealer_linker_shop_model');
+            $this->dealer_linker_shop_model->insert($Set);
+            $this->Message .= '经销商联系人新增成功, 刷新后生效!';
+        } else {
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商联系人新增失败';
+        }
+        return true;
+    }
+
+    private function _add_owner () {
+        $Set = array(
+            'dealer_id' => $this->_NewDealerV,
+            'owner_id' => $this->session->userdata('uid'),
+            'primary' => YES
+        );
+        $Set = gh_escape($Set);
+        $this->load->model('dealer/dealer_owner_model');
+        if (!!($NewId = $this->dealer_owner_model->insert($Set))) {
+            $this->Message .= '经销商属主新增成功, 刷新后生效!';
+        } else {
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'经销商属主新增失败';
+        }
+        return true;
+    }
+
+    /**
+    *
+    * @return void
+    */
+    public function edit() {
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->dealer_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
+     *
+     * @param  int $id
+     * @return void
+     */
+    public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->dealer_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
+     * 开始正常使用
+     */
+    public function start () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->dealer_model->update(array('status' => YES), $Where)) {
+                $this->Message = '启用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'启用失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
+     * 停止正常使用
+     */
+    public function stop () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->dealer_model->update(array('status' => NO), $Where)) {
+                $this->Message = '停用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'停用失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
 }

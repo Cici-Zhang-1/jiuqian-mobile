@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Visit extends MY_Controller {
     public function __construct() {
         parent::__construct();
+        log_message('debug', 'Controller  __construct Visit Start!');
         $this->load->model('permission/visit_model');
     }
 
@@ -20,68 +21,62 @@ class Visit extends MY_Controller {
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $this->data['action'] = site_url($Item);
-            $this->load->view($Item, $this->data);
+            $this->_index($View);
         }
     }
 
     public function read() {
-        $this->_Item = $this->_Item.__FUNCTION__;
+        $this->get_page_search();
         $Data = array();
-        if(!($Query = $this->visit_model->select())){
-            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有访问控制信息';
-        }else{
-            $Data['content'] = $Query;
+        if(!($Data = $this->visit_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
         }
-        $this->_return($Data);
+        $this->_ajax_return($Data);
     }
 
     public function add() {
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Id = $this->visit_model->insert($Post))){
-                $this->load->model('permission/role_visit_model');  // 在添加角色时，给管理组生成对应的角色
-                $this->role_visit_model->insert(array('rid' => SUPER_NO, 'vid' => $Id));
-                $this->Success .= '访问控制新增成功, 刷新后生效!';
+            if(!!($NewId = $this->visit_model->insert($Post))) {
+                $this->load->model('permission/role_visit_model');
+                $this->role_visit_model->insert(array('role_v' => SUPER_NO, 'visit_v' => $NewId));
+                $this->Message = '新建成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'访问控制新增失败';
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
     public function edit() {
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Where = $this->input->post('selected');
+            $Where = $Post['v'];
+            unset($Post['v']);
             if(!!($this->visit_model->update($Post, $Where))){
-                $this->Success .= '访问控制修改成功, 刷新后生效!';
+                $this->Message = '内容修改成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'访问控制修改失败';
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
     public function remove() {
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            if($this->visit_model->delete($Where)){
-                $this->load->model('permission/role_visit_model');   // 删除访问控制时，要清除角色-访问控制权限管理
-                $this->role_visit_model->delete_by_vid($Where);
-                $this->Success .= '访问控制删除成功, 刷新后生效!';
-            }else {
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'访问控制删除失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
         }
-        $this->_return();
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->visit_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
     }
 }

@@ -1,10 +1,40 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['drawing/drawing_model/insert_drawing'] = array(
-	'type' => 'd_type',
-	'opid' => 'd_order_product_id',
-	'name' => 'd_name',
-	'path' => 'd_path',
-	'creator' => 'd_creator',
-	'create_datetime' => 'd_create_datetime',
-);
+$config['drawing/drawing_model'] = array(
+                                'name' => 'd_name',
+                                'type' => 'd_type',
+                                'order_product_id' => 'd_order_product_id',
+                                'path' => 'd_path',
+                                'create_datetime' => 'd_create_datetime',
+                        'creator' => 'd_creator'
+                    );
+$config['drawing/drawing_model/insert'] = array(
+                                'name' => 'd_name',
+                                'type' => 'd_type',
+                                'order_product_id' => 'd_order_product_id',
+                                'path' => 'd_path',
+                                'create_datetime' => 'd_create_datetime',
+                        'creator' => 'd_creator'
+                    );
+$config['drawing/drawing_model/insert_batch'] = array(
+                                'name' => 'd_name',
+                                'type' => 'd_type',
+                                'order_product_id' => 'd_order_product_id',
+                                'path' => 'd_path',
+                                'create_datetime' => 'd_create_datetime',
+                        'creator' => 'd_creator'
+                    );
+$config['drawing/drawing_model/update'] = array(
+                                'name' => 'd_name',
+                                'type' => 'd_type',
+                                'order_product_id' => 'd_order_product_id',
+                        'path' => 'd_path'
+                    );
+$config['drawing/drawing_model/update_batch'] = array(
+                                'name' => 'd_name',
+                                'type' => 'd_type',
+                                'order_product_id' => 'd_order_product_id',
+                                'path' => 'd_path',
+                        'v' => 'd_id'
+                    );

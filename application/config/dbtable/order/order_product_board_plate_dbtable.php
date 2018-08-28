@@ -23,31 +23,10 @@ $config['order/order_product_board_plate_model/insert'] = array(
 	'down_edge' => 'opbp_down_edge',
 	'qrcode' => 'opbp_qrcode',
 );
-$config['order/order_product_board_plate_model/update'] = array(
-	'opbid' => 'opbp_order_product_board_id',
-	'cubicle_name' => 'opbp_cubicle_name',
-	'cubicle_num' => 'opbp_cubicle_num',
-	'plate_name' => 'opbp_plate_name',
-	'plate_num' => 'opbp_plate_num',
-	'width' => 'opbp_width',
-	'length' => 'opbp_length',
-	'thick' => 'opbp_thick',
-	'area' => 'opbp_area',
-	'slot' => 'opbp_slot',
-	'punch' => 'opbp_punch',
-	'edge' => 'opbp_edge',
-	'remark' => 'opbp_remark',
-	'decide_size' => 'opbp_decide_size',
-	'abnormity' => 'opbp_abnormity',
-	'bd_file' => 'opbp_bd_file',
-	'left_edge' => 'opbp_left_edge',
-	'right_edge' => 'opbp_right_edge',
-	'up_edge' => 'opbp_up_edge',
-	'down_edge' => 'opbp_down_edge',
-	'qrcode' => 'opbp_qrcode',
-);
+
 $config['order/order_product_board_plate_model/insert_batch'] = array(
-	'opbid' => 'opbp_order_product_board_id',
+	'order_product_board_id' => 'opbp_order_product_board_id',
+	'order_product_classify_id' => 'opbp_order_product_classify_id',
 	'cubicle_name' => 'opbp_cubicle_name',
 	'cubicle_num' => 'opbp_cubicle_num',
 	'plate_name' => 'opbp_plate_name',
@@ -67,10 +46,10 @@ $config['order/order_product_board_plate_model/insert_batch'] = array(
 	'right_edge' => 'opbp_right_edge',
 	'up_edge' => 'opbp_up_edge',
 	'down_edge' => 'opbp_down_edge',
-	'qrcode' => 'opbp_qrcode',
+	'qrcode' => 'opbp_qrcode'
 );
 $config['order/order_product_board_plate_model/replace_order_product_board_plate'] = array(
-	'opbid' => 'opbp_order_product_board_id',
+	'order_product_board_id' => 'opbp_order_product_board_id',
 	'cubicle_num' => 'opbp_cubicle_num',
 	'cubicle_name' => 'opbp_cubicle_name',
 	'plate_name' => 'opbp_plate_name',
@@ -92,9 +71,36 @@ $config['order/order_product_board_plate_model/replace_order_product_board_plate
 	'qrcode' => 'opbp_qrcode',
 	'bd_file' => 'opbp_bd_file',
 );
+
+$config['order/order_product_board_plate_model/update'] = array(
+    'order_product_board_id' => 'opbp_order_product_board_id',
+    'cubicle_name' => 'opbp_cubicle_name',
+    'cubicle_num' => 'opbp_cubicle_num',
+    'plate_name' => 'opbp_plate_name',
+    'plate_num' => 'opbp_plate_num',
+    'width' => 'opbp_width',
+    'length' => 'opbp_length',
+    'thick' => 'opbp_thick',
+    'area' => 'opbp_area',
+    'slot' => 'opbp_slot',
+    'punch' => 'opbp_punch',
+    'edge' => 'opbp_edge',
+    'remark' => 'opbp_remark',
+    'decide_size' => 'opbp_decide_size',
+    'abnormity' => 'opbp_abnormity',
+    'bd_file' => 'opbp_bd_file',
+    'left_edge' => 'opbp_left_edge',
+    'right_edge' => 'opbp_right_edge',
+    'up_edge' => 'opbp_up_edge',
+    'down_edge' => 'opbp_down_edge',
+    'qrcode' => 'opbp_qrcode',
+);
+
 $config['order/order_product_board_plate_model/update_batch'] = array(
-	'opbpid' => 'opbp_id',
-	'opcid' => 'opbp_order_product_classify_id',
+    'v' => 'opbp_id',
+	'order_product_board_id' => 'opbp_id',
+	'order_product_classify_id' => 'opbp_order_product_classify_id',
 	'qrcode' => 'opbp_qrcode',
 	'plate_num' => 'opbp_plate_num',
+	'cubicle_num' => 'opbp_cubicle_num',
 );

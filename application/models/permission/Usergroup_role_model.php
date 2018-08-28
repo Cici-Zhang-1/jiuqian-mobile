@@ -24,7 +24,7 @@ class Usergroup_role_model extends MY_Model{
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的用户组';
+                $GLOBALS['error'] = '没有符合搜索条件的用户组角色';
             }
         }
         return $Return;
@@ -81,7 +81,7 @@ class Usergroup_role_model extends MY_Model{
 	 * @param $Where
 	 * @return bool
 	 */
-	public function delete_by_uid($Where) {
+	public function delete_by_usergroup_v($Where) {
 		if (is_array($Where)) {
 			$this->HostDb->where_in('ur_usergroup_id', $Where);
 		}else {

@@ -13,23 +13,49 @@ class Visit_model extends MY_Model {
         parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model permission/Visit_model Start!' . $this->_Module);
     }
-    public function select() {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('visit');
 
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $Query = $this->HostDb->select($Sql)->from('visit')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
                 $this->cache->save($Cache, $Return, MONTHS);
-            }else{
-                $GLOBALS['error'] = '没有用访问控制信息!';
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的访问控制';
             }
         }
         return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(v_id) as num', FALSE);
+        $this->HostDb->from('visit');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
     }
 
     public function select_allowed_by_ugid($Id) {

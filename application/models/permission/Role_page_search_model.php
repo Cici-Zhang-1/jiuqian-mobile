@@ -61,11 +61,23 @@ class Role_page_search_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $Mids = $this->HostDb->select('rm_menu_id')->from('role_menu') // Menu
+                        ->where('rm_role_id', $V)->get_compiled_select();
+
+            $RolePageSearch = $this->HostDb->select('rps_id, rps_page_search_id')->from('role_page_search') // RoleFunc
+                        ->where('rps_role_id', $V)->get_compiled_select();
             $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('page_search')
+                ->join('menu', 'm_id = ps_menu_id', 'left')
+                ->join('(' . $RolePageSearch . ') as A', 'A.rps_page_search_id = ps_id', 'left')
+                ->where_in('m_id', $Mids, false)
+                ->order_by('m_displayorder')
+                ->get();
+            /*$Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_page_search')
                 ->join('page_search', 'ps_id = rps_page_search_id', 'left')
                 ->where('rps_role_id', $V)
-                ->group_by('ps_id')->get();
+                ->group_by('ps_id')->get();*/
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -109,7 +121,7 @@ class Role_page_search_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_psid($Mid){
+    public function delete_by_page_search_v($Mid){
         if(is_array($Mid)){
             $this->HostDb->where_in('rps_page_search_id', $Mid);
         }else{
@@ -125,7 +137,7 @@ class Role_page_search_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rps_role_id', $Rid);
         }else{

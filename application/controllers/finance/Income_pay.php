@@ -1,94 +1,102 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-/**
- * 2016年1月19日
- * @author Zhangcc
- * @version
- * @des
- */
-class Income_pay extends MY_Controller{
-    private $_Module = 'finance';
-    private $_Controller;
-    private $_Item ;
-    public function __construct(){
-        parent::__construct();
-        $this->load->model('finance/income_pay_model');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
 
-        log_message('debug', 'Controller Finance/Income_pay Start!');
+/**
+ * Income pay Controller
+ *
+ * @package  CodeIgniter
+ * @category Controller
+ */
+class Income_pay extends MY_Controller {
+    private $__Search = array(
+        'finance_activity_type' => ''
+    );
+    public function __construct() {
+        parent::__construct();
+        log_message('debug', 'Controller finance/Income_pay __construct Start!');
+        $this->load->model('finance/income_pay_model');
     }
 
-    public function index(){
+    /**
+    *
+    * @return void
+    */
+    public function index() {
         $View = $this->uri->segment(4, 'read');
         if(method_exists(__CLASS__, '_'.$View)){
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $Data['action'] = site_url($Item);
-            $this->load->view($Item, $Data);
+            $this->_index($View);
         }
     }
 
-    public function read($Type = 'all'){
-        $Type = trim($Type);
+    public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
         $Data = array();
-        if('all' == $Type){
-            $Type = array('income', 'pay');
-        }elseif ('income' == $Type){
-            $Type = array('income');
-        }elseif ('pay' == $Type){
-            $Type = array('pay');
-        }else{
-            $Type = array('income', 'pay');
+        if(!($Data = $this->income_pay_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
         }
-        if(!!($Data = $this->income_pay_model->select($Type))){
-            $Content = $Data['content'];
-            foreach ($Content as $key => $value){
-                if('income' == $value['type']){
-                    $Content[$key]['type_cn'] = '收入';
-                }else{
-                    $Content[$key]['type_cn'] = '支出';
-                }
-            }
-            $Data['content'] = $Content;
-            unset($Content);
-            $this->Success = '获取收支类型成功!';
-        }else{
-            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合条件的收支类型';
-        }
-        $this->_return($Data);
+        $this->_ajax_return($Data);
     }
 
-    public function add(){
-        $Run = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Run)){
+    /**
+     *
+     * @return void
+     */
+    public function add() {
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Id = $this->income_pay_model->insert($Post))){
-                $this->Success .= '进账新增成功, 刷新后生效!';
+            if(!!($NewId = $this->income_pay_model->insert($Post))) {
+                $this->Message = '新建成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'进账新增失败';
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
-    public function edit(){
-        $Run = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Run)){
+    /**
+    *
+    * @return void
+    */
+    public function edit() {
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Where = $this->input->post('selected');
-            if(!!($Return = $this->income_pay_model->update($Post, $Where))){
-                $this->Success .= '进账修改成功, 刷新后生效!';
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->income_pay_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'进账修改失败';
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
+    }
+
+    /**
+     *
+     * @param  int $id
+     * @return void
+     */
+    public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->income_pay_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
     }
 }

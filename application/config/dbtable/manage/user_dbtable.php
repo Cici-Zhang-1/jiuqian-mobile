@@ -5,14 +5,17 @@ $config['manage/user_model/insert'] = array(
 	'truename' => 'u_truename',
 	'mobilephone' => 'u_mobilephone',
 	'password' => 'u_password',
-	'ugid' => 'u_usergroup_id',
+	'usergroup_v' => 'u_usergroup_id',
 	'creator' => 'u_creator',
 	'create_datetime' => 'u_create_datetime',
+    'group_no' => 'u_group_no'
 );
 $config['manage/user_model/update'] = array(
 	'name' => 'u_name',
 	'truename' => 'u_truename',
 	'mobilephone' => 'u_mobilephone',
 	'password' => 'u_password',
-	'ugid' => 'u_usergroup_id',
+	'usergroup_v' => 'u_usergroup_id',
+    'status' => 'u_status',
+    'group_no' => 'u_group_no'
 );

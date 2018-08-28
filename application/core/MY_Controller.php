@@ -16,7 +16,7 @@ class MY_Controller extends CI_Controller
         'keyword' => '',    // 关键字
         'p' => 0,   // 第几页
         // 'pn' => 0,  // 共多少页
-        'pagesize' => MIN_PAGESIZE,    // 每页条数
+        'pagesize' => MOBILE_MIN_PAGESIZE,    // 每页条数
         // 'num' => 0, // 总条数
         'paging' => 1 // 是否分页
     );
@@ -24,6 +24,7 @@ class MY_Controller extends CI_Controller
 	protected $Code = EXIT_SUCCESS;	// 返回码，默认是成功返回
 	protected $Message = ''; // 返回时，携带的信息
 	protected $Location = '';
+	protected $Confirm = '';
 	public function __construct()
 	{
 		parent::__construct();
@@ -62,6 +63,7 @@ class MY_Controller extends CI_Controller
         $this->config->load($File, true, true);
         if (!!($Rules = $this->config->item($Item, $File))) {
             $this->form_validation->set_rules($Rules);
+            $this->form_validation->set_error_delimiters('', '');
             if($this->form_validation->run()){
                 return true;
             } else {
@@ -105,9 +107,9 @@ class MY_Controller extends CI_Controller
 	public function _ajax_return($Data = array()) {
 		$this->Message .= isset($GLOBALS['message'])?(is_array($GLOBALS['message'])?implode(',', $GLOBALS['message']):$GLOBALS['message']):'';
 		if (isset($_GET['callback'])) {
-            exit($_GET['callback'] . '(' .json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'contents' => $Data)) . ')');
+            exit($_GET['callback'] . '(' .json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'confirm' => $this->Confirm, 'contents' => $Data)) . ')');
         }else {
-            exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'contents' => $Data)));
+            exit(json_encode(array('code'=>$this->Code, 'message'=> $this->Message, 'location' => $this->Location, 'confirm' => $this->Confirm, 'contents' => $Data)));
         }
 	}
 
@@ -115,7 +117,9 @@ class MY_Controller extends CI_Controller
         $Search = array();
 	    foreach ($this->_Search as $Key => $Value) {
             $Search[$Key] = $this->input->get($Key, true);
-            $Search[$Key] = trim($Search[$Key]);
+            if (!is_array($Search[$Key])) {
+                $Search[$Key] = trim($Search[$Key]);
+            }
             if(false === $Search[$Key] || '' == $Search[$Key]){
                 $Search[$Key] = $Value;
             }
@@ -124,8 +128,14 @@ class MY_Controller extends CI_Controller
             $Search['pn'] = 0;
         } */
         if ($Search['paging']) {
-            if(empty($Search['pagesize']) || $Search['pagesize'] < MIN_PAGESIZE || $Search['pagesize'] > MAX_PAGESIZE){
-                $Search['pagesize'] = MIN_PAGESIZE;
+            if ($GLOBALS['MOBILE']) {
+                if(empty($Search['pagesize']) || $Search['pagesize'] < MOBILE_MIN_PAGESIZE || $Search['pagesize'] > MAX_PAGESIZE){
+                    $Search['pagesize'] = MOBILE_MIN_PAGESIZE;
+                }
+            } else {
+                if(empty($Search['pagesize']) || $Search['pagesize'] < MIN_PAGESIZE || $Search['pagesize'] > MAX_PAGESIZE){
+                    $Search['pagesize'] = MIN_PAGESIZE;
+                }
             }
             if(empty($Search['p']) || $Search['p'] < 1){
                 $Search['p'] = 1;
@@ -135,7 +145,7 @@ class MY_Controller extends CI_Controller
 	        $Search['pagesize'] = ALL_PAGESIZE;
         }
 
-        $this->_Search = $Search;
+        $this->_Search = gh_escape($Search);
     }
 	/**
 	 * 获得收索分页条件
@@ -178,9 +188,16 @@ class MY_Controller extends CI_Controller
 	    if(empty($Return['pn'])){
 	        $Return['pn'] = 0;
 	    }
-	    if(empty($Return['pagesize']) || $Return['pagesize'] < MIN_PAGESIZE || $Return['pagesize'] > MAX_PAGESIZE){
-	        $Return['pagesize'] = MIN_PAGESIZE;
-	    }
+	    if ($GLOBALS['MOBILE']) {
+            if(empty($Return['pagesize']) || $Return['pagesize'] < MOBILE_MIN_PAGESIZE || $Return['pagesize'] > MAX_PAGESIZE){
+                $Return['pagesize'] = MOBILE_MIN_PAGESIZE;
+            }
+        } else {
+            if(empty($Return['pagesize']) || $Return['pagesize'] < MIN_PAGESIZE || $Return['pagesize'] > MAX_PAGESIZE){
+                $Return['pagesize'] = MIN_PAGESIZE;
+            }
+        }
+
 	    if(empty($Return['p']) || $Return['p'] < 1){
 	        $Return['p'] = 1;
 	    }elseif (!empty($Return['pn']) && $Return['p'] > $Return['pn']){
@@ -193,15 +210,21 @@ class MY_Controller extends CI_Controller
      * 获取配置信息
      * @return array
      */
-	protected function _get_configs() {
-        $this->load->model('manage/configs_model');
-        $Configs = array();
-        if (!!($Model = $this->configs_model->select())) {
-            foreach ($Model as $Key => $Value) {
-                $Configs[$Value['name']] = $Value['config'];
+	protected function _get_configs($Name = '') {
+        static $Configs = array();
+        if (empty($Configs)) {
+            $this->load->model('manage/configs_model');
+            if (!!($Model = $this->configs_model->select())) {
+                foreach ($Model as $Key => $Value) {
+                    $Configs[$Value['name']] = $Value['config'];
+                }
             }
         }
-        return $Configs;
+        if (empty($Name)) {
+            return $Configs;
+        } else {
+            return $Configs[$Name];
+        }
     }
 	
 }//end Base_Controller

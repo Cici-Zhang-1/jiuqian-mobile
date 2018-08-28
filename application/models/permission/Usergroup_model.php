@@ -126,17 +126,4 @@ class Usergroup_model extends MY_Model{
         $this->remove_cache($this->_Module);
         return TRUE;
     }
-
-    private function _get_role_tree(){
-        $Rid = $this->session->userdata('rid');
-        $Child = array();
-        if(!!($Query = $this->select_role())){
-            foreach ($Query as $key => $value){
-                $Child[$value['r_parent']][] = $value['r_id'];
-            }
-            ksort($Child);
-            $Child = gh_infinity_category($Child, $Rid);
-        }
-        return $Child;
-    }
 }

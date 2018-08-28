@@ -47,7 +47,7 @@ class Card_type_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(ct_id) as num', FALSE);
+        $this->HostDb->select('count(ct_name) as num', FALSE);
         $this->HostDb->from('card_type');
 
         $Query = $this->HostDb->get();

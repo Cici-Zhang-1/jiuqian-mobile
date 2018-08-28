@@ -1,166 +1,206 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年10月19日
- * @author Zhangcc
- * @version
- * @des
- * 发货
+ * Dealer_delivery_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Dealer_delivery_model extends MY_Model{
-    /**
-     * 主要联系人
-     */
-    private $_Default = 1;
-    /**
-     * 非主要联系人
-     */
-    private $_UDefault = 0;
-    private $_Module = 'dealer';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
-    
+class Dealer_delivery_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-        log_message('debug', 'Model Dealer/Dealer_delivery_model Start!');
-        
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model dealer/Dealer_delivery_model Start!');
     }
 
-    public function select($Did){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Did;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('dealer_delivery');
-            $this->HostDb->join('area', 'a_id = dd_area_id', 'left');
-            $this->HostDb->join('logistics', 'l_id = dd_logistics_id', 'left');
-            $this->HostDb->join('out_method', 'om_id = dd_out_method_id', 'left');
-            
-            $this->HostDb->where('dd_dealer_id', $Did);
-    
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
+    /**
+     * Select from table dealer_delivery
+     */
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('dealer_delivery')
+                    ->join('boolean_type', 'bt_name = dd_primary', 'left')
+                    ->join('area', 'a_id = dd_area_id', 'left');
+                if (!empty($Search['v'])) {
+                    $this->HostDb->where('dd_dealer_id', $Search['v']);
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
                 $this->cache->save($Cache, $Return, MONTHS);
-            }else{
-                $GLOBALS['error'] = '该经销商没有联系人信息!';
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的经销商发货信息';
             }
         }
         return $Return;
     }
-    
-    /**
-     * 判断是否有主要联系人
-     * @param unknown $Did
-     */
-    private function _select_dealer_delivery_default($Did){
-        $Query = $this->HostDb->select('dd_id')
-                            ->from('dealer_delivery')
-                            ->where(array('dd_dealer_id' => $Did, 'dd_default' => $this->_Default))
-                            ->get();
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(dd_id) as num', FALSE);
+        if (!empty($Search['v'])) {
+            $this->HostDb->where('dd_dealer_id', $Search['v']);
+        }
+        $this->HostDb->from('dealer_delivery');
+
+        $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
             $Query->free_result();
-            return true;
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
         }else{
             return false;
         }
     }
 
-    public function select_dealer_delivery_by_dealer($Rid){
-        try {
-            $this->HostDb->where('dd_dealer_id', $Rid);
-            $Query = $this->HostDb->get('dealer_delivery');
-            if($Query->num_rows() > 0){
-                return $Query->result_array();
-            }else{
-                return false;
-            }
-        } catch (Exception $e) {
-            $GLOBALS['error'] = $e->message();
-            return false;
+    public function select_primary ($DealerV) {
+        $Return = false;
+        $Query = $this->HostDb->select('dd_id')->from('dealer_delivery')
+            ->where('dd_dealer_id', $DealerV)
+            ->where('dd_primary', YES)
+            ->limit(ONE)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Row = $Query->row_array();
+            $Return = $Row['dd_id'];
         }
+        return $Return;
     }
-
     /**
-     * 插入经销商 联系人
-     * @param unknown $Data
+     * 获取收货数量
+     * @param $Vs
+     * @return mixed
      */
-    public function insert($Data){
+    public function select_dealer_delivery_nums ($Vs) {
+        $Compiled = $this->HostDb->select('dd_dealer_id')
+            ->from('dealer_delivery')
+            ->where_in('dd_id', $Vs)
+            ->group_by('dd_dealer_id')
+            ->get_compiled_select();
+        $Query = $this->HostDb->select('count(dd_dealer_id) as nums, dd_dealer_id as dealer_id', false)
+            ->from('dealer_delivery')
+            ->where_in('dd_dealer_id', $Compiled, false)
+            ->group_by('dd_dealer_id')
+            ->get();
+        $Return = false;
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->row_array();
+        }
+        return $Return;
+    }
+    /**
+     * Insert data to table dealer_delivery
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
-        if(!isset($Data['dd_default']) || ($this->_Default == $Data['dd_default'])){
-            log_message('debug', '新建时设为默认发货信息');
-            $Data['dd_default'] = $this->_Default;
-            $this->_update_dealer_delivery_undefault($Data['dd_dealer_id']);
-        }elseif(!$this->_select_dealer_delivery_default($Data['dd_dealer_id'])){
-            /**
-             * 判断是否有默认的发货地址，如果没有则设为默认
-             */
-            $Data['dd_default'] = $this->_Default;
-        }else{
-            $Data['dd_default'] = $this->_UDefault;
+        if ($Data['dd_primary']) {
+            $this->_update_primary($Data['dd_dealer_id']);
         }
-        
         if($this->HostDb->insert('dealer_delivery', $Data)){
-            log_message('debug', "Model Dealer_delivery_model/insert Success!");
-            $this->remove_cache($this->_Cache);
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model Dealer_delivery_model/insert Error");
+        } else {
+            $GLOBALS['error'] = '插入经销商发货信息数据失败!';
             return false;
         }
     }
 
     /**
-     * 更新经销商 联系人
-     * @param unknown $Data
-     * @param unknown $Where
+     * Update the data of table dealer_delivery
+     * @param $Data
+     * @param $Where
+     * @return boolean
      */
-    public function update($Data, $Where){
+    public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        
-        if($this->_Default == $Data['dd_default']){
-            $this->_update_dealer_delivery_undefault($Data['dd_dealer_id']);
-        }elseif(!$this->_select_dealer_delivery_default($Data['dd_dealer_id'])){
-            $Data['dd_default'] = $this->_Default;
+        if ($Data['dd_primary']) {
+            $this->_update_primary($Data['dd_dealer_id']);
         }
-        $this->HostDb->where('dd_id',$Where);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('dd_id', $Where);
+        } else {
+            $this->HostDb->where('dd_id', $Where);
+        }
         $this->HostDb->update('dealer_delivery', $Data);
-        $this->remove_cache($this->_Cache);
-        return TRUE;
+        $this->remove_cache($this->_Module);
+        return true;
     }
 
     /**
-     * 更改经销商发货未非默认的发货
-     * @param unknown $Did
+     * 批量更新table dealer_delivery
      */
-    private function _update_dealer_delivery_undefault($Did){
-        $this->HostDb->where(array('dd_dealer_id' => $Did));
-        return $this->HostDb->update('dealer_delivery', array('dd_default' => $this->_UDefault));
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('dealer_delivery', $Data, 'dd_id');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 
-    public function delete($Where){
-        $this->HostDb->where_in('dd_id', $Where);
-        $this->HostDb->delete('dealer_delivery');
-        $this->remove_cache($this->_Cache);
-        return TRUE;
-    }
-    
     /**
-     * 通过经销商Id号删除
-     * @param unknown $Where
+     * @param $DealerV
+     * @return bool
      */
-    public function delete_by_did($Where){
-        $this->HostDb->where_in('dd_dealer_id', $Where);
+    public function update_primary ($DealerV) {
+        $Compiled = $this->HostDb->select('dd_id')
+            ->from('dealer_delivery')
+            ->where('dd_dealer_id', $DealerV)
+            ->limit(ONE)
+            ->get_compiled_select();
+        $Compiled = $this->HostDb->select('dd_id')->from('(' . $Compiled . ') AS A', false)->get_compiled_select();
+        $this->HostDb->set('dd_primary', YES);
+        $this->HostDb->where_in('dd_id', $Compiled, false);
+        $this->HostDb->update('dealer_delivery');
+        return true;
+    }
+    /**
+     * 切换主要联系人
+     * @param $DealerV
+     * @return bool
+     */
+    private function _update_primary ($DealerV) {
+        $this->HostDb->set('dd_primary', NO);
+        $this->HostDb->where('dd_dealer_id', $DealerV);
+        $this->HostDb->update('dealer_delivery');
+        return true;
+    }
+    /**
+     * Delete data from table dealer_delivery
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('dd_id', $Where);
+        } else {
+            $this->HostDb->where('dd_id', $Where);
+        }
+
         $this->HostDb->delete('dealer_delivery');
-        $this->remove_cache($this->_Cache);
-        return TRUE;
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

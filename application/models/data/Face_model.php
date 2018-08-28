@@ -1,87 +1,173 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年11月30日
- * @author Zhangcc
- * @version
- * @des
+ * Face_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Face_model extends MY_Model{
-    private $_Modular = 'data';
-    private $_Model = 'face_model';
-    private $_Item;
-    private $_Cache;
+class Face_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        log_message('debug', 'Model Data/Wardrobe_punch_model Start!');
-        parent::__construct();
-        $this->e_cache->open_cache();
-        $this->_Item = $this->_Modular.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Modular.'_'.$this->_Model.'_';
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model data/Face_model Start!');
     }
 
-    public function select_face() {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
+    private function _select () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__;
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item, $this->_Modular);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('face');
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('face');
             $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
+            if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
-                $Query->free_result();
-            }else{
-                $GLOBALS['error'] = '无任何单双面';
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的单双面';
+            }
+        }
+        return $Return;
+    }
+    /**
+     * Select from table face
+     * @param $Search array
+     * @return array
+     */
+    public function select($Search = array()) {
+        if (empty($Search)) {
+            return $this->_select();
+        }
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('face');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的单双面';
             }
         }
         return $Return;
     }
 
-    public function insert_face($Set) {
-        $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Modular);
-        if($this->HostDb->insert('face', $Set)){
-            log_message('debug', "Model '.$Item.' Success!");
-            $this->_remove_cache();
-            return $this->HostDb->insert_id();
+    private function _page_num($Search){
+        $this->HostDb->select('count(f_id) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+        }
+        $this->HostDb->from('face');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
         }else{
-            log_message('debug', "Model '.$Item.' Error");
             return false;
         }
     }
 
-    public function update_face($Set, $Where) {
+    /**
+     * Insert data to table face
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Modular);
-        $this->HostDb->where('f_id',$Where);
-        if($this->HostDb->update('face', $Set)){
-            $this->_remove_cache();
-            return true;
-        }else{
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('face', $Data)){
+            $this->remove_cache($this->_Module);
+            return $this->HostDb->insert_id();
+        } else {
+            $GLOBALS['error'] = '插入单双面数据失败!';
             return false;
         }
     }
+
     /**
-     * 删除异形
-     * @param unknown $Where
+     * Insert batch data to table face
      */
-    public function delete_face($Where){
-        if(is_array($Where)){
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+        }
+        if($this->HostDb->insert_batch('face', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入单双面数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table face
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
             $this->HostDb->where_in('f_id', $Where);
-        }else{
+        } else {
             $this->HostDb->where('f_id', $Where);
         }
-        if($this->HostDb->delete('face')){
-            $this->_remove_cache();
-            return true;
-        }else{
-            return false;
-        }
+        $this->HostDb->update('face', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
     }
 
-    private function _remove_cache(){
-        $this->load->helper('file');
-        delete_cache_files('(.*face.*)');
+    /**
+     * 批量更新table face
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('face', $Data, 'f_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table face
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('f_id', $Where);
+        } else {
+            $this->HostDb->where('f_id', $Where);
+        }
+
+        $this->HostDb->delete('face');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

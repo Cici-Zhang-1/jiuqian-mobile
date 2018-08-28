@@ -8,6 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category Controller
  */
 class Form_type extends MY_Controller {
+    private $__Search = array(
+        'paging' => 0
+    );
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller  __construct Start!');
@@ -29,6 +32,7 @@ class Form_type extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
         if(!($Data = $this->form_type_model->select($this->_Search))){

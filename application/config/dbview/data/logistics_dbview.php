@@ -1,11 +1,6 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['data/logistics_model/select'] = array(
-	'l_id' => 'lid',
-	'l_name' => 'name',
-	'a_id' => 'aid',
-	'l_address' => 'address',
-	'l_phone' => 'phone',
-	'l_vip' => 'vip',
-	'concat(ifnull(a_province, ""), ifnull(a_city, ""), ifnull(a_county, ""))' => 'area',
-);
+                                'l_name' => array(
+                                                                    'name',                                                        'v'                                                ),                                        'l_phone' => 'phone',                                        'l_area_id' => 'area_id',                                        'l_address' => 'address',                                        'l_vip' => 'vip',                                        'u_truename' => 'creator',                                        'l_create_datetime' => 'create_datetime'                    );

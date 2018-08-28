@@ -7,44 +7,50 @@
  * 个人中心
  */
 class Myself extends MY_Controller{
-	private $_Module;
-    private $_Controller;
-    private $_Item ;
 	public function __construct(){
 		parent::__construct();
+        log_message('debug', 'Controller Manage/Myself __construct Start!');
 		$this->load->model('manage/user_model');
-		$this->_Module = $this->router->directory;
-		$this->_Controller = $this->router->class;
-		$this->_Item = $this->_Module.$this->_Controller.'/';
-		log_message('debug', 'Controller Manage/Myself __construct Start!');
 	}
 	
 	public function index(){
-		$View = $this->uri->segment(4, 'read');
-		$View = '_'.$View;
-		if(method_exists(__CLASS__, $View)){
-			$this->$View();
-		}else{
-			$Item = $this->_Item.$View;
-			$Data['action'] = site_url($Item);
-			$this->load->view($Item, $Data);
-		}
+        $View = $this->uri->segment(4, 'read');
+        if(method_exists(__CLASS__, '_'.$View)){
+            $View = '_'.$View;
+            $this->$View();
+        }else{
+            $this->_index($View);
+        }
 	}
 	
-	private function _read(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    $Data = array();
-	    if(!!($Data['self'] = $this->user_model->select_self($this->session->userdata('uid')))){
-	        unset($Self);
-	        $Data['action'] = site_url($this->_Item.'edit');
-	        $this->load->view($Item, $Data);
-	    }else{
-	        redirect();
-	    }
+	public function read(){
+        $Data = array();
+        if(!($Data = $this->user_model->select_self())){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
 	}
 
 	public function edit(){
-	    $Item = $this->_Item.__FUNCTION__;
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            $Password = $this->input->post('password', true);
+            if(empty($Password)){
+                unset($Post['password']);
+            }
+            if(!!($this->user_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
+
+	    /* $Item = $this->_Item.__FUNCTION__;
 	    if($this->form_validation->run($Item)){
 	        $Post = gh_escape($_POST);
 	        unset($Post['selected']);
@@ -62,6 +68,42 @@ class Myself extends MY_Controller{
 	    }else{
 	        $this->Failue .= validation_errors();
 	    }
-	    $this->_return();
+	    $this->_return(); */
 	}
+
+    public function start () {
+        if (!!($this->user_model->update(array('status' => START_WORK), $this->session->userdata('uid')))) {
+            $this->Message = '启用成功, 刷新后生效!';
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'启用失败';
+        }
+        $this->_ajax_return();
+    }
+
+    public function stop () {
+	    $Post = array(
+	        $this->session->userdata('uid')
+        );
+        if (!!($User = $this->user_model->work_status($Post))) {
+            $this->load->library('arrange_work');
+            foreach ($User as $Key => $Value) {
+                $this->arrange_work->stop($Value);
+            }
+            if(!!($this->user_model->update(array('status' => STOP_WORK), $Post))){
+                $this->Message = '停用成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'停用失败';
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '用户不存在';
+        }
+        $this->_ajax_return();
+    }
+
+    public function offtime () {
+
+    }
 }

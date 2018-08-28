@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['permission/role_menu_model/select_by_rid'] = array(
-	'rm_menu_id' => 'mid',
+	'rm_menu_id' => 'v',
 );
 $config['permission/role_menu_model/select_by_usergroup_v'] = array(
     'm_id' => 'v',

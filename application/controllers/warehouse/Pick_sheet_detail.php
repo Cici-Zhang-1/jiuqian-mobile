@@ -2,16 +2,20 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * { title | title | replace({'_': ' '}) } Controller
+ * Pick sheet detail Controller
  *
  * @package  CodeIgniter
  * @category Controller
  */
 class Pick_sheet_detail extends MY_Controller {
+    private $__Search = array(
+        'paging' => 0,
+        'v' => 0
+    );
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller  __construct Start!');
-        $this->load->model('warehouse/pick_sheet_detail_model');
+        log_message('debug', 'Controller warehouse/Pick_sheet_detail __construct Start!');
+        $this->load->model('order/order_product_model');
     }
 
     /**
@@ -29,12 +33,28 @@ class Pick_sheet_detail extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
-        if(!($Data = $this->pick_sheet_detail_model->select($this->_Search))){
+        if(!($Data = $this->order_product_model->select_pick_sheet_detail($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
+        } else {
+            $this->load->helper('json_helper');
+            foreach ($Data['content'] as $Key => $Value) {
+                $Data['content'][$Key]['pack_detail'] = discode_pack($Value['pack_detail']);
+            }
+            $this->load->model('warehouse/unqrcode_model');
+            if (!!($Unqrcode = $this->unqrcode_model->select_pick_sheet_detail($this->_Search))) {
+                foreach ($Unqrcode['content'] as $Key => $Value) {
+                    $Value['pack_detail'] = discode_pack($Value['pack_detail']);
+                    $Value['warehouse_v'] = discode_warehouse_v($Value['warehouse_v']);
+                    array_push($Data['content'], $Value);
+                }
+                $Data['num'] += $Unqrcode['num'];
+            }
         }
+        $Data['query']['stock_outted_v'] = $this->_Search['v'];
         $this->_ajax_return($Data);
     }
 
@@ -42,12 +62,10 @@ class Pick_sheet_detail extends MY_Controller {
      *
      * @return void
      */
-    public function add()
-    {
-        $data = array();
+    public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Cid = $this->pick_sheet_detail_model->insert($Post))) {
+            if(!!($NewId = $this->pick_sheet_detail_model->insert($Post))) {
                 $this->Message = '新建成功, 刷新后生效!';
             }else{
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
@@ -56,7 +74,6 @@ class Pick_sheet_detail extends MY_Controller {
         }
         $this->_ajax_return();
     }
-
     /**
     *
     * @return void
@@ -82,6 +99,10 @@ class Pick_sheet_detail extends MY_Controller {
      * @return void
      */
     public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('v', true);
             if ($this->pick_sheet_detail_model->delete($Where)) {

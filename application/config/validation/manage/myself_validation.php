@@ -2,12 +2,12 @@
 
 $config['manage/myself/edit'] = array(
 	array(
-		'field' => 'selected',
+		'field' => 'v',
 		'label' => '编号',
 		'rules' => 'required|numeric|min_length[1]|max_length[10]'
 	),
 	array(
-		'field' => 'username',
+		'field' => 'name',
 		'label' => '用户名',
 		'rules' => 'trim|required|min_length[1]|max_length[64]'
 	),

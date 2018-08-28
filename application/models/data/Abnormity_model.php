@@ -1,83 +1,172 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- *  2015-5-7
- * @author ZhangCC
- * @version
- * @description  
+ * Abnormity_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Abnormity_model extends MY_Model{
-    private $_Module = 'data';
-    private $_Model = 'abnormity_model';
-    private $_Item;
-    private $_Cache;
+class Abnormity_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-        log_message('debug', 'Model Data/Abnormity_model Start!');
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model data/Abnormity_model Start!');
     }
-    
-    public function select_abnormity($PrintList, $Scan) {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.(Int)$PrintList.(Int)$Scan;
-        if(!($Return = $this->cache->get($Cache))){
+
+    private function _select () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ ;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('abnormity');
-            if(false !== $PrintList){
-                $this->HostDb->where('a_print_list', $PrintList);
-            }
-            if(false !== $Scan){
-                $this->HostDb->where('a_scan', $Scan);
-            }
-        
+            $this->HostDb->select($Sql)->from('abnormity');
             $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
+            if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
-            }else{
-                $GLOBALS['error'] = '没有异形板块信息!';
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的异形';
             }
         }
         return $Return;
     }
-    
-    public function insert_abnormity($Data) {
+    /**
+     * Select from table abnormity
+     */
+    public function select($Search = array()) {
+        if (empty($Search)) {
+            return $this->_select();
+        } else {
+            $Item = $this->_Item . __FUNCTION__;
+            $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+            $Return = false;
+            if (!($Return = $this->cache->get($Cache))) {
+                $Search['pn'] = $this->_page_num($Search);
+                if(!empty($Search['pn'])){
+                    $Sql = $this->_unformat_as($Item);
+                    $this->HostDb->select($Sql)->from('abnormity');
+                    if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    }
+                    $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn'],
+                        'pagesize' => $Search['pagesize']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的异形';
+                }
+            }
+            return $Return;
+        }
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(a_name) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+        }
+        $this->HostDb->from('abnormity');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Insert data to table abnormity
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('abnormity', $Data)){
-            log_message('debug', "Model Abnormity_model/insert_abnormity Success!");
-            $this->remove_cache($this->_Cache);
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model Abnormity_model/insert_abnormity Error");
+        } else {
+            $GLOBALS['error'] = '插入异形数据失败!';
             return false;
         }
     }
-    
-    public function update_abnormity($Data, $Where) {
+
+    /**
+     * Insert batch data to table abnormity
+     */
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+        }
+        if($this->HostDb->insert_batch('abnormity', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入异形数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table abnormity
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        $this->HostDb->where('a_id', $Where);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('a_name', $Where);
+        } else {
+            $this->HostDb->where('a_name', $Where);
+        }
         $this->HostDb->update('abnormity', $Data);
-        $this->remove_cache($this->_Cache);
-        return TRUE;
+        $this->remove_cache($this->_Module);
+        return true;
     }
+
     /**
-     * 删除异形
-     * @param unknown $Where
+     * 批量更新table abnormity
      */
-    public function delete_abnormity($Where){
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('abnormity', $Data, 'a_name');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table abnormity
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('a_id', $Where);
-        }else{
-            $this->HostDb->where('a_id', $Where);
+            $this->HostDb->where_in('a_name', $Where);
+        } else {
+            $this->HostDb->where('a_name', $Where);
         }
-        if($this->HostDb->delete('abnormity')){
-            $this->remove_cache($this->_Cache);
-            return true;
-        }else{
-            return false;
-        }
+
+        $this->HostDb->delete('abnormity');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Warehouse_area extends MY_Controller {
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller  __construct Start!');
+        log_message('debug', 'Controller Warehouse_area __construct Start!');
         $this->load->model('warehouse/warehouse_area_model');
     }
 
@@ -42,9 +42,7 @@ class Warehouse_area extends MY_Controller {
      *
      * @return void
      */
-    public function add()
-    {
-        $data = array();
+    public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
             if(!!($Cid = $this->warehouse_area_model->insert($Post))) {
@@ -58,30 +56,15 @@ class Warehouse_area extends MY_Controller {
     }
 
     /**
-    *
-    * @return void
-    */
-    public function edit() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            $Where = $Post['v'];
-            unset($Post['v']);
-            if(!!($this->warehouse_area_model->update($Post, $Where))){
-                $this->Message = '内容修改成功, 刷新后生效!';
-            }else{
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
      *
      * @param  int $id
      * @return void
      */
     public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('v', true);
             if ($this->warehouse_area_model->delete($Where)) {
@@ -89,6 +72,48 @@ class Warehouse_area extends MY_Controller {
             } else {
                 $this->Code = EXIT_ERROR;
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function enable() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->warehouse_area_model->update(array('status' => 1), $Where)) {
+                $this->load->model('warehouse/warehouse_shelve_model');
+                $this->warehouse_shelve_model->update_by_warehouse_area_num(array('status' => 1), $Where);
+                $this->load->model('warehouse/warehouse_model');
+                $this->warehouse_model->update_by_warehouse_area_num(array('status' => 1), $Where);
+                $this->Message = '启用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'启用失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function unable() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->warehouse_area_model->update(array('status' => 0), $Where)) {
+                $this->load->model('warehouse/warehouse_shelve_model');
+                $this->warehouse_shelve_model->update_by_warehouse_area_num(array('status' => 0), $Where);
+                $this->load->model('warehouse/warehouse_model');
+                $this->warehouse_model->update_by_warehouse_area_num(array('status' => 0), $Where);
+                $this->Message = '停用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'停用失败!';
             }
         }
         $this->_ajax_return();

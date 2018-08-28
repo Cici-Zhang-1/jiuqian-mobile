@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['permission/role_visit_model/select_by_rid'] = array(
-	'rv_visit_id' => 'vid',
+	'rv_visit_id' => 'visit_v',
 );
 
 $config['permission/role_visit_model/select_by_usergroup_v'] = array(

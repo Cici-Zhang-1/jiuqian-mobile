@@ -1,170 +1,226 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年10月24日
- * @author Zhangcc
- * @version
- * @des
+ * Board_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Board_model extends MY_Model{
-    private $_Module = 'product';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
+class Board_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-        
-        log_message('debug', 'Model Product/Board_model Start!');
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model product/Board_model Start!');
     }
 
-    public function select() {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
-        if(!($Return = $this->cache->get($Cache))){
+    /**
+     * 不分页获取全部数据
+     * @return array|bool
+     */
+    private function _select () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('board');
-            $this->HostDb->join('board_thick', 'bt_id = b_thick', 'left');
-            $this->HostDb->join('board_color as A', 'A.bc_id = b_color', 'left');
-            $this->HostDb->join('board_nature', 'bn_id = b_nature', 'left');
-            $this->HostDb->join('board_class as B', 'B.bc_id = b_class', 'left');
-            $this->HostDb->join('supplier', 's_id = b_supplier_id', 'left');
-	    $this->HostDb->order_by('b_color');
-	    $this->HostDb->order_by('b_supplier_id');
-            
-             
+            $this->HostDb->select($Sql)->from('board')
+                ->join('j_saler_board_price', 'sbp_board = b_name && sbp_creator = ' . $this->session->userdata('uid'), 'left', false);
+            $this->HostDb->where('b_status', YES);
             $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = array(
-                    'content' => $Query->result_array()
-                );
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的板材';
             }
         }
         return $Return;
     }
-    
-    public function select_stock(){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('board');
-            $this->HostDb->join('board_thick', 'bt_id = b_thick', 'left');
-            
-            $this->HostDb->where('bt_name > 5');
-            $this->HostDb->order_by('b_amount', 'desc');
-             
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = array(
-                    'content' => $Query->result_array()
-                );
-                $this->cache->save($Cache, $Return, MONTHS);
-            }
-        }
-        return $Return;
-    }
-    
     /**
-     * 根据板材名称获取板材id号
-     * @param unknown $Name
+     * @param array $Search
+     * @return array|bool
      */
-    public function select_board_id($Name){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Name;
-        $Bid = false;
-        if(!($Bid = $this->cache->get($Cache))){
-            $Query = $this->HostDb->select('b_id')->from('board')
-                        ->where(array('b_name' => $Name))->limit(1)->get();
-            if($Query->num_rows() > 0){
-                $Row = $Query->row_array();
-                $Query->free_result();
-                $Bid = $Row['b_id'];
-                $this->cache->save($Cache, $Bid, HOURS);
+    public function select($Search = array()) {
+        if (!empty($Search)) {
+            $Item = $this->_Item . __FUNCTION__;
+            $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+            $Return = false;
+            if (!($Return = $this->cache->get($Cache))) {
+                $Search['pn'] = $this->_page_num($Search);
+                if(!empty($Search['pn'])){
+                    $Sql = $this->_unformat_as($Item);
+                    $this->HostDb->select($Sql)->from('board')
+                        ->join('user', 'u_id = b_creator', 'left')
+                        ->join('supplier', 's_id = b_supplier_id', 'left')
+                        ->join('boolean_type', 'bt_name = b_status', 'left')
+                        ->join('j_saler_board_price', 'sbp_board = b_name && sbp_creator = ' . $this->session->userdata('uid'), 'left', false);
+                    if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                        $this->HostDb->group_start()
+                            ->like('b_name', $Search['keyword'])
+                            ->group_end();
+                    }
+                    $this->HostDb->where('b_status', $Search['status']);
+                    $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn'],
+                        'pagesize' => $Search['pagesize']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的板材';
+                }
             }
+            return $Return;
+        } else {
+            return $this->_select();
         }
-        return $Bid;
     }
 
-    /**
-     * 插入
-     * @param unknown $Set
-     */
-    public function insert($Set) {
-        $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format($Set, $Item, $this->_Module);
-        if($this->HostDb->insert('board', $Data)){
-            log_message('debug', "Model Board_model/insert Success!");
-            $this->remove_cache($this->_Cache);
-            return $this->HostDb->insert_id();
+    private function _page_num($Search){
+        $this->HostDb->select('count(b_name) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->group_start()
+                ->like('b_name', $Search['keyword'])
+                ->group_end();
+        }
+        $this->HostDb->where('b_status', $Search['status']);
+        $this->HostDb->from('board');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
         }else{
-            log_message('debug', "Model Board_model/insert Error");
             return false;
         }
     }
-    
+
     /**
-     * 批量插入
-     * @param unknown $Set
+     * 判断是否存在
+     * @param $Board
+     * @return bool
      */
-    public function insert_ignore_batch($Set){
-        $Item = $this->_Item.__FUNCTION__;
-        $value = array();
-        foreach ($Set as $key => $value){
-            $value = $this->_format($value, $Item, $this->_Module);
-            $Set[$key] = '(\''.implode('\',\'', $value).'\')';
+    public function is_exist ($Board) {
+        $Query = $this->HostDb->select('b_name')
+            ->from('board')
+            ->where('b_name', $Board)
+            ->limit(ONE)
+            ->get();
+        return $Query->num_rows() > 0;
+    }
+    private function _is_exist ($Data, $Where = array()) {
+        $this->HostDb->select('b_name')
+            ->from('board')
+            ->where('b_name', $Data['b_name']);
+        if (!empty($Where)) {
+            $this->HostDb->where_not_in('b_name', $Where);
         }
-        $Keys = array_keys($value);
-        $Key = '('.implode(',', $Keys).')';
-        $Values = implode(',', $Set);
-        $this->remove_cache($this->_Cache);
-        return $this->HostDb->query("INSERT IGNORE INTO n9_board {$Key} VALUES {$Values}");
+        $Query = $this->HostDb->get();
+        return $Query->num_rows() > 0;
+    }
+    /**
+     * Insert data to table board
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format($Data, $Item);
+        if ($this->_is_exist($Data)) {
+            $GLOBALS['error'] = $Data['b_name'] . '已经存在!';
+        } else {
+            if($this->HostDb->insert('board', $Data)){
+                $this->remove_cache($this->_Module);
+                return $this->HostDb->insert_id();
+            } else {
+                $GLOBALS['error'] = '插入板材数据失败!';
+            }
+        }
+        return false;
     }
 
     /**
-     * 更新
-     * @param unknown $Set
-     * @param unknown $Where
+     * Insert batch data to table board
+     */
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+            if ($this->_is_exist($Data[$key])) {
+                $GLOBALS['error'] = $Data[$key]['b_name'] . '已经存在!';
+                return false;
+            }
+        }
+        if($this->HostDb->insert_batch('board', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入板材数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table board
+     * @param $Data
+     * @param $Where
+     * @return boolean
      */
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        $this->HostDb->where('b_id', $Where);
-        $this->HostDb->update('board', $Data);
-        $this->remove_cache($this->_Cache);
-        return TRUE;
-    }
-    
-    /**
-     * 批量更新
-     * @param unknown $Set
-     */
-    public function update_batch($Set){
-        $Item = $this->_Item.__FUNCTION__;
-        foreach ($Set as $key => $value){
-            $Set[$key] = $this->_format_re($value, $Item, $this->_Module);
+        if (isset($Data['b_name']) && $this->_is_exist($Data, $Where)) {
+            $GLOBALS['error'] = $Data['b_name'] . '已经存在!';
+            return false;
         }
-        $this->HostDb->update_batch('board',$Set,'b_id');
-        $this->remove_cache($this->_Cache);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('b_name', $Where);
+        } else {
+            $this->HostDb->where('b_name', $Where);
+        }
+        $this->HostDb->update('board', $Data);
+        $this->remove_cache($this->_Module);
         return true;
     }
+
     /**
-     * 删除板块
-     * @param unknown $Where
+     * 批量更新table board
      */
-    public function delete($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('b_id', $Where);
-        }else{
-            $this->HostDb->where('b_id', $Where);
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
         }
+        $this->HostDb->update_batch('board', $Data, 'b_name');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table board
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('b_name', $Where);
+        } else {
+            $this->HostDb->where('b_name', $Where);
+        }
+
         $this->HostDb->delete('board');
-        $this->remove_cache($this->_Cache);
-        return TRUE;
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

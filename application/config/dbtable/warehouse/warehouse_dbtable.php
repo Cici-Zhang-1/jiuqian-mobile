@@ -37,6 +37,12 @@ $config['warehouse/warehouse_model/update'] = array(
                                 'max' => 'w_max',
                         'status' => 'w_status'
                     );
+$config['warehouse/warehouse_model/update_by_warehouse_area_num'] = array(
+    'status' => 'w_status'
+);
+$config['warehouse/warehouse_model/update_by_warehouse_shelve_num'] = array(
+    'status' => 'w_status'
+);
 $config['warehouse/warehouse_model/update_batch'] = array(
                                 'num' => 'w_num',
                                 'warehouse_shelve_num' => 'w_warehouse_shelve_num',

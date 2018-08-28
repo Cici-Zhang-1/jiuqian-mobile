@@ -10,12 +10,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * session中存储的内容
  */
-$config['session_keys'] = 'uid username truename ugid usergroup';
+$config['session_keys'] = 'uid name truename ugid usergroup';
 
 /**
  * cookie中存储的内容
  */
-$config['cookie_keys'] = 'uid';
+$config['cookie_keys'] = 'uid truename';
 
 /**
  * action对应的Controller
@@ -24,3 +24,7 @@ $config['uris'] = array('default'=>'order', 'asure_produce'=>'order', 'order_del
 $config['page'] = array('delivery_history' => array(true,100));
 
 $config['order_nums'] = 4; //生成订单编号的前缀是8位(20150101)还是4位(0101)
+
+/**
+ * 产品定义
+ */

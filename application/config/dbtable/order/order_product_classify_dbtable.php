@@ -1,26 +1,90 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
+$config['order/order_product_classify_model'] = array(
+                                'order_product_id' => 'opc_order_product_id',
+                                'board' => 'opc_board',
+                                'amount' => 'opc_amount',
+                                'area' => 'opc_area',
+                                'classify_id' => 'opc_classify_id',
+                                'status' => 'opc_status',
+                                'optimize' => 'opc_optimize',
+                                'sn' => 'opc_sn',
+                                'optimize_datetime' => 'opc_optimize_datetime',
+                        'optimizer' => 'opc_optimizer'
+                    );
 $config['order/order_product_classify_model/insert'] = array(
-	'opid' => 'opc_order_product_id',
-	'board' => 'opc_board',
-	'classify_id' => 'opc_classify_id',
-	'status' => 'opc_status',
-	'optimize' => 'opc_optimize',
-);
+                                'order_product_id' => 'opc_order_product_id',
+                                'board' => 'opc_board',
+                                'amount' => 'opc_amount',
+                                'area' => 'opc_area',
+                                'classify_id' => 'opc_classify_id',
+                                'status' => 'opc_status',
+    'procedure' => 'opc_procedure',
+    'production_line' => 'opc_production_line'
+                    );
+$config['order/order_product_classify_model/insert_batch'] = array(
+                                'order_product_id' => 'opc_order_product_id',
+                                'board' => 'opc_board',
+                                'amount' => 'opc_amount',
+                                'area' => 'opc_area',
+                                'classify_id' => 'opc_classify_id',
+                                'status' => 'opc_status',
+    'procedure' => 'opc_procedure',
+    'production_line' => 'opc_production_line'
+                    );
 $config['order/order_product_classify_model/update'] = array(
-	'amount' => 'opc_amount',
-	'area' => 'opc_area',
-	'optimize' => 'opc_optimize',
+    'order_product_id' => 'opc_order_product_id',
+    'board' => 'opc_board',
+    'amount' => 'opc_amount',
+    'area' => 'opc_area',
+    'classify_id' => 'opc_classify_id',
+    'status' => 'opc_status',
+    'procedure' => 'opc_procedure',
+    'production_line' => 'opc_production_line',
+    'sn' => 'opc_sn',
+    'optimize' => 'opc_optimize',
+    'optimize_datetime' => 'opc_optimize_datetime',
+    'print' => 'opc_print',
+    'print_datetime' => 'opc_print_datetime',
+    'saw' => 'opc_saw',
+    'saw_datetime' => 'opc_saw_datetime',
+    'edge' => 'opc_edge',
+    'edge_datetime' => 'opc_edge_datetime',
+    'punch' => 'opc_punch',
+    'punch_datetime' => 'opc_punch_datetime',
+    'scan' => 'opc_scan',
+    'scan_datetime' => 'opc_scan_datetime',
+    'pack' => 'opc_pack',
+    'pack_datetime' => 'opc_pack_datetime',
+    'batch_num' => 'opc_batch_num',
+    'mrp_id' => 'opc_mrp_id'
 );
 $config['order/order_product_classify_model/update_batch'] = array(
-	'opcid' => 'opc_id',
-	'amount' => 'opc_amount',
-	'area' => 'opc_area',
-	'optimize' => 'opc_optimize',
-);
-$config['order/order_product_classify_model/update_workflow'] = array(
-	'status' => 'opc_status',
-	'sn' => 'opc_sn',
-	'optimizer' => 'opc_optimizer',
-	'optimize_datetime' => 'opc_optimize_datetime',
+    'v' => 'opc_id',
+    'order_product_id' => 'opc_order_product_id',
+    'board' => 'opc_board',
+    'amount' => 'opc_amount',
+    'area' => 'opc_area',
+    'classify_id' => 'opc_classify_id',
+    'status' => 'opc_status',
+    'procedure' => 'opc_procedure',
+    'production_line' => 'opc_production_line',
+    'sn' => 'opc_sn',
+    'optimize' => 'opc_optimize',
+    'optimize_datetime' => 'opc_optimize_datetime',
+    'print' => 'opc_print',
+    'print_datetime' => 'opc_print_datetime',
+    'saw' => 'opc_saw',
+    'saw_datetime' => 'opc_saw_datetime',
+    'edge' => 'opc_edge',
+    'edge_datetime' => 'opc_edge_datetime',
+    'punch' => 'opc_punch',
+    'punch_datetime' => 'opc_punch_datetime',
+    'scan' => 'opc_scan',
+    'scan_datetime' => 'opc_scan_datetime',
+    'pack' => 'opc_pack',
+    'pack_datetime' => 'opc_pack_datetime',
+    'batch_num' => 'opc_batch_num',
+    'mrp_id' => 'opc_mrp_id'
 );

@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Toggle_type extends MY_Controller {
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller  __construct Start!');
+        log_message('debug', 'Controller  __construct data/Toggle_type Start!');
         $this->load->model('data/toggle_type_model');
     }
 

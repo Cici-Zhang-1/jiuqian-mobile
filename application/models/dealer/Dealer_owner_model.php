@@ -1,213 +1,205 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2016年1月20日
- * @author Administrator
- * @version
- * @des
+ * Dealer_owner_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Dealer_owner_model extends MY_Model{
-    private $_Module = 'dealer';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
-    static $Default;
+class Dealer_owner_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_'.$this->session->userdata('uid').'_';
-
-        log_message('debug', 'Model Dealer/Dealer_owner_model Start!');
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model dealer/Dealer_owner_model Start!');
     }
 
     /**
-     * 获取经销商的属主
+     * Select from table dealer_owner
      */
-    public function select_owner($Did){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Did;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql, FALSE)
-                        ->from('dealer_owner')
-                        ->join('user', 'u_id = do_owner_id', 'left')
-                        ->where('do_dealer_id', $Did)
-                    ->get();
-            if($Query->num_rows() > 0){
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('dealer_owner')
+                    ->join('boolean_type', 'bt_name = do_primary', 'left')
+                    ->join('user', 'u_id = do_owner_id', 'left');
+                if (!empty($Search['v'])) {
+                    $this->HostDb->where('do_dealer_id', $Search['v']);
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
-                    'content' => $Query->result_array()
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
                 );
-                $Query->free_result();
                 $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的客户属主';
+            }
+        }
+        return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(do_id) as num', FALSE);
+        if (!empty($Search['v'])) {
+            $this->HostDb->where('do_dealer_id', $Search['v']);
+        }
+        $this->HostDb->from('dealer_owner');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
             }else{
-                $GLOBALS['error'] = '该客户没有指定属主';
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
             }
+            return $Pn;
+        }else{
+            return false;
         }
-        return $Return;
     }
+
     /**
-     * 获取客人可操作的经销商
+     * Insert data to table dealer_owner
+     * @param $Data
+     * @return Insert_id | Boolean
      */
-    public function select(){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
-        if(!($Return = $this->cache->get($Cache))){
-            $this->load->model('dealer/dealer_organization_model');
-            $CheckerId = $this->dealer_organization_model->select_doid_by_name('设计师');
-            $PayerId = $this->dealer_organization_model->select_doid_by_name('财务');
-             
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('dealer_owner')
-                            ->join('dealer', 'd_id = do_dealer_id', 'left')
-                            ->join('area as d', 'd.a_id = d_area_id', 'left')
-                            ->join('payterms', 'p_id = d_payterms_id', 'left')
-                            ->join('n9_dealer_linker as A', 'A.dl_dealer_id = d_id && A.dl_primary = 1', 'left', false)
-                            ->join('n9_dealer_linker as B', 'B.dl_dealer_id = d_id && B.dl_type = '.$CheckerId, 'left', false)
-                            ->join('n9_dealer_linker as C', 'C.dl_dealer_id = d_id && C.dl_type = '.$PayerId, 'left', false)
-                            ->join('n9_dealer_delivery', 'dd_dealer_id = d_id && dd_default = 1', 'left', false)
-                            ->join('area as dd', 'dd.a_id = dd_area_id', 'left')
-                            ->join('logistics', 'l_id = dd_logistics_id', 'left')
-                            ->join('out_method', 'om_id = dd_out_method_id', 'left');
-             
-            $this->HostDb->where('do_owner_id', $this->session->userdata('uid'));
-             
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = array(
-                    'content' => $Query->result_array()
-                );
-                $Query->free_result();
-                $this->cache->save($Cache, $Return, MONTHS);
-            }
-        }
-        return $Return;
-    }
-    /**
-     * 插入经销商
-     * @param unknown $Data
-     */
-    public function insert($Data){
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
+        if ($Data['do_primary']) {
+            $this->_update_primary($Data['do_dealer_id']);
+        }
         if($this->HostDb->insert('dealer_owner', $Data)){
-            log_message('debug', "Model Dealer_owner_model/dealer_owner Success!");
-            $this->remove_cache($this->_Cache);
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model Dealer_owner_model/dealer_owner Error");
+        } else {
+            $GLOBALS['error'] = '插入客户属主数据失败!';
             return false;
         }
     }
-    
-    public function insert_batch($Data){
+
+    public function insert_batch ($Data) {
         $Item = $this->_Item.__FUNCTION__;
         foreach ($Data as $key => $value){
-            $Data[$key] = $this->_format($value, $Item, $this->_Module);
+            $Data[$key] = $this->_format($value, $Item);
         }
         if($this->HostDb->insert_batch('dealer_owner', $Data)){
-            log_message('debug', "Model Dealer_owner_model/insert_batch Success!");
             $this->remove_cache($this->_Module);
             return true;
-        }else{
-            log_message('debug', "Model Dealer_owner_model/insert_batch Error");
+        } else {
+            $GLOBALS['error'] = '插入客户属主数据失败!';
             return false;
         }
     }
-    
-    /**
-     * 批量导入
-     * @param unknown $Data
-     */
-    public function replace_batch($Data){
-        $Item = $this->_Item.__FUNCTION__;
-        
-        $Keys = '';
-        foreach ($Data as $key => $value){
-            if(empty($Keys)){
-                $Data[$key] = $this->_format($value, $Item, $this->_Module);
-                $Keys = '('.implode(',', array_keys($Data[$key])).')';
-                $Data[$key] = '('.implode(',', $Data[$key]).')';
-            }else{
-                $Data[$key] = '('.implode(',', $Data[$key]).')';
-            }
-        }
-        $Data = implode(',', $Data);
-        $Query = $this->HostDb->query("REPLACE INTO n9_dealer_owner$Keys values $Data");
-        $this->remove_cache($this->_Module);
-        return true;
-    }
 
     /**
-     * 更新经销商信息
-     * @param unknown $Data
-     * @param unknown $Where
+     * Update the data of table dealer_owner
+     * @param $Data
+     * @param $Where
+     * @return boolean
      */
-    public function update($Data, $Where){
+    public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        $this->HostDb->where('d_id', $Where);
-        $this->HostDb->update('dealer', $Data);
-        $this->remove_cache($this->_Cache);
-        return TRUE;
-    }
-    
-    public function general($Where){
-        $this->HostDb->set('do_primary', 0);
-        if(is_array($Where)){
+        if ($Data['do_primary']) {
+            $this->_update_primary($Data['do_dealer_id']);
+        }
+        if (is_array($Where)) {
             $this->HostDb->where_in('do_id', $Where);
-        }else{
+        } else {
             $this->HostDb->where('do_id', $Where);
         }
-        $this->HostDb->update('dealer_owner');
-        $this->remove_cache($this->_Module);
-        return true;
-    }
-    
-    public function primary($Where){
-        $this->HostDb->set('do_primary', 1);
-        if(is_array($Where)){
-            $this->HostDb->where_in('do_id', $Where);
-        }else{
-            $this->HostDb->where('do_id', $Where);
-        }
-        $this->HostDb->update('dealer_owner');
+        $this->HostDb->update('dealer_owner', $Data);
         $this->remove_cache($this->_Module);
         return true;
     }
 
-    public function delete_by_did($Did){
-        if(is_array($Did)){
-            $this->HostDb->where_in('do_dealer_id', $Did);
-        }else{
-            $this->HostDb->where('do_dealer_id', $Did);
+    /**
+     * 批量更新table dealer_owner
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
         }
+        $this->HostDb->update_batch('dealer_owner', $Data, 'do_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * @param $DealerV
+     * @return bool
+     */
+    public function update_primary ($DealerV) {
+        $Compiled = $this->HostDb->select('do_id')
+            ->from('dealer_owner')
+            ->where('do_dealer_id', $DealerV)
+            ->limit(ONE)
+            ->get_compiled_select();
+        $Compiled = $this->HostDb->select('do_id')->from('(' . $Compiled . ') AS A', false)->get_compiled_select();
+        $this->HostDb->set('do_primary', YES);
+        $this->HostDb->where_in('do_id', $Compiled, false);
+        $this->HostDb->update('dealer_owner');
+        return true;
+    }
+    /**
+     * 切换主要联系人
+     * @param $DealerV
+     * @return bool
+     */
+    private function _update_primary ($DealerV) {
+        $this->HostDb->set('do_primary', NO);
+        $this->HostDb->where('do_dealer_id', $DealerV);
+        $this->HostDb->update('dealer_owner');
+        return true;
+    }
+    /**
+     * Delete data from table dealer_owner
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('do_id', $Where);
+        } else {
+            $this->HostDb->where('do_id', $Where);
+        }
+
         $this->HostDb->delete('dealer_owner');
         $this->remove_cache($this->_Module);
         return true;
     }
+
     /**
-     * 删除经销商
-     * @param unknown $Where
+     * 释放或者丢弃客户如公海池
+     * @param $Where
+     * @param int $Owner
+     * @return bool
      */
-    public function delete_dealer($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('d_id', $Where);
-        }else{
-            $this->HostDb->where('d_id', $Where);
+    public function delete_by_dealer_v ($Where, $Owner = 0) {
+        $this->HostDb->where('do_primary', YES);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('do_dealer_id', $Where);
+        } else {
+            $this->HostDb->where('do_dealer_id', $Where);
         }
-        $this->HostDb->delete('dealer');
-        $this->remove_cache($this->_Module);
-        return true;
-    }
-    
-    public function delete($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('do_id', $Where);
-        }else{
-            $this->HostDb->where('do_id', $Where);
+        if (!empty($Owner)) { // 删除对应属主的
+            $this->HostDb->where('do_owner_id', $this->session->userdata('uid'));
         }
+
         $this->HostDb->delete('dealer_owner');
         $this->remove_cache($this->_Module);
         return true;

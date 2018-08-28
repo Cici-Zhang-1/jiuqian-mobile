@@ -16,10 +16,11 @@ class Home extends MY_Controller{
     }
 
     public function index(){
-        if ($GLOBALS['MOBILE']) {
+        /*if ($GLOBALS['MOBILE']) {
             $this->load->view('mobile/home'); // 加载移动页
         } else {
             $this->load->view('home'); // Load Desk Page
-        }
+        }*/
+        $this->load->view('mobile/home');
     }
 }

@@ -11,9 +11,9 @@
 		<form class="form-horizontal" id="selfForm" action="<?php echo $action;?>" method="post" role="form">
 			<input type="hidden" name="selected" value="<?php echo $self['uid'];?>" />
 			<div class="form-group">
-				<label class="control-label col-md-2" for="username">用户名:</label>
+				<label class="control-label col-md-2" for="name">用户名:</label>
 				<div class="col-md-4">
-					<input class="form-control" name="username" id="username" placeholder="用户名" value="<?php echo $self['username']?>"/>
+					<input class="form-control" name="name" id="name" placeholder="用户名" value="<?php echo $self['name']?>"/>
 				</div>
 			</div>
 			<div class="form-group">

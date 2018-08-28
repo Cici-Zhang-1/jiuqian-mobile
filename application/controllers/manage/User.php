@@ -8,7 +8,7 @@
 class User extends MY_Controller{
     private $__Search = array(
         'paging' => 0,
-        'usergroup_v' => array()
+        'usergroup_v' => ''
     );
 	public function __construct(){
 		parent::__construct();
@@ -28,97 +28,42 @@ class User extends MY_Controller{
 	}
 	
 	public function read(){
-	    $this->__Search['paging'] = 0;
-	    $this->__Search['usergroup_v'] = $this->__read_child_usergroup();$this->session->userdata('ugid');
-	    array_merge($this->_Search, $this->__Search);
-        $this->get_page_search();
+	    $this->__Search['usergroup_v'] = implode(',', $this->__read_usergroup());
+	    $this->_Search = array_merge($this->_Search, $this->__Search);
+	    $this->get_page_search();
         $Data = array();
         if(!($Data = $this->user_model->select($this->_Search))){
-            // $Content = $Data['content'];
-            $TmpSource = array();
-            $TmpDes = array();
-            foreach ($Data['content'] as $key => $value){
-                $TmpSource[$value['uid']] = $value;
-                $Child[$value['parent']][] = array('ugid' => $value['ugid'], 'uid' => $value['uid']);
-            }
-            ksort($Child);
-            $Child = $this->_infinity_category($Child);
-            $Child = array_unique($Child);
-
-            while(list($key, $value) = each($Child)){
-                $TmpDes[] = $TmpSource[$value];
-            }
-            $Data['content'] = $TmpDes;
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }
         $this->_ajax_return($Data);
-
-        $Parent = $this->input->get('parent', true);
-        $Parent = trim($Parent);
-        if(preg_match('/\d{1,10}/', $Parent)){
-            $Pid = $Parent;
-        }elseif(is_string($Parent) && !empty($Parent)){
-            $this->load->model('permission/usergroup_model');
-            if(!($Pid = $this->usergroup_model->select_usergroup_id($Parent))){
-                $this->Failue = '用户组不存在';
-            }
-        }else{
-            $Pid = $this->session->userdata('ugid');
-        }
-        if(empty($this->Failue)){
-            $Item = $this->_Item.__FUNCTION__;
-            $Return = array();
-            if(!!($Ugids = $this->_read_usergroup($Pid))
-                && !!($Query = $this->user_model->select_by_usergroup($Ugids))){
-
-                foreach ($Query as $key => $value){
-                    $Data[$value['uid']] = $value;
-                    $Child[$value['parent']][] = array('ugid' => $value['ugid'], 'uid' => $value['uid']);
-                }
-                ksort($Child);
-                $Child = $this->_infinity_category($Child, $Pid);
-                $Child = array_unique($Child);
-                while(list($key, $value) = each($Child)){
-                    $Return['content'][] = $Data[$value];
-                }
-            }else{
-                $this->Failue = '没有其他用户';
-            }
-        }
-
-        $this->_return($Return);
 	}
 
     /**
      * 获取子用户组
      * @return array|bool
      */
-	private function __read_child_usergroup() {
-	    $Pid = $this->session->usergroup('ugid');
-        if(!!($Query = $this->usergroup_model->select())){
-            foreach ($Query as $key => $value){
-                $Return[$value['parent']][] = $value['v'];
+	private function __read_usergroup($Ugid = 0) {
+	    $_Search = $this->_Search;
+        $this->_Search['paging'] = 0;
+        $this->get_page_search();
+        if(!($Data = $this->usergroup_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+            $this->_Search = $_Search;
+            return false;
+        } else {
+            foreach ($Data['content'] as $key => $value){
+                $Child[$value['parent']][] = $value['v'];
             }
-            ksort($Return);
-            $Return = gh_infinity_category($Return, $Pid);
-        }else{
-            $this->Failue = '没有用户组!';
-            $Return = false;
+            ksort($Child);
+            $Ugid = !empty($Ugid) ? $Ugid : $this->session->userdata('ugid');
+            $Child = gh_infinity_category($Child, $Ugid);
+            $this->_Search = $_Search;
+            return $Child;
         }
-
-        return $Return;
     }
-	
-	public function read_all(){
-	    $Data = array();
-	    if(!!($Data = $this->user_model->select())){
-	        $this->Success = '获取用户成功';
-	    }else{
-	        $this->Failue = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'获取用户失败!';
-	    }
-	    $this->_return($Data);
-	}
+/*
 	private function _infinity_category($Tree, $Parent = 0){
 		$Return = array();
 		if(is_array($Tree) && count($Tree) > 0 && isset($Tree[$Parent])){
@@ -131,77 +76,218 @@ class User extends MY_Controller{
 			}
 		}
 		return $Return;
-	}
-	
-	/**
-	 * 读取当前可以读取的用户组
-	 * @param unknown $Pid
-	 */
-	private function _read_usergroup($Pid){
-	    $this->load->model('manage/usergroup_model');
-	    if(!!($Query = $this->usergroup_model->select())){
-	        foreach ($Query as $key => $value){
-	            $Return[$value['parent']][] = $value['uid'];
-	        }
-	        ksort($Return);
-	        $Return = gh_infinity_category($Return, $Pid);
-	    }else{
-	        $this->Failue = '没有用户组!';
-	        $Return = false;
-	    }
-	    
-	    return $Return;
-	}
-	
+	}*/
+
 	public function add(){
-		$Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-			$Post = gh_escape($_POST);
-			if(!!($Id = $this->user_model->insert($Post))){
-				$this->Success .= '用户新增成功, 刷新后生效!';
-			}else{
-				$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户新增失败';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if (!!($Cid = $this->user_model->insert($Post))) {
+                $this->_set_usergroup_amount($Post['usergroup_v']);
+                $this->Message = '新建成功, 刷新后生效!';
+            } else {
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
+            }
+        }
+        $this->_ajax_return();
 	}
-	
-	
+
 	public function edit(){
-		$Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-			$Post = gh_escape($_POST);
-			unset($Post['selected']);
-			$Password = $this->input->post('password', true);
-			if(empty($Password)){
-			    unset($Post['password']);
-			}
-			$where = $this->input->post('selected');
-			if(!!($this->user_model->update($Post, $where))){
-				$this->Success .= '用户信息修改成功, 刷新后生效!';
-			}else{
-				$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户信息修改失败&nbsp;&nbsp;';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            $Password = $this->input->post('password', true);
+            if(empty($Password)){
+                unset($Post['password']);
+            }
+            $UsergroupV = $this->user_model->select_usergroup_v($Where);
+            if(!!($this->user_model->update($Post, $Where))){
+                if ($UsergroupV['usergroup_v'] != $Post['usergroup_v']) {
+                    $this->_set_usergroup_amount($UsergroupV['usergroup_v']);
+                    $this->_set_usergroup_amount($Post['usergroup_v']);
+                }
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
 	}
+	public function start () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if (!!($this->user_model->update(array('status' => START_WORK), $Post))) {
+                $this->Message = '启用成功, 刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'启用失败';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function stop () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            if (!!($User = $this->user_model->work_status($Post))) {
+                $this->load->library('arrange_work');
+                foreach ($User as $Key => $Value) {
+                    $this->arrange_work->stop($Value);
+                }
+                if(!!($this->user_model->update(array('status' => START_WORK), $Post))){
+                    $this->Message = '停用成功, 刷新后生效!';
+                }else{
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'停用失败';
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '用户不存在';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function offtime () {
+
+    }
 	
 	public function remove(){
-		$Item = $this->_Item.__FUNCTION__;
-		if($this->form_validation->run($Item)){
-			$Where = $this->input->post('selected', true);
-		    if($this->user_model->delete($Where)){
-				$this->Success .= '用户信息删除成功, 刷新后生效!';
-			}else {
-				$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组信息删除失败&nbsp;&nbsp;';
-			}
-		}else{
-			$this->Failue .= validation_errors();
-		}
-		$this->_return();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            $UsergroupVs = $this->user_model->select_usergroup($Where);
+            if ($this->user_model->delete($Where)) {
+                foreach ($UsergroupVs as $Key => $Value) {
+                    $this->_set_usergroup_amount($Value['usergroup_v']);
+                }
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
 	}
+
+    /**
+     * 属主
+     */
+	public function owner () {
+        $Data = array();
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('客服部'))) {
+            $UsergroupVs = $this->__read_usergroup($UsergroupV);
+            array_push($UsergroupVs, $UsergroupV);
+            $this->__Search['usergroup_v'] = implode(',', $UsergroupVs);
+            $this->_Search = array_merge($this->_Search, $this->__Search);
+            $this->get_page_search();
+            if(!($Data = $this->user_model->select($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            }
+        } else {
+            $this->Message = '请先设立客服部';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+    /**
+     * 电子锯
+     */
+	public function electronic_saw() {
+	    if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('电子锯'))) {
+	        $this->__Search['usergroup_v'] = $UsergroupV;
+            $this->_Search = array_merge($this->_Search, $this->__Search);
+            $this->get_page_search();
+            $Data = array();
+            if(!($Data = $this->user_model->select($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            } else {
+                foreach ($Data['content'] as $Key => $Value) {
+                    $Value['name'] = $Value['truename'];
+                    $Data['content'][$Key] = $Value;
+                }
+            }
+        } else {
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+
+    public function edger () {
+        $Data = array();
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('封边'))) {
+            $Data = $this->_get_user($UsergroupV);
+        } else {
+            $this->Message = '请先建立封边用户组!';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+    public function puncher () {
+        $Data = array();
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('打孔'))) {
+            $Data = $this->_get_user($UsergroupV);
+        } else {
+            $this->Message = '请先建立打孔用户组!';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+    public function sscanner () {
+        $Data = array();
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('扫描'))) {
+            $Data = $this->_get_user($UsergroupV);
+        } else {
+            $this->Message = '请先建立扫描用户组!';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+    public function ppacker () {
+        $Data = array();
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('打包'))) {
+            $Data = $this->_get_user($UsergroupV);
+        } else {
+            $this->Message = '请先建立包装用户组!';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+    private function _get_user($UsergroupV) {
+        $this->__Search['usergroup_v'] = $UsergroupV;
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Data = array();
+        if(!($Data = $this->user_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        } else {
+            foreach ($Data['content'] as $Key => $Value) {
+                $Value['name'] = $Value['truename'];
+                $Data['content'][$Key] = $Value;
+            }
+        }
+        return $Data;
+    }
+
+    private function _set_usergroup_amount ($UsergroupV) {
+	    $this->load->model('permission/usergroup_model');
+	    return $this->usergroup_model->update($this->user_model->select_usergroup_amount($UsergroupV), $UsergroupV);
+    }
 }

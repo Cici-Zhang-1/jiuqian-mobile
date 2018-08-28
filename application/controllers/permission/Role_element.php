@@ -34,7 +34,20 @@ class Role_element extends MY_Controller {
         $Data = array();
         if ($V > 0) {
             if (!!($Role = $this->role_model->is_exist($V))) {
-                if (!!($ParentRoleElement = $this->role_element_model->select_by_usergroup_v($this->session->userdata('ugid')))) {
+                if (!!($Query = $this->role_element_model->select_by_role_v($Role['v']))) {
+                    foreach ($Query as $Key => $Value) {
+                        $Query[$Key]['checked'] = intval($Value['checked']);
+                    }
+                    $Data['query']['role_v'] = $Role['v'];
+                    $Data['content'] = $Query;
+                    $Data['num'] = count($Query);
+                    $Data['p'] = ONE;
+                    $Data['pn'] = ONE;
+                } else {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = '请先开通角色的菜单和卡片权限!';
+                }
+                /*if (!!($ParentRoleElement = $this->role_element_model->select_by_usergroup_v($this->session->userdata('ugid')))) {
                     if (!!($RoleElement = $this->role_element_model->select_by_role_v($Role['v']))) {
                         $Tmp = array();
                         foreach ($RoleElement as $Key => $Value) {
@@ -47,14 +60,14 @@ class Role_element extends MY_Controller {
                             }
                         }
                     }
-                    $Data['role_v'] = $Role['v'];
+                    $Data['query']['role_v'] = $Role['v'];
                     $Data['content'] = $ParentRoleElement;
                     $Data['num'] = count($ParentRoleElement);
                     $Data['p'] = ONE;
                     $Data['pn'] = ONE;
                 } else {
                     $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'您无权设置角色元素权限, 请联系管理员';
-                }
+                }*/
             } else {
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色不存在, 请联系管理员';
             }
@@ -65,27 +78,22 @@ class Role_element extends MY_Controller {
     }
 
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Post = gh_escape($_POST);
-            if(!!($this->role_element_model->delete_by_rid($Post['rid']))){
-                if (isset($Post['eid'])) {
-                    $Data = array();
-                    foreach ($Post['eid'] as $key => $value) {
-                        $Data[] = array(
-                            'eid' => $value,
-                            'rid' => $Post['rid']
-                        );
-                    }
-                    $this->role_element_model->insert_batch($Data);
-                }
-                $this->Success .= '角色-元素权限修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色-元素修改失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
         }
-        $this->_return();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $this->role_element_model->delete_by_role_v($Post['role_v']);
+            foreach ($Post['v'] as $Key => $Value) {
+                $Data[] = array(
+                    'element_v' => $Value,
+                    'role_v' =>$Post['role_v']
+                );
+            }
+            $this->role_element_model->insert_batch($Data);
+            $this->Message = '内容修改成功, 刷新后生效!';
+        }
+        $this->_ajax_return();
     }
 }

@@ -1,90 +1,23 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['dealer/dealer_model/is_valid'] = array(
-	'd_id' => 'did',
-	'd_des' => 'des',
-	'd_shop' => 'shop',
-	'd_debt1' => 'debt1',
-	'd_debt2' => 'debt2',
-	'd_balance' => 'balance',
-	'concat(ifnull(d.a_province, ""), ifnull(d.a_city, ""), ifnull(d.a_county, ""), "-", ifnull(d_address,""))' => 'area',
-	'A.dl_name' => 'linker',
-	'if(strcmp(A.dl_mobilephone, ""),A.dl_mobilephone, A.dl_telephone)' => 'way',
+$config['dealer/dealer_model/select'] = array(
+                                'd_id' => 'v',
+    'd_company_type' => 'company_type',
+    'd_name' => 'name',
+    'd_area_id' => 'area_id',
+    'd_address' => 'address',                                        'd_discount' => 'discount',                                        'd_credit' => 'credit',                                        'd_payterms' => 'payterms',                                        'd_remark' => 'remark',                                        'd_creator' => 'creator',                                        'd_create_datetime' => 'create_datetime',                                        'd_debt1' => 'debt1',                                        'd_produce' => 'produce',                                        'd_debt3' => 'debt3',                                        'd_delivered' => 'delivered',                                        'd_received' => 'received',                                        'd_balance' => 'balance',                                        'd_status' => 'status',                                        'd_start_date' => 'start_date',                                        'd_start' => 'start',
+    'concat(a_province, a_city, a_county, d_address)' => 'area',
+    'u_truename' => 'owner',
+    'ds_label' => 'status_label',
+    'd_num' => 'num',
+    'd_dealer_rank' => 'dealer_rank',
+    'd_down_payment' => 'down_payment'
+    );
+
+$config['dealer/dealer_model/is_exist'] = array(
+    'd_id' => 'v'
 );
-$config['dealer/dealer_model/select_dealer'] = array(
-	'd_id' => 'did',
-	'd_des' => 'des',
-	'd_shop' => 'shop',
-	'd_debt1' => 'debt1',
-	'd_debt2' => 'debt2',
-	'd_deliveried' => 'deliveried',
-	'd_received' => 'received',
-	'd_balance' => 'balance',
-	'd.a_id' => 'aid',
-	'concat(d.a_province, d.a_city, ifnull(d.a_county, ""), "-", ifnull(d_address,""))' => 'area',
-	'dc_id' => 'dcid',
-	'dc_name' => 'category',
-	'd_remark' => 'remark',
-	'c.u_truename' => 'creator',
-	'dl_name' => 'linker',
-	'if(strcmp(dl_mobilephone, ""),dl_mobilephone, dl_telephone)' => 'way',
-	'p_id' => 'pid',
-	'p_name' => 'payterms',
-	'o.u_truename' => 'owner',
-);
-$config['dealer/dealer_model/select_dealer_money'] = array(
-	'd_id' => 'did',
-	'd_des' => 'des',
-	'd_shop' => 'shop',
-	'd_debt1' => 'debt1',
-	'd_debt2' => 'debt2',
-	'd_deliveried' => 'deliveried',
-	'd_received' => 'received',
-	'd_balance' => 'balance',
-	'd.a_id' => 'aid',
-	'concat(d.a_province, d.a_city, ifnull(d.a_county, ""), "-", ifnull(d_address,""))' => 'area',
-	'dc_id' => 'dcid',
-	'dc_name' => 'category',
-	'd_remark' => 'remark',
-	'u_truename' => 'owner',
-	'dl_name' => 'linker',
-	'if(strcmp(dl_mobilephone, ""),dl_mobilephone, dl_telephone)' => 'way',
-	'p_id' => 'pid',
-	'p_name' => 'payterms',
-);
-$config['dealer/dealer_model/select_all'] = array(
-	'd_id' => 'did',
-	'd_des' => 'dealer',
-	'p_name' => 'payterms',
-	'concat(ifnull(d.a_province,""), ifnull(d.a_city, ""), ifnull(d.a_county, ""), ifnull(d_address,""))' => 'dealer_address',
-	'A.dl_name' => 'dealer_linker',
-	'if(A.dl_mobilephone = "", A.dl_telephone, A.dl_mobilephone)' => 'dealer_phone',
-	'B.dl_name' => 'checker',
-	'if(B.dl_mobilephone = "", B.dl_telephone, B.dl_mobilephone)' => 'checker_phone',
-	'C.dl_name' => 'payer',
-	'if(C.dl_mobilephone = "", C.dl_telephone, C.dl_mobilephone)' => 'payer_phone',
-	'concat(ifnull(d.a_province,""), ifnull(d.a_city, ""), ifnull(dd.a_county, ""))' => 'delivery_area',
-	'dd_address' => 'delivery_address',
-	'dd_name' => 'delivery_linker',
-	'dd_phone' => 'delivery_phone',
-	'l_name' => 'logistics',
-	'om_name' => 'out_method',
-);
-$config['dealer/dealer_model/select_dealer_all'] = array(
-	'd_id' => 'did',
-	'd_des' => 'dealer',
-	'dealer_address' => 'dealer_address',
-	'p_name' => 'payterms',
-	'dealer_linker' => 'dealer_linker',
-	'dealer_phone' => 'dealer_phone',
-	'checker' => 'checker',
-	'checker_phone' => 'checker_phone',
-	'payer' => 'payer',
-	'payer_phone' => 'payer_phone',
-	'delivery_area' => 'delivery_area',
-	'dd_address' => 'delivery_address',
-	'l_name' => 'logistics',
-	'om_name' => 'out_method',
-	'dd_name' => 'delivery_linker',
-	'dd_phone' => 'delivery_phone',
+$config['dealer/dealer_model/is_public'] = array(
+    'd_id' => 'v'
 );

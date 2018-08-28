@@ -63,7 +63,7 @@ class Role_menu extends MY_Controller {
                     while(list($key, $value) = each($Child)){
                         $DesSource[] = $TmpSource[$value];
                     }
-                    $Data['role_v'] = $Role['v'];
+                    $Data['query']['role_v'] = $Role['v'];
                     $Data['content'] = $DesSource;
                     $Data['num'] = count($DesSource);
                     $Data['p'] = ONE;
@@ -81,27 +81,22 @@ class Role_menu extends MY_Controller {
     }
 
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Post = gh_escape($_POST);
-            if(!!($this->role_menu_model->delete_by_rid($Post['rid']))){
-                if (isset($Post['mid'])) {
-                    $Data = array();
-                    foreach ($Post['mid'] as $key => $value) {
-                        $Data[] = array(
-                            'mid' => $value,
-                            'rid' => $Post['rid']
-                        );
-                    }
-                    $this->role_menu_model->insert_batch($Data);
-                }
-                $this->Success .= '角色-菜单权限修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'角色-菜单修改失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
         }
-        $this->_return();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $this->role_menu_model->delete_by_role_v($Post['role_v']);
+            foreach ($Post['v'] as $Key => $Value) {
+                $Data[] = array(
+                    'menu_v' => $Value,
+                    'role_v' =>$Post['role_v']
+                );
+            }
+            $this->role_menu_model->insert_batch($Data);
+            $this->Message = '内容修改成功, 刷新后生效!';
+        }
+        $this->_ajax_return();
     }
 }

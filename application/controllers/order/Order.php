@@ -6,14 +6,18 @@
  * @description  
  */
 class Order extends MY_Controller {
-	private $Count;
-	private $Insert;
+	private $Insert; // 新增orderid
 	private $Search = array(
-			'status' => '',
-	        'start_date' => '',
-	        'end_date' => '',
-			'keyword' => ''
+        'status' => '',
+        'start_create_date' => '',
+        'end_create_date' => '',
+        'keyword' => '',
+        'all' => NO,
+        'dealer_id' => ZERO
 	);
+	private $_Order = array(); // orderdata
+    private $_OrderProduct = array();
+	private $_ShopPrimaryInfo = array(); // dealer_shop_primary_info
 	public function __construct(){
 		parent::__construct();
         log_message('debug', 'Controller Order/Order __construct Start!');
@@ -30,33 +34,89 @@ class Order extends MY_Controller {
 		}
 	}
 	
-	public function read(){
-		$Cookie = $this->_Cookie.__FUNCTION__;
+	public function read() {
 		$this->_Search = array_merge($this->_Search, $this->Search);
         $this->get_page_search();
-        // $this->Search = $this->get_page_conditions($Cookie, $this->Search);
         $this->Search = $this->_Search;
-		$Data = array();
-		if(!empty($this->Search)){
-		    $this->load->library('permission');
-		    if (!!($E = $this->permission->get_element_by_operation())) {
-                $this->order_model->set_element($E);
+        if ($this->_Search['start_create_date'] == '') {
+            $this->_Search['start_create_date'] = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (empty($this->_Search['owner'])) { // 默认只看自己的订单
+            $this->_Search['owner'] = $this->session->userdata('uid');
+        }
+        if (empty($this->_Search['dealer_id'])) {
+            $DealerId = $this->input->get('v');
+            $DealerId = intval($DealerId);
+            if (!empty($DealerId)) {
+                $this->_Search['dealer_id'] = $DealerId;
             }
-
-		    if(!!($Data = $this->order_model->select_order($this->Search))){
-		        $this->Search['pn'] = $Data['pn'];
-		        $this->Search['num'] = $Data['num'];
-		        $this->Search['p'] = $Data['p'];
-		        $this->input->set_cookie(array('name' => $Cookie, 'value' => json_encode($this->Search), 'expire' => HOURS));
-		    }else{
-		        $this->Code = EXIT_ERROR;
-		        $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合条件的订单';;
-		    }
-		}else{
-		    $this->Message = '对不起, 没有符合条件的内容!';
-		}
+        }
+		$Data = array();
+        if(!($Data = $this->order_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        if (!empty($this->_Search['dealer_id'])) {
+            $Data['query']['dealer_id'] = $this->_Search['dealer_id'];
+        }
 		$this->_ajax_return($Data);
 	}
+
+    /**
+     * 详细信息
+     */
+	public function detail () {
+	    $this->_Search['order_id'] = ZERO;
+        $this->get_page_search();
+        if (empty($this->_Search['order_id'])) {
+            $OrderId = $this->input->get('v', true);
+            $OrderId = intval($OrderId);
+            if (!empty($OrderId)) {
+                $this->_Search['order_id'] = $OrderId;
+            } else {
+                $this->_get_order_product();
+            }
+        }
+
+        $Data = array();
+        if (!empty($this->_Search['order_id'])) {
+            if(!($Data = $this->order_model->select_detail($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单详情不存在';
+                $this->Code = EXIT_ERROR;
+            } else {
+                $Data['content']['order_product'] = $this->_get_order_product_num();
+            }
+            $Data['query']['order_id'] = $this->_Search['order_id'];
+        } else {
+            $this->Message = '请选择订单获取订单详情';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+
+    private function _get_order_product () {
+        $OrderProductId = $this->input->get('order_product_id', true);
+        $OrderProductId = intval($OrderProductId);
+        if (!empty($OrderProductId)) {
+            $this->load->model('order/order_product_model');
+            if (!!($this->_OrderProduct = $this->order_product_model->is_exist('', $OrderProductId))) {
+                $this->_Search['order_id'] = $this->_OrderProduct['order_id'];
+            }
+        }
+        return true;
+    }
+
+    private function _get_order_product_num () {
+	    $this->load->model('order/order_product_model');
+	    $Data = array();
+        if ($Query = $this->order_product_model->select_by_order_id($this->_Search['order_id'])) {
+            foreach ($Query as $Key => $Value) {
+                $Tmp = explode('-', $Value['num']);
+                $Data[] = array_pop($Tmp);
+            }
+        }
+        return implode(',', $Data);
+    }
 	
 	/**
 	 * 根据经销商信息获取订单编号(登帐时使用)
@@ -89,16 +149,18 @@ class Order extends MY_Controller {
 	/**
 	 * 新建订单
 	 */
-	public function add($Dismantle=''){
-	    $Dismantle = trim($Dismantle);
+	public function add(){
+	    $Product = $this->input->post('product', true);
+	    $_POST['product'] = is_array($Product) ? $Product : explode(',', $Product);
 		if ($this->_do_form_validation()) {
-            $Order = array(
-                'otid' => $this->input->post('otid', true),
-                'dealer_id' => $this->input->post('did', true),
+            $this->_Order = array(
+                'order_type' => $this->input->post('order_type', true),
+                'task_level' => $this->input->post('task_level', true),
+                'dealer_id' => $this->input->post('dealer_id', true),
                 'dealer' => $this->input->post('dealer', true),
+                'shop_id' => $this->input->post('shop_id', true),
                 'checker' => $this->input->post('checker', true),
                 'checker_phone' => $this->input->post('checker_phone', true),
-                'payterms' => $this->input->post('payterms', true),
                 'payer' => $this->input->post('payer', true),
                 'payer_phone' => $this->input->post('payer_phone', true),
                 'logistics' => $this->input->post('logistics', true),
@@ -108,28 +170,31 @@ class Order extends MY_Controller {
                 'delivery_linker' => $this->input->post('delivery_linker', true),
                 'delivery_phone' => $this->input->post('delivery_phone', true),
                 'owner' => $this->input->post('owner', true),
-                'remark' => $this->input->post('remark', true),
-                'dealer_remark' => $this->input->post('dealer_remark', true),
                 'request_outdate' => $this->input->post('request_outdate', true),
-                'flag' => $this->input->post('flag', true)
+                'remark' => $this->input->post('remark', true),
+                'dealer_remark' => $this->input->post('out_remark', true),
+                'down_payment' => ONE
             );
-            $Order = gh_escape($Order);
-            if(!!($this->Insert = $this->order_model->insert_order($Order))){
+            $this->load->model('dealer/shop_model');
+            if ($this->_ShopPrimaryInfo = $this->shop_model->select_primary_info($this->_Order['shop_id'])) {
+                $this->_Order['down_payment'] = $this->_ShopPrimaryInfo['down_payment']; // 可能首付会不同
+                $this->_set_checker();
+                $this->_set_payer();
+                $this->_set_dealer_delivery();
+            }
+            $this->_Order = gh_escape($this->_Order);
+            if(!!($this->Insert = $this->order_model->insert($this->_Order))){
                 $this->load->library('workflow/workflow');
-                if(!!($this->workflow->initialize('order',$this->Insert['oid']))){
-                    $this->workflow->create();
+                $W = $this->workflow->initialize('order');
+
+                if(!!($W->initialize($this->Insert['v']))){
+                    $W->create();
                     $this->_add_order_product();
-                    if('dismantle' == $Dismantle){
-                        $this->Location = array(
-                            'type' => 'tab',
-                            'title' => '拆单',
-                            'url' => site_url('order/dismantle/index/read?id='.$this->Insert['oid'])
-                        );
-                    }
-                    $this->Message = $this->Insert['order_num'].'订单新增成功, 刷新后生效!';
+                    $this->Confirm = '新建订单' . $this->Insert['order_num'] . '是否拆单?';
+                    $this->Location = '/order/dismantle?order_id=' . $this->Insert['v'];
                 }else{
                     $this->Code = EXIT_ERROR;
-                    $this->Message = $this->workflow->get_failue();
+                    $this->Message = $W->get_failue();
                 }
             }else{
                 $this->Code = EXIT_ERROR;
@@ -138,168 +203,112 @@ class Order extends MY_Controller {
         }
 		$this->_return($this->Insert);
 	}
-	
+	private function _set_checker() {
+	    $this->load->model('dealer/dealer_linker_shop_model');
+	    $Checker = $this->dealer_linker_shop_model->select_position($this->_Order['shop_id'], '设计师');
+	    $this->_Order['checker'] = $this->_Order['checker'] == '' ? (isset($Checker['linker']) ? $Checker['linker'] : $this->_ShopPrimaryInfo['primary_linker']) : $this->_Order['checker'];
+	    $this->_Order['checker_phone'] = $this->_Order['checker_phone'] == '' ? (isset($Checker['phone']) ? $Checker['phone'] : $this->_ShopPrimaryInfo['primary_phone']) : $this->_Order['checker_phone'];
+    }
+    private function _set_payer () {
+        $this->load->model('dealer/dealer_linker_shop_model');
+        $Payer = $this->dealer_linker_shop_model->select_position($this->_Order['shop_id'], '财务');
+        $this->_Order['payer'] = $this->_Order['payer'] == '' ? (isset($Payer['linker']) ? $Payer['linker'] : $this->_ShopPrimaryInfo['primary_linker']) : $this->_Order['payer'];
+        $this->_Order['payer_phone'] = $this->_Order['payer_phone'] == '' ? (isset($Payer['phone']) ? $Payer['phone'] : $this->_ShopPrimaryInfo['primary_phone']) : $this->_Order['payer_phone'];
+    }
+    private function _set_dealer_delivery () {
+        $this->_Order['logistics'] = $this->_Order['logistics'] == '' ? $this->_ShopPrimaryInfo['logistics'] : $this->_Order['logistics'];
+        $this->_Order['out_method'] = $this->_Order['out_method'] == '' ? $this->_ShopPrimaryInfo['out_method'] : $this->_Order['out_method'];
+        $this->_Order['delivery_linker'] = $this->_Order['delivery_linker'] == '' ? $this->_ShopPrimaryInfo['delivery_linker'] : $this->_Order['delivery_linker'];
+        $this->_Order['delivery_phone'] = $this->_Order['delivery_phone'] == '' ? $this->_ShopPrimaryInfo['delivery_phone'] : $this->_Order['delivery_phone'];
+        $this->_Order['delivery_area'] = $this->_Order['delivery_area'] == '' ? $this->_ShopPrimaryInfo['delivery_area'] : $this->_Order['delivery_area'];
+        $this->_Order['delivery_address'] = $this->_Order['delivery_address'] == '' ? $this->_ShopPrimaryInfo['delivery_address'] : $this->_Order['delivery_address'];
+    }
+
+    /**
+     * 添加订单备注
+     * @return bool
+     */
+    /*private function _add_order_remark () {
+	    $Set = array(
+	        'remark' => $this->input->post('remark', true)
+        );
+	    if ($Set['remark'] != '') {
+            $this->load->model('order/order_remark_model');
+            $Set['for'] = NO;
+            $Set['status'] = O_MINUS;
+            $Set['order_id'] = $this->Insert['v'];
+            return $this->order_remark_model->insert($Set);
+        }
+	    return true;
+    }*/
+
+    /**
+     * 添加客户备注
+     * @return bool
+     */
+    /*private function _add_dealer_remark () {
+        $Set = array(
+            'remark' => $this->input->post('dealer_remark', true)
+        );
+        if ($Set['remark'] != '') {
+            $this->load->model('order/order_remark_model');
+            $Set['for'] = YES;
+            $Set['status'] = O_MINUS;
+            $Set['order_id'] = $this->Insert['v'];
+            return $this->order_remark_model->insert($Set);
+        }
+        return true;
+    }*/
+
+    /**
+     * 新建订单时新建订单产品
+     */
 	private function _add_order_product(){
-	    $Pid = $this->input->post('pid', TRUE);
-	    if(!is_array($Pid)){
-	        $Pid = array($Pid);
-	    }
+	    $Product = $this->input->post('product', true);
 	    $this->load->model('product/product_model');
-	    if(!!($Pid = $this->product_model->select_product_code_by_id($Pid))){
+	    if(!!($Product = $this->product_model->select_product_code_by_id($Product))){
 	        $this->load->model('order/order_product_model');
-	        if(!!($Query = $this->order_product_model->insert($Pid, $this->Insert))){
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order_product');
+	        if(!!($Query = $this->order_product_model->insert($Product, $this->Insert))){
 	            foreach ($Query as $key => $value){
-	                if(!!($this->workflow->initialize('order_product', $value['opid']))){
-	                    $this->workflow->create();
+	                if(!!($W->initialize($value['v']))){
+                        $W->create();
 	                }else{
-	                    $this->Failue = $this->workflow->get_failue();
+	                    $this->Message = $W->get_failue();
 	                    break;
 	                }
 	            }
 	        }else{
-	            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单产品新增失败!';
+	            $this->Code = EXIT_ERROR;
+	            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单产品新增失败!';
 	        }
 	    }else{
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'获取产品类型失败!';
+            $this->Code = EXIT_ERROR;
+	        $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'获取产品类型失败!';
 	    }
-	}
-	
-	private function _add_order_products(){
-	    $Pid = $this->input->post('pid', true);
-	    if($Pid){
-	        if(!is_array($Pid)){
-	            $Pid = array($Pid);
-	        }
-	        $this->load->model('product/product_model');
-	        if(!!($Pid = $this->product_model->select_product_code_by_id($Pid))){
-	            foreach ($Pid as $key => $value){
-	                $OrderProduct[$key] = array(
-	                    'order_id' => $this->Insert['oid'],
-	                    'pid' => $value['pid'],
-	                    'num' => $this->Insert['order_num'].'-'.$value['code'].'1'
-	                );
-	            }
-	            $this->load->model('order/order_product_model');
-	            if(!!($Return = $this->order_product_model->insert_batch($OrderProduct))){
-	                foreach ($Return as $key => $value){
-	                    $this->workflow->initialize('order_product', $value['opid']);
-	                    $this->workflow->create();
-	                }
-	            }
-	        }
-	    }
-	    return true;
-	}
-	
-	/**
-	 * 插入订单详情
-	 * @param unknown $Id
-	 * @return boolean
-	 */
-	private function _add_order_detail(){
-		$OdproductId = $this->input->post('odproduct_id');
-		if(is_array($OdproductId)){
-			$this->Count = count($OdproductId);
-		}elseif($OdproductId !== false){
-			$this->Count = 1;
-		}
-		if($this->Count > 0){
-			$Item = $this->_Module.'/order_detail';
-			$Run = $Item.'/add';
-			if($this->Count > 1){
-				$Run .= '/array';
-			}
-			if($this->form_validation->run($Run)){
-				$this->config->load('formview', TRUE);
-				$FormView = $this->config->item($Item, 'formview');
-				foreach ($FormView as $key=>$value){
-					$tmp = $this->input->post($key)?$this->input->post($key):$this->_default($key);
-					if($tmp !== false){
-						if(is_array($tmp)){
-							foreach ($tmp as $ikey => $ivalue){
-								$Set[$ikey][$value] = $ivalue;
-							}
-						}else{
-							$Set[$value] = $tmp;
-						}
-						unset($tmp);
-					}
-				}
-				if(isset($Set)){
-					if($this->Count > 1){
-						if(!!($this->order_detail_model->insert_batch_order_detail(gh_mysql_string($Set)))){
-							return true;
-						}else{
-							$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户新增失败&nbsp;&nbsp;';
-						}
-					}else{
-						if(!!($this->order_detail_model->insert_order_detail(gh_mysql_string($Set)))){
-							return true;
-						}else{
-							$this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户新增失败&nbsp;&nbsp;';
-						}
-					}
-				}else{
-					return true;
-				}
-			}else{
-				$this->Failue .= validation_errors();
-			}
-		}else{
-			return true;
-		}
 	}
 	
 	public function edit(){
-        $Run = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Run)){
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Selected = intval(trim($this->input->post('selected', true)));
-            if(!!($Return = $this->order_model->is_editable($Selected))){
-                $Return = array_pop($Return);
-                if($Return['status'] > 16){
-                    /*等待发货之后的订单支付条款不可以改变*/
-                    $Post['payterms'] = $Return['payterms'];
-                }elseif($Return['status'] > 15 && ('款到生产' == $Post['payterms'] || '款到发货' == $Post['payterms'])){
-                    $Post['payterms'] = $Return['payterms'];
-                }elseif (15 == $Return['status'] && ('物流代收' == $Post['payterms'] 
-                    || '按月结款' == $Post['payterms'] 
-                    || '到厂付款' == $Post['payterms'])){
-                    /*款到发货的订单，修改支付方式为物流代收，则自动状态进1*/
-                    $Workflow = $Return['oid'];
-                }elseif (($Return['status'] > 9 && $Return['status'] <= 15) && '款到生产' == $Post['payterms']){
-                    /*款到发货之后修改支付方式，如果修改为款到发货，则保持原支付条款*/
-                    $Post['payterms'] = $Return['payterms'];
-                }elseif (9 == $Return['status'] && ('物流代收' == $Post['payterms'] 
-                    || '款到发货' == $Post['payterms'] 
-                    || '按月结款' == $Post['payterms'] 
-                    || '到厂付款' == $Post['payterms'])){
-                    /*款到发货时修改支付方式，则状态进1*/
-                    $Workflow = $Return['oid'];
-                }
-                /* else{
-                    $Post['payterms'] = $Return['payterms'];
-                } */
-                unset($Return);
-                if(!!($this->order_model->update_order($Post, $Selected))){
-                    if(isset($Workflow)){
-                        $this->load->library('workflow/workflow');
-                        if($this->workflow->initialize('order', $Workflow)){
-                            $this->workflow->payterms();
-                        }
+            $V = intval(trim($this->input->post('v', true)));
+            if(!!($Return = $this->order_model->is_editable($V))){
+                if(!!($this->order_model->update($Post, $V))){
+                    $this->load->library('workflow/workflow');
+                    $W = $this->workflow->initialize('order');
+                    if($W->initialize($V)) {
+                        $W->store_message('修改了订单基本信息', O_RECORD);
                     }
                     $this->Message .= '订单修改成功, 刷新后生效!';
                 }else{
                     $this->Code = EXIT_ERROR;
                     $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单修改失败';
                 }
-            }else{
+            } else {
                 $this->Code = EXIT_ERROR;
-                $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单修改失败';
+                $this->Message .= '订单已经作废或者发货, 不能修改基本信息';
             }
-        }else{
-            $this->Code = EXIT_ERROR;
-            $this->Message .= validation_errors();
         }
 		$this->_return();
 	}
@@ -362,4 +371,29 @@ class Order extends MY_Controller {
 	    }
 	    $this->_return();
 	}
+
+    /**
+     * 从新拆单
+     */
+	public function re_dismantle () {
+        if ($this->_do_form_validation()) {
+            $V = $this->input->post('v', true);
+            if (!!($this->order_model->is_re_dismantlable($V))) {
+                $this->load->library('workflow/workflow');
+                $W = $this->workflow->initialize('order');
+                if ($W->initialize($V)) {
+                    $W->re_dismantle();
+                    $this->Message = '订单产品重新拆单成功!';
+                    $this->Location = '/order/dismantle?order_id=' . $V;
+                } else {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = $W->get_failue();
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '这个订单不能已经不能重新拆单!';
+            }
+        }
+        $this->_ajax_return();
+    }
 }

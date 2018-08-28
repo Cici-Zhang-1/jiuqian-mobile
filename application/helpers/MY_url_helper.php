@@ -30,3 +30,11 @@ if(! function_exists('drawing_url')){
         return base_url(substr($String, strlen(ROOTDIR)));
     }
 }
+
+
+if (! function_exists('pub_url')) {
+    function pub_url($Uri = '') {
+        $CI = &get_instance();
+        return trim(trim($CI->config->item('pub_url'), '/') . '/' . trim($Uri, '/'), '/');
+    }
+}

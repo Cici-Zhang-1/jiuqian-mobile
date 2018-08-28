@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 13:26
  *
  * Desc:
- * php index.php generate create false/controller/view/modal/dbview/dbtable/validation data-page_type
+ * php index.php generate create false/controller/view/modal/dbview/dbtable/validation data-data
  */
 class Generate extends MY_Controller {
     private $_Name = '';
@@ -276,8 +276,10 @@ class Generate extends MY_Controller {
         );
         $Configs = array();
         $Config = array();
+        $PrimaryKey = '';
         foreach ($Table as $Key => $Value) {
             if ($Value['primary_key'] && $Value['auto_increment']) {
+                $PrimaryKey = $Key;
                 continue;
             }
             $I = explode('_', $Key);
@@ -286,12 +288,30 @@ class Generate extends MY_Controller {
             $Config[$NewKey] = $Key;
         }
         foreach ($Keys as $Key => $Value) {
+            $Source = $Config;
+            if ($Value == 'update_batch') {
+                $Source['v'] = $PrimaryKey;
+                if (isset($Source['creator'])) {
+                    unset($Source['creator']);
+                }
+                if (isset($Source['create_datetime'])) {
+                    unset($Source['create_datetime']);
+                }
+            }
+            if ($Value == 'update') {
+                if (isset($Source['creator'])) {
+                    unset($Source['creator']);
+                }
+                if (isset($Source['create_datetime'])) {
+                    unset($Source['create_datetime']);
+                }
+            }
             if ($Value == '') {
                 $Value = $Module . '/' . $Dbtable . '_model';
             } else {
                 $Value = $Module . '/' . $Dbtable . '_model/' . $Value;
             }
-            $Configs[$Value] = $Config;
+            $Configs[$Value] = $Source;
         }
         return $Configs;
     }
@@ -345,20 +365,39 @@ class Generate extends MY_Controller {
             'label' => '{{ config.comment }}',
             'rules' => 'trim|{{ config.rules | join('|') }}'
         );*/
+        $Filter = array(
+            'creator',
+            'create_datetime'
+        );
         $Numeric = array(
             'int',
             'smallint',
             'tinyint'
         );
+        $Decimal = array(
+            'float',
+            'decimal',
+            'double'
+        );
+        $Enum = array(
+            'enum'
+        );
+
         foreach ($Table as $Key => $Value) {
             $Config = array();
             if ($Value['primary_key']) {
                 $Config['name'] = 'v';
-                $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
+                $Config['comment']  = $Value['comment'];
+                // $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
+                $Config['rules']['required'] = 'required';
                 if (in_array($Value['type'], $Numeric)) {
-                    $Config['rules']['required'] = 'required';
                     $Config['rules']['numeric'] = 'numeric';
-                    $Config['rules']['min_length'] = 'max_length[1]';
+                    $Config['rules']['min_length'] = 'min_length[1]';
+                } elseif (in_array($Value['type'], $Decimal)) {
+                    $Config['rules']['decimal'] = 'decimal';
+                    $Config['rules']['min_length'] = 'min_length[1]';
+                } elseif (in_array($Value['type'], $Enum)) {
+                    $Config['rules']['in_list'] = 'in_list[' . str_replace('\'', '', $Value['list']) . ']';
                 }
                 if ($Value['max_length'] > 0) {
                     $Config['rules']['max_length'] = 'max_length[' . $Value['max_length'] . ']';
@@ -371,13 +410,29 @@ class Generate extends MY_Controller {
             $I = explode('_', $Key);
             array_shift($I);
             $NewKey = implode('_', $I);
-            $Config['name'] = $NewKey;
-            $Config['comment']  = $NewKey;
-            if ($Value['unique']) {
-                $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
+            if (in_array($NewKey, $Filter)) {
+                continue;
             }
-            if (in_array($Value['type'], $Numeric)) {
+            $Config['name'] = $NewKey;
+            $Config['comment']  = $Value['comment'];
+            if ($Value['unique'] || $Value['primary_key']) { // 唯一性
+                $Config['rules']['required'] = 'required';
+                $Config['rules']['is_unique'] = 'is_unique[' . $TableName . '.' . $Key . ']';
+            } else {
+                if (!$Value['null'] && $Value['default'] === null) {
+                    $Config['rules']['required'] = 'required';
+                }
+            }
+            if (in_array($Value['type'], $Numeric)) { //数字类型
                 $Config['rules']['numeric'] = 'numeric';
+            } elseif (in_array($Value['type'], $Decimal)) {
+                $Config['rules']['decimal'] = 'decimal';
+                $Config['rules']['min_length'] = 'min_length[1]';
+            } elseif (in_array($Value['type'], $Enum)) {
+                $Config['rules']['in_list'] = 'in_list[' . str_replace('\'', '', $Value['list']) . ']';
+            }
+            if ($Value['type'] == 'blob') {
+                $Config['rules']['max_length'] = 'max_length[65535]';
             }
             if ($Value['max_length'] > 0) {
                 $Config['rules']['max_length'] = 'max_length[' . $Value['max_length'] . ']';
@@ -406,7 +461,10 @@ class Generate extends MY_Controller {
                     'comment' => $Value->comment,
                     'auto_increment' => $Value->auto_increment,
                     'primary_key' => $Value->primary_key,
-                    'unique' => $Value->unique
+                    'unique' => $Value->unique,
+                    'null' => $Value->null,
+                    'default' => $Value->default,
+                    'list' => $Value->list
                 );
                 if ($Value->primary_key) {
                     $Table['v'] = $Value->name;

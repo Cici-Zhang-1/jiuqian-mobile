@@ -8,15 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 优化列表
  */
 class Optimize extends MY_Controller{
-    private $_Module = 'order';
-    private $_Controller;
-    private $_Item;
-    private $_Cookie;
-    private $Search = array(
-        'sort' => '0',
-        'optimize' => '1',
-        'product' => '1',
-        'keyword' => '',
+    private $__Search = array(
+        'status' => NO,
+        'product_id' => 1
     );
     private $_ExcelTitle = array(
         '序号' => 'no',
@@ -49,12 +43,8 @@ class Optimize extends MY_Controller{
     );
     public function __construct(){
         parent::__construct();
-        $this->load->model('order/order_product_classify_model');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-        $this->_Cookie = $this->_Module.'_'.$this->_Controller.'_';
-        
         log_message('debug', 'Controller Produce/Optimize Start!');
+        $this->load->model('order/order_product_classify_model');
     }
 
     public function index(){
@@ -70,20 +60,12 @@ class Optimize extends MY_Controller{
     }
 
     public function read(){
-        $Cookie = $this->_Cookie.__FUNCTION__;
-        $this->Search = $this->get_page_conditions($Cookie, $this->Search);
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
         $Data = array();
-        if(!empty($this->Search)){
-            if(!!($Data = $this->order_product_classify_model->select_optimize($this->Search))){
-                $this->Search['pn'] = $Data['pn'];
-                $this->Search['num'] = $Data['num'];
-                $this->Search['p'] = $Data['p'];
-                $this->input->set_cookie(array('name' => $Cookie, 'value' => json_encode($this->Search), 'expire' => HOURS));
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有需要打印的清单';;
-            }
-        }else{
-            $this->Failue = '对不起, 没有符合条件的内容!';
+        if(!($Data = $this->order_product_classify_model->select_optimize($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
         }
         $this->_return($Data);
     }
@@ -110,165 +92,69 @@ class Optimize extends MY_Controller{
         $this->_return($Data);
     }
 
+    private function _pre_handle () {
+        $V = $this->input->get('v', true);
+        if (!is_array($V)) {
+            $V = explode(',', $V);
+        }
+        foreach ($V as $Key => $Value) {
+            $V[$Key] = intval(trim($Value));
+        }
+        $_POST['v'] = $V;
+        return true;
+    }
+    public function pre_download () {
+        if ($this->_pre_handle()) {
+            $V = $_POST['v'];
+            $FileName = date('Y-m-d H:i:s');
+            $this->load->model('order/order_product_board_plate_model');
+            if (!!($Query = $this->order_product_board_plate_model->select_optimize($V))) {
+                $this->_write_to_excel($Query, $FileName);
+            } else {
+                $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
+                $this->Code = EXIT_ERROR;
+            }
+        } else {
+            echo 111;
+        }
+        $this->_ajax_return();
+    }
+
     public function download(){
-        $Item = $this->_Item.__FUNCTION__;
-        $Type = $this->uri->segment(4, 'preview');
-        $Type = trim($Type);
-        $Id = $this->input->get('id', true);
-        $Id = explode(',', $Id);
-        if(is_array($Id)){
-            foreach ($Id as $key => $value){
-                $Id[$key] = intval($value);
-            }
-            $FileName = date('YmdHis', time());
+        if ($this->_pre_handle()) {
+            $V = $_POST['v'];
+            $FileName = date('Y-m-d H:i:s');
             $this->load->model('order/order_product_board_plate_model');
-            if('preview' == $Type){
-                $Query = $this->order_product_board_plate_model->select_optimize($Id);
-            }elseif ('optimize' == $Type){
-                if(!!($this->order_product_classify_model->update_optimize($Id, $FileName))){
-                    $Query = $this->order_product_board_plate_model->select_optimize($Id);
-                    
+            if (!!($this->order_product_classify_model->update_optimize($V, $FileName))) {
+                if (!!($Query = $this->order_product_board_plate_model->select_optimize($V))) {
                     $this->load->library('workflow/workflow');
-                    foreach ($Id as $key => $value){
-                        /*由于在导出给cuterite时，当前状态和下一状态可能不一致，因此分别执行*/
-                        if($this->workflow->initialize('order_product_classify', $Id)){
-                            $this->workflow->optimize();
-                        }else{
-                            $this->Failue .= $this->workflow->get_failue();
-                            $Query = false;
-                            break;
-                        }
+                    $W = $this->workflow->initialize('order_product_classify');
+                    if ($W->initialize($V)) {
+                        $W->optimize();
+                        $this->_write_to_excel($Query, $FileName);
+                    } else {
+                        $this->Message .= $W->get_failue();
+                        $this->Code = EXIT_ERROR;
                     }
-                }else{
-                    $Query = false;
+                } else {
+                    $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
+                    $this->Code = EXIT_ERROR;
                 }
-            }else{
-                $this->Failue = '您要访问的内容不存在';
-                $Query = false;
+            } else {
+                $this->Message .= '优化时，预处理板块清单时发生错误!';
+                $this->Code = EXIT_ERROR;
             }
-            if(!!($Query)){
-                $Set = array();
-                $Set[] = array_keys($this->_ExcelTitle);
-                foreach ($Query as $ikey => $ivalue){
-                    $Value = array();
-                    $ivalue['full_width'] = $ivalue['width'];
-                    $ivalue['full_length'] = $ivalue['length'];
-                    $ivalue['width'] = $ivalue['width'] - $ivalue['up_edge'] - $ivalue['down_edge'];
-                    $ivalue['length'] = $ivalue['length'] - $ivalue['left_edge'] - $ivalue['right_edge'];
-                    foreach ($this->_ExcelTitle as $kkey => $kvalue){
-                        if(empty($kvalue)){
-                            $Value[] = '';
-                        }elseif(isset($ivalue[$kvalue])){
-                            $Value[] = $ivalue[$kvalue];
-                        }else{
-                            $Value[] = $this->_default_download($kvalue, $ivalue);
-                        }
-                    }
-                    $Set[] = $Value;
-                }
-                require_once APPPATH.'/third_party/PHPExcels/PHPExcel.php';
-                $objPHPExcel = new PHPExcel();
-                $objPHPExcel->getProperties()->setCreator("9000")
-                    ->setLastModifiedBy("9000")
-                    ->setTitle("9000CuteRite")
-                    ->setSubject("9000CuteRite")
-                    ->setDescription("CuteRite,电子锯")
-                    ->setKeywords("9000 CuteRite")
-                    ->setCategory("CuteRite");
-                $objPHPExcel->setActiveSheetIndex(0);
-                $objPHPExcel->getActiveSheet()
-                    ->fromArray(
-                        $Set,  // The data to set
-                        NULL,        // Array values with this value will not be set
-                        'A1'         // Top left coordinate of the worksheet range where
-                    )->setTitle('9000CuteRite下料尺寸');
-
-                // Redirect output to a client’s web browser (Excel5)
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename="'.$FileName.'cuterite.xls"');
-                header('Cache-Control: max-age=0');
-                // If you're serving to IE 9, then the following may be needed
-                header('Cache-Control: max-age=1');
-
-                // If you're serving to IE over SSL, then the following may be needed
-                header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-                header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-                header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-                header ('Pragma: public'); // HTTP/1.0
-
-                $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-                $objWriter->save('php://output');
-            }else {
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
-            }
-        }else{
-            $this->Failue .= '请先选择订单';
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
-
-    /**
-     * 导出预处理的表格
-     * @throws PHPExcel_Exception
-     * @throws PHPExcel_Reader_Exception
-     */
-    public function produce_prehandle(){
-        $Id = $this->input->get('id', true);
-        $Id = explode(',', $Id);
-        if(is_array($Id)){
-            foreach ($Id as $key => $value){
-                $Id[$key] = intval($value);
-            }
-            $FileName = date('YmdHis', time());
-            $this->load->model('order/order_product_board_plate_model');
-
-            $Query = $this->order_product_board_plate_model->select_optimize_produce_prehandle($Id);
-
-            if(!!($Query)){
-                $this->_out_put_excel($Query, $FileName);
-            }else {
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
-            }
-        }else{
-            $this->Failue .= '请先选择订单';
-        }
-        $this->_return();
-    }
-
-    /**
-     * 预处理选择条目导出到Excel
-     * @throws PHPExcel_Exception
-     * @throws PHPExcel_Reader_Exception
-     */
-    public function produce_prehandled(){
-        $Id = $this->input->get('id', true);
-        $Id = explode(',', $Id);
-        if(is_array($Id)){
-            foreach ($Id as $key => $value){
-                $Id[$key] = intval($value);
-            }
-            $FileName = date('YmdHis', time());
-            $this->load->model('order/order_product_board_plate_model');
-
-            $Query = $this->order_product_board_plate_model->select_optimize_produce_prehandled($Id);
-
-            if(!!($Query)){
-                $this->_out_put_excel($Query, $FileName);
-            }else {
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
-            }
-        }else{
-            $this->Failue .= '请先选择订单';
-        }
-        $this->_return();
-    }
-
-    private function _out_put_excel($Query, $FileName){
+    private function _write_to_excel ($BoardPlate, $FileName) {
         $Set = array();
         $Set[] = array_keys($this->_ExcelTitle);
-        foreach ($Query as $ikey => $ivalue){
+        foreach ($BoardPlate as $ikey => $ivalue){
             $Value = array();
+            $ivalue['full_width'] = $ivalue['width'];
+            $ivalue['full_length'] = $ivalue['length'];
             $ivalue['width'] = $ivalue['width'] - $ivalue['up_edge'] - $ivalue['down_edge'];
             $ivalue['length'] = $ivalue['length'] - $ivalue['left_edge'] - $ivalue['right_edge'];
             foreach ($this->_ExcelTitle as $kkey => $kvalue){
@@ -282,7 +168,7 @@ class Optimize extends MY_Controller{
             }
             $Set[] = $Value;
         }
-        require_once APPPATH.'/third_party/PHPExcels/PHPExcel.php';
+        require_once APPPATH.'third_party/PHPExcels/PHPExcel.php';
         $objPHPExcel = new PHPExcel();
         $objPHPExcel->getProperties()->setCreator("9000")
             ->setLastModifiedBy("9000")
@@ -329,22 +215,22 @@ class Optimize extends MY_Controller{
             case 'num':
                 $Return = 1;
                 break;
-            case 'dealer':
+            /*case 'dealer':
                 if(mb_strlen($Tmp['dealers']) > 10){
                     $Dealers = explode('_', $Tmp['dealers']);
-                    if(count($Dealers) > 2){
-                        $Return = $Dealers[1];
+                    if(count($Dealers) > 4){
+                        $Return = $Dealers[3];
                     }else{
                         $Return = $Tmp['dealers'];
                     }
                 }else{
                     $Return = $Tmp['dealers'];
                 }
-                break;
+                break;*/
             case 'face':
                 if (empty($Face)) {
                     $this->load->helper('dismantle_helper');
-                    $Face = get_face();
+                    $Face = $this->_get_face();
                 }
                 if (isset($Face[$Tmp['punch'] . $Tmp['slot']])) {
                     $Return = $Face[$Tmp['punch'] . $Tmp['slot']];
@@ -356,16 +242,45 @@ class Optimize extends MY_Controller{
         }
         return $Return;
     }
-
-    /*private function _face() {
+    private function _get_face () {
         $this->load->model('data/face_model');
         $Face = array();
-        if (!!($Query = $this->face_model->select_face())) {
+        if (!!($Query = $this->face_model->select())) {
             foreach ($Query as $value) {
-                $Face[$value['wardrobe_punch'] . $value['wardrobe_slot']] = $value['flag'];
+                $Face[$value['punch'] . $value['slot']] = $value['flag'];
             }
         }
-
         return $Face;
-    }*/
+    }
+
+    /**
+     * 走推台锯，不走优化
+     */
+    public function to_board () {
+        $V = $this->input->post('v', true);
+        if (!is_array($V)) {
+            $V = explode(',', $V);
+        }
+        foreach ($V as $Key => $Value) {
+            $V[$Key] = intval(trim($Value));
+        }
+        $this->load->model('order/order_product_classify_model');
+        if (!!($Query = $this->order_product_classify_model->are_to_able($V))) {
+            foreach ($Query as $Key => $Value) {
+                $Query[$Key] = $Value['order_product_id'];
+            }
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order_product');
+            if ($W->initialize($Query)) {
+                $W->to_board();
+            } else {
+                $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']: $W->get_failue();
+                $this->Code = EXIT_ERROR;
+            }
+        } else {
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'当前状态不可以转换';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return();
+    }
 }

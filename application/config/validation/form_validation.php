@@ -16,7 +16,7 @@ $config = array(
         ),
 		'sign/in' => array(
 				array(
-						'field' => 'username',
+						'field' => 'name',
 						'label' => '用户名',
 						'rules' => 'trim|required|min_length[1]|max_length[64]'
 				),
@@ -2022,7 +2022,7 @@ $config = array(
 						'rules' => 'required|numeric|min_length[1]|max_length[10]'
 				),
 				array(
-						'field' => 'username',
+						'field' => 'name',
 						'label' => '用户名',
 						'rules' => 'trim|required|min_length[1]|max_length[64]'
 				),
@@ -2137,7 +2137,7 @@ $config = array(
                 'rules' => 'required|numeric|min_length[1]|max_length[10]'
             )
         ),
-        'order/deliveried/redelivery' => array(
+        'order/delivered/redelivery' => array(
                 array(
                     'field' => 'selected[]',
                     'label' => '重新发货的订单',

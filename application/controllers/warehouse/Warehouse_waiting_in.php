@@ -2,16 +2,20 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * { title | title | replace({'_': ' '}) } Controller
+ * Warehouse waiting in Controller
+ * 等待入库订单
  *
  * @package  CodeIgniter
  * @category Controller
  */
 class Warehouse_waiting_in extends MY_Controller {
+    private $__Search = array(
+        'start_date' => ''
+    );
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller  __construct Start!');
-        $this->load->model('warehouse/warehouse_waiting_in_model');
+        log_message('debug', 'Controller warehouse/Warehouse_waiting_in __construct Start!');
+        $this->load->model('order/order_product_model');
     }
 
     /**
@@ -29,68 +33,35 @@ class Warehouse_waiting_in extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
+        if (empty($this->_Search['start_date'])) {
+            $this->_Search['start_date'] = date('Y-m-d',strtotime('-15 days'));
+        }
         $Data = array();
-        if(!($Data = $this->warehouse_waiting_in_model->select($this->_Search))){
+        if(!($Data = $this->order_product_model->select_warehouse_waiting_in($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
+        } else {
+            foreach ($Data['content'] as $Key => $Value) {
+                $PackDetail = json_decode($Value['pack_detail'], true);
+                $Value['pack_detail'] = '';
+                if (is_array($PackDetail)) {
+                    foreach ($PackDetail as $IKey => $IValue) {
+                        if ($IValue > 0) {
+                            if ($IKey == 'thick') {
+                                $Value['pack_detail'] .= ' 厚板: ' . $IValue;
+                            } elseif ($IKey == 'thin') {
+                                $Value['pack_detail'] .= ' 薄板: ' . $IValue;
+                            } else {
+                                $Value['pack_detail'] .= '  ' . $IValue . '  ';
+                            }
+                        }
+                    }
+                }
+                $Data['content'][$Key] = $Value;
+            }
         }
         $this->_ajax_return($Data);
-    }
-
-    /**
-     *
-     * @return void
-     */
-    public function add()
-    {
-        $data = array();
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            if(!!($Cid = $this->warehouse_waiting_in_model->insert($Post))) {
-                $this->Message = '新建成功, 刷新后生效!';
-            }else{
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
-                $this->Code = EXIT_ERROR;
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-    *
-    * @return void
-    */
-    public function edit() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            $Where = $Post['v'];
-            unset($Post['v']);
-            if(!!($this->warehouse_waiting_in_model->update($Post, $Where))){
-                $this->Message = '内容修改成功, 刷新后生效!';
-            }else{
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-     *
-     * @param  int $id
-     * @return void
-     */
-    public function remove() {
-        if ($this->_do_form_validation()) {
-            $Where = $this->input->post('v', true);
-            if ($this->warehouse_waiting_in_model->delete($Where)) {
-                $this->Message = '删除成功，刷新后生效!';
-            } else {
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
-            }
-        }
-        $this->_ajax_return();
     }
 }

@@ -2,16 +2,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * { title | title | replace({'_': ' '}) } Controller
+ * Pick sheet Controller
  *
  * @package  CodeIgniter
  * @category Controller
  */
 class Pick_sheet extends MY_Controller {
+    private $__Search = array(
+        'status' => 1
+    );
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller  __construct Start!');
-        $this->load->model('warehouse/pick_sheet_model');
+        log_message('debug', 'Controller warehouse/Pick_sheet __construct Start!');
+        $this->load->model('stock/stock_outted_model');
     }
 
     /**
@@ -29,9 +32,10 @@ class Pick_sheet extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
-        if(!($Data = $this->pick_sheet_model->select($this->_Search))){
+        if(!($Data = $this->stock_outted_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }
@@ -42,12 +46,10 @@ class Pick_sheet extends MY_Controller {
      *
      * @return void
      */
-    public function add()
-    {
-        $data = array();
+    public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Cid = $this->pick_sheet_model->insert($Post))) {
+            if(!!($NewId = $this->stock_outted_model->insert($Post))) {
                 $this->Message = '新建成功, 刷新后生效!';
             }else{
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
@@ -66,7 +68,7 @@ class Pick_sheet extends MY_Controller {
             $Post = gh_escape($_POST);
             $Where = $Post['v'];
             unset($Post['v']);
-            if(!!($this->pick_sheet_model->update($Post, $Where))){
+            if(!!($this->stock_outted_model->update($Post, $Where))){
                 $this->Message = '内容修改成功, 刷新后生效!';
             }else{
                 $this->Code = EXIT_ERROR;
@@ -82,9 +84,13 @@ class Pick_sheet extends MY_Controller {
      * @return void
      */
     public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('v', true);
-            if ($this->pick_sheet_model->delete($Where)) {
+            if ($this->stock_outted_model->delete($Where)) {
                 $this->Message = '删除成功，刷新后生效!';
             } else {
                 $this->Code = EXIT_ERROR;

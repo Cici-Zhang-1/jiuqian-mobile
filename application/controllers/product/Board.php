@@ -1,232 +1,200 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年10月24日
- * @author Zhangcc
- * @version
- * @des
- * 在售板材
+ * Board Controller
+ *
+ * @package  CodeIgniter
+ * @category Controller
  */
-class Board extends MY_Controller{
-    private $_Module;
-	private $_Controller;
-	private $_Item;
-	private $_Cookie;
-	
-    public function __construct(){
+class Board extends MY_Controller {
+    private $__Search = array(
+        'status' => YES
+    );
+    public function __construct() {
         parent::__construct();
+        log_message('debug', 'Controller product/Board __construct Start!');
         $this->load->model('product/board_model');
-        $this->_Module = $this->router->directory;
-        $this->_Controller = $this->router->class;
-        $this->_Item = $this->_Module.$this->_Controller.'/';
-        
-        log_message('debug', 'Controller Product/Board Start!');
     }
 
-    public function index(){
+    /**
+    *
+    * @return void
+    */
+    public function index() {
         $View = $this->uri->segment(4, 'read');
         if(method_exists(__CLASS__, '_'.$View)){
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $Data['action'] = site_url($Item);
-            $this->load->view($Item, $Data);
+            $this->_index($View);
         }
     }
 
-    public function read(){
-        if(!!($Data = $this->board_model->select())){
-            $this->Success = '获取板材信息成功!';
-        }else{
-            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合搜索条件的板材信息';
+    public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Data = array();
+        if(!($Data = $this->board_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
         }
-        $this->_return($Data);
+        $this->_ajax_return($Data);
     }
-    
 
-    public function read_stock(){
-        if(!!($Data = $this->board_model->select_stock())){
-            $this->Success = '获取板材信息成功!';
-        }else{
-            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有符合搜索条件的板材信息';
-        }
-        $this->_return($Data);
-    }
-    
-    public function add(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Name = $this->input->post('name');
-            $Length = $this->input->post('length');
-            $Width = $this->input->post('width');
-            $ThickId = $this->input->post('thick_id');
-            $Thick = explode('-', $ThickId);
-            $NatureId = $this->input->post('nature_id');
-            $Nature = explode('-', $NatureId);
-            $ClassId = $this->input->post('class_id');
-            $Class = explode('-', $ClassId);
-            $SupplierId = $this->input->post('supplier_id');
-            $Supplier = explode('-', $SupplierId);
-            $Remark = $this->input->post('remark');
-            $ColorId = $this->input->post('color_id');
-            if('' != $Name){/*采用自定义命名方式，只能新增一个*/
-                $Color = array_shift($ColorId);
-                $ColorId = array($Color);
-                unset($Color);
-            }
-            
-            foreach ($ColorId as $key => $value){
-                $Color = explode('-', $value);
-                $Set[$key] = array(
-                    'name' => '' == $Name?(intval($Thick[1]).$Nature[1].$Color[1].$Supplier[1]):$Name,
-                    'length' => $Length,
-                    'width' => $Width,
-                    'thick_id' => $Thick[0],
-                    'color_id' => $Color[0],
-                    'nature_id' => $Nature[0],
-                    'class_id' => $Class[0],
-                    'supplier_id' => $Supplier[0],
-                    'remark' => $Remark
-                );
-            }
-            $Set = gh_escape($Set);
-            if(!!($Id = $this->board_model->insert_ignore_batch($Set))){
-                $this->Success .= '板材新增成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板材信息新增失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
-    }
-    
-    public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Name = $this->input->post('name');
-            $Length = $this->input->post('length');
-            $Width = $this->input->post('width');
-            $ThickId = $this->input->post('thick_id');
-            $Thick = explode('-', $ThickId);
-            $NatureId = $this->input->post('nature_id');
-            $Nature = explode('-', $NatureId);
-            $ClassId = $this->input->post('class_id');
-            $Class = explode('-', $ClassId);
-            $SupplierId = $this->input->post('supplier_id');
-            $Supplier = explode('-', $SupplierId);
-            $Remark = $this->input->post('remark');
-            $ColorId = $this->input->post('color_id');
-            if(count($ColorId) > 1){
-                $Color = array_shift($ColorId);
-                $ColorId = array($Color);
-                unset($Color);
-            }
-            
-            $Color = explode('-', $ColorId[0]);
-            $Set = array(
-                'name' => '' == $Name?(intval($Thick[1]).$Nature[1].$Color[1].$Supplier[1]):$Name,
-                'length' => $Length,
-                'width' => $Width,
-                'thick_id' => $Thick[0],
-                'color_id' => $Color[0],
-                'nature_id' => $Nature[0],
-                'class_id' => $Class[0],
-                'supplier_id' => $Supplier[0],
-                'remark' => $Remark
-            );
-            $Set = gh_escape($Set);
-            $where = $this->input->post('selected');
-            if(!!($this->board_model->update($Set, $where))){
-                $this->Success .= '板材信息修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板材信息修改失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
-    }
-    
     /**
-     * 批量定义板块的单价
+     *
+     * @return void
      */
-    public function unit_price(){
-        $Selected = $this->input->post('selected', true);
-        $UnitPrice = $this->input->post('unit_price', true);
-        $Selected = trim($Selected);
-        $Selected = explode(',', $Selected);
-        $UnitPrice = floatval(trim($UnitPrice));
-        $Set = array();
-        foreach ($Selected as $key => $value){
-            $value = intval(trim($value));
-            if($value > 0){
-                $Set[$key] = array(
-                    'bid' => $value,
-                    'unit_price' => $UnitPrice
-                );
-            }
-        }
-        unset($Selected);
-        if(!empty($Set)){
-            if(!!($this->board_model->update_batch($Set))){
-                $this->Success .= '板材单价修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板材单价修改失败';
-            }
-        }else{
-            $this->Failue = '请选择要修改单价的板材!';
-        }
-        $this->_return();
-    }
-    public function edit_amount(){
-        $Selected = $this->input->post('selected', true);
-        $Amount = $this->input->post('amount', true);
-        $Selected = trim($Selected);
-        $Selected = explode(',', $Selected);
-        $Amount = intval(trim($Amount));
-        $Set = array();
-        foreach ($Selected as $key => $value){
-            $value = intval(trim($value));
-            if($value > 0){
-                $Set[$key] = array(
-                    'bid' => $value,
-                    'amount' => $Amount
-                );
-            }
-        }
-        unset($Selected);
-        if(!empty($Set)){
-            if(!!($this->board_model->update_batch($Set))){
-                $this->Success .= '板材板材库存修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板材板材库存修改失败';
-            }
-        }else{
-            $this->Failue = '请选择要修改板材库存的板材!';
-        }
-        $this->_return();
-    }
-    /**
-     * 删除
-     */
-    public function remove(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            if($Where !== false && is_array($Where) && count($Where) > 0){
-                if($this->board_model->delete($Where)){
-                    $this->Success .= '板材删除成功, 刷新后生效!';
-                }else {
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板材删除失败';
+    public function add() {
+        $this->_format();
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $this->load->model('supplier/supplier_model');
+            if (!!($Supplier = $this->supplier_model->is_exist($Post['supplier_id']))) {
+                if ($Post['name'] != '') {
+                    $Post['color'] = array_pop($Post['color']);
+                    $Post['thick'] = array_pop($Post['thick']);
+                    $Post['nature'] = array_pop($Post['nature']);
+                    if(!!($NewId = $this->board_model->insert($Post))) {
+                        $this->Message = '新建成功, 刷新后生效!';
+                    }else{
+                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                        $this->Code = EXIT_ERROR;
+                    }
+                } else {
+                    $Color = $Post['color'];
+                    $Thick = $Post['thick'];
+                    $Nature = $Post['nature'];
+                    $Set = array();
+                    foreach ($Thick as $Key => $Value) {
+                        $Post['thick'] = $Value;
+                        foreach ($Nature as $Ikey => $Ivalue) {
+                            $Post['nature'] = $Ivalue;
+                            foreach ($Color as $IIkey => $IIvalue) {
+                                $Post['color'] = $IIvalue;
+                                $Post['name'] = $Value . $Ivalue . $IIvalue . $Supplier['code'];
+                                array_push($Set, $Post);
+                            }
+                        }
+                    }
+                    if(!!($this->board_model->insert_batch($Set))) {
+                        $this->Message = '新建成功, 刷新后生效!';
+                    }else{
+                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                        $this->Code = EXIT_ERROR;
+                    }
                 }
-            }else{
-                $this->Failue .= '没有可删除项!';
+            } else {
+                $this->Message = '供应商不存在!';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
+    }
+
+    /**
+    *
+    * @return void
+    */
+    public function edit() {
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->board_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    private function _format () {
+        $Thick = $this->input->post('thick', true);
+        $_POST['thick'] = explode(',', $Thick);
+        $Nature = $this->input->post('nature', true);
+        $_POST['nature'] = explode(',', $Nature);
+        $Color = $this->input->post('color', true);
+        $_POST['color'] = explode(',', $Color);
+    }
+    /**
+     *
+     * @param  int $id
+     * @return void
+     */
+    public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->board_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function start () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->board_model->update(array('status' => YES), $Where)) {
+                $this->Message = '起售成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'起售失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function stop () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->board_model->update(array('status' => NO), $Where)) {
+                $this->Message = '停售成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error'] : '停售失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
+     * 定采购价
+     */
+    public function purchase () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->board_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
     }
 }

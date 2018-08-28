@@ -1,6 +1,6 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['data/board_color_model/select_board_color'] = array(
-	'bc_id' => 'bcid',
-	'bc_name' => 'name',
-);
+$config['data/board_color_model/select'] = array(
+                                'bc_name' => array(
+                                                                    'name',                                                        'v'                                                ),                    );

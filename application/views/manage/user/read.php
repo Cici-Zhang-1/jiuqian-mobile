@@ -50,7 +50,7 @@
 					<tr class="no-data"><td colspan="9">没有数据</td></tr>
 			      	<tr class="model">
 			      		<td ><input name="uid"  type="checkbox" value=""/></td>
-						<td name="username"></td>
+						<td name="name"></td>
 						<td name="truename"></td>
 						<td name="mobilephone"></td>
 						<td name="creator"></td>

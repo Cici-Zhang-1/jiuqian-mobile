@@ -62,11 +62,26 @@ class Role_form_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $FuncVs = $this->HostDb->select('rf_func_id')->from('role_func') // Func
+                            ->where('rf_role_id', $V)->get_compiled_select();
+
+            $RoleForm = $this->HostDb->select('rf_id, rf_form_id')->from('role_form') // RoleForm
+                            ->where('rf_role_id', $V)->get_compiled_select();
             $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('form AS FORM')
+                ->join('func AS FUNC', 'FUNC.f_id = FORM.f_func_id', 'left')
+                ->join('menu', 'm_id = FUNC.f_menu_id', 'left')
+                ->join('(' . $RoleForm . ') as A', 'A.rf_form_id = FORM.f_id', 'left')
+                ->where_in('FUNC.f_id', $FuncVs, false)
+                ->order_by('m_displayorder')
+                ->order_by('FUNC.f_id')
+                ->get();
+
+            /*$Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_form')
                 ->join('form', 'f_id = rf_form_id', 'left')
                 ->where('rf_role_id', $V)
-                ->group_by('f_id')->get();
+                ->group_by('f_id')->get();*/
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -110,7 +125,7 @@ class Role_form_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_fid($Mid){
+    public function delete_by_form_v($Mid){
         if(is_array($Mid)){
             $this->HostDb->where_in('rf_form_id', $Mid);
         }else{
@@ -126,7 +141,7 @@ class Role_form_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rf_role_id', $Rid);
         }else{

@@ -38,7 +38,18 @@ class Role_func_model extends MY_Model {
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
 
-            log_message('debug', 'sssssssssssssssssssssssssssssssssssss' . $Item);
+            /*$Mids = $this->HostDb->select('m_id')->from('role_menu')
+                ->where('rm_role_id', $V)->get_compiled_select();
+
+            $RoleFunc = $this->HostDb->select('rf_id, rf_func_id')->from('role_func')
+                ->where('rf_role_id', $V)->get_compiled_select();
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('func')
+                ->join('(' . $RoleFunc . ') as A', 'A.rf_func_id = f_id', 'left')
+                ->join('menu', 'm_id = f_menu_id', 'left')
+                ->where_in('m_id', $Mids, false)
+                ->order_by('m_displayorder')
+                ->get();*/
             $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_func')
                 ->join('func', 'f_id = rf_func_id', 'left')
@@ -63,11 +74,23 @@ class Role_func_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $Mids = $this->HostDb->select('rm_menu_id')->from('role_menu') // Menu
+                ->where('rm_role_id', $V)->get_compiled_select();
+
+            $RoleFunc = $this->HostDb->select('rf_id, rf_func_id')->from('role_func') // RoleFunc
+                ->where('rf_role_id', $V)->get_compiled_select();
             $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('func')
+                ->join('menu', 'm_id = f_menu_id', 'left')
+                ->join('(' . $RoleFunc . ') as A', 'A.rf_func_id = f_id', 'left')
+                ->where_in('m_id', $Mids, false)
+                ->order_by('m_displayorder')
+                ->get();
+            /*$Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_func')
                 ->join('func', 'f_id = rf_func_id', 'left')
                 ->where('rf_role_id', $V)
-                ->group_by('f_id')->get();
+                ->group_by('f_id')->get();*/
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -111,7 +134,7 @@ class Role_func_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_fid($Where){
+    public function delete_by_func_v($Where){
         if(is_array($Where)){
             $this->HostDb->where_in('rf_func_id', $Where);
         }else{
@@ -127,7 +150,7 @@ class Role_func_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rf_role_id', $Rid);
         }else{

@@ -47,3 +47,30 @@ if (!function_exists('valid_array')) {
         return isset($Array) && is_array($Array) && count($Array) > 0;
     }
 }
+
+if (!function_exists('combos')) {
+    /**
+     * 级联多维数组
+     * @param $data
+     * @param array $all
+     * @param array $group
+     * @param null $val
+     * @param int $i
+     * @return array
+     */
+    function combos($data, &$all = array(), $group = array(), $val = null, $i = 0) {
+        if (isset($val)) {
+            array_push($group, $val);
+        }
+
+        if ($i >= count($data)) {
+            array_push($all, $group);
+        } else {
+            foreach ($data[$i] as $v) {
+                combos($data,$all, $group, $v, $i + 1);
+            }
+        }
+
+        return $all;
+    }
+}

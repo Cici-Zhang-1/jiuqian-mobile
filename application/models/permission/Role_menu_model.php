@@ -79,11 +79,10 @@ class Role_menu_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
         if($this->HostDb->insert('role_menu', $Data)){
-            log_message('debug', "Model Role_menu_model/insert_role_menu Success!");
-            $this->remove_cache('menu');
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model Role_menu_model/insert_role_menu Error");
+        } else {
+            $GLOBALS['error'] = '插入角色菜单失败!';
             return false;
         }
     }
@@ -94,11 +93,10 @@ class Role_menu_model extends MY_Model {
             $Data[$key] = $this->_format($value, $Item);
         }
         if($this->HostDb->insert_batch('role_menu', $Data)){
-            log_message('debug', "Model Role_menu_model/insert_batch Success!");
             $this->remove_cache($this->_Module);
             return true;
-        }else{
-            log_message('debug', "Model Role_menu_model/insert_batch Error");
+        } else {
+            $GLOBALS['error'] = '插入角色菜单失败!';
             return false;
         }
     }
@@ -108,7 +106,7 @@ class Role_menu_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_mid($Mid){
+    public function delete_by_menu_v($Mid){
         if(is_array($Mid)){
             $this->HostDb->where_in('rm_menu_id', $Mid);
         }else{
@@ -119,7 +117,7 @@ class Role_menu_model extends MY_Model {
         return true;
     }
 
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rm_role_id', $Rid);
         }else{

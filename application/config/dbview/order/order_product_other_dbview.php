@@ -1,27 +1,36 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['order/order_product_other_model/select_order_product_other_by_opid'] = array(
-	'opo_other_id' => 'oid',
-	'p_name' => 'type',
-	'opo_other' => 'name',
-	'opo_spec' => 'spec',
+$config['order/order_product_other_model/select'] = array(
+	'opo_id' => 'v',
+    'opo_goods_speci_id' => 'goods_speci_id',
+	'opo_other' => array('other', 'name'),
+	'opo_speci' => 'speci',
 	'opo_unit' => 'unit',
 	'opo_amount' => 'amount',
 	'opo_unit_price' => 'unit_price',
 	'opo_sum' => 'sum',
 	'opo_remark' => 'remark',
+    'op_id' => 'order_product_id',
+    'op_num' => 'num',
+    'op_product' => 'product',
+    'op_remark' => 'order_product_remark',
+    'op_pack' => 'pack',
+    'wop_label' => 'status_label',
+    'p_code' => 'code'
 );
-$config['order/order_product_other_model/select_check_by_opid'] = array(
-	'opo_id' => 'opoid',
-	'op_id' => 'opid',
-	'p_name' => 'type',
-	'opo_other' => 'other',
-	'opo_spec' => 'spec',
-	'opo_unit' => 'unit',
-	'if(opo_unit_price = 0, o_unit_price, opo_unit_price)' => 'unit_price',
-	'opo_amount' => 'amount',
-	'opo_sum' => 'sum',
-	'opo_remark' => 'remark',
-	'op_num' => 'order_product_num',
-	'op_remark' => 'remarks',
+
+$config['order/order_product_board_model/select_for_sure'] = array(
+    'opo_id' => 'v'
+);
+
+$config['order/order_product_other_model/select_by_order_product_id'] = array(
+    'opo_id' => 'v',
+    'opo_goods_speci_id' => 'goods_speci_id',
+    'opo_other' => 'other',
+    'opo_speci' => 'speci',
+    'opo_unit' => 'unit',
+    'opo_amount' => 'amount',
+    'opo_unit_price' => 'unit_price',
+    'opo_sum' => 'sum',
+    'opo_remark' => 'remark'
 );

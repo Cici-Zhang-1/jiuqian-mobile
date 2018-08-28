@@ -7,6 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 class Order_product_board extends MY_Controller{
+    private $__Search = array(
+        'order_id' => ZERO,
+        'product_id' => ZERO
+    );
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_product_board Start !');
@@ -14,33 +18,48 @@ class Order_product_board extends MY_Controller{
     }
 
     public function read(){
-        $Oid = $this->input->get('id', true);
-        $Product = $this->input->get('product', true);
-        $Product = trim($Product);
-        $Oid = intval(trim($Oid));
-        $Data = array();
-        if($Oid && $Product != false){
-            $Cache = $Oid.'_'.$Product.'_order_order_product_board';
-            $this->e_cache->open_cache();
-            $Return = array();
-            if(!($Return = $this->cache->get($Cache))){
-                if(!!($Query = $this->order_product_board_model->select_order_product_board($Oid, $Product))){
-                    $this->config->load('dbview/order');
-                    $Dbview = $this->config->item('order/order_product_board/read');
-                    foreach ($Query as $key=>$value){
-                        foreach ($Dbview as $ikey=>$ivalue){
-                            $Return[$key][$ivalue] = isset($value[$ikey])?$value[$ikey]:'';
-                        }
-                    }
-                    $this->cache->save($Cache, $Return, HOURS);
-                }else{
-                    $this->Failue .= '该订单暂时没有'.$Product.'柜体信息';
-                }
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if (empty($this->_Search['order_id'])) {
+            $OrderId = $this->input->get('v', true);
+            $OrderId = intval($OrderId);
+            if (!empty($OrderId)) {
+                $this->_Search['order_id'] = $OrderId;
             }
-            $Data['content'] = $Return;
-            unset($Return);
         }
-        $this->_return($Data);
+
+        $Data = array();
+        if (!empty($this->_Search['order_id'])) {
+            if(!($Data = $this->order_product_board_model->select($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            }
+            $Data['query']['order_id'] = $this->_Search['order_id'];
+        } else {
+            $this->Message = '请选择订单后查看板块信息';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
+    }
+
+    public function cabinet () {
+        $this->__Search['product_id'] = CABINET;
+        $this->read();
+    }
+
+    public function wardrobe () {
+        $this->__Search['product_id'] = WARDROBE;
+        $this->read();
+    }
+
+    public function door () {
+        $this->__Search['product_id'] = DOOR;
+        $this->read();
+    }
+
+    public function wood () {
+        $this->__Search['product_id'] = WOOD;
+        $this->read();
     }
     
 

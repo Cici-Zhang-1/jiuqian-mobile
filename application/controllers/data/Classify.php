@@ -1,172 +1,190 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2016年3月12日
- * @author Zhangcc
- * @version
- * @des
- * 板材归类
+ * Classify Controller
+ *
+ * @package  CodeIgniter
+ * @category Controller
  */
-class Classify extends MY_Controller{
-    private $_Module;
-    private $_Controller;
-    private $_Item ;
-    public function __construct(){
-        log_message('debug', 'Controller Data/Classify Start!');
+class Classify extends MY_Controller {
+    private $__Search = array(
+        'class' => '',
+        'parent' => ZERO
+    );
+    public function __construct() {
         parent::__construct();
+        log_message('debug', 'Controller data/Classify __construct Start!');
         $this->load->model('data/classify_model');
-        $this->_Module = $this->router->directory;
-        $this->_Controller = $this->router->class;
-        $this->_Item = $this->_Module.$this->_Controller.'/';
     }
 
-    public function index(){
+    /**
+    *
+    * @return void
+    */
+    public function index() {
         $View = $this->uri->segment(4, 'read');
         if(method_exists(__CLASS__, '_'.$View)){
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $this->data['action'] = site_url($Item);
-            $this->load->view($Item, $this->data);
+            $this->_index($View);
         }
     }
 
-    public function read(){
-        $Parent = $this->input->get('parent', true);
-        $Parent = trim($Parent);
-        if(preg_match('/\d{1,10}/', $Parent)){
-            $Pid = $Parent;
-        }elseif(is_string($Parent) && !empty($Parent)){
-            if(!($Pid = $this->classify_model->select_classify_id(gh_mysql_string($Parent)))){
-                $this->Failue = '您要查找的板块分类不存在';
+    public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if(preg_match('/^\d{1,10}$/', $this->_Search['parent'])){
+        }elseif(is_string($this->_Search['parent']) && !empty($this->_Search['parent'])){
+            if(!($this->_Search['parent'] = $this->classify_model->select_classify_id(gh_mysql_string($this->_Search['parent'])))){
+                $this->_Search['parent'] = ZERO;
             }
         }else{
-            $Pid = 0;
+            $this->_Search['parent'] = 0;
         }
-        $Return = array();
-        if(empty($this->Failue)){
-            if(!!($Query = $this->classify_model->select())){
-                foreach ($Query as $key => $value){
-                    $Data[$value['cid']] = $value;
-                    $Child[$value['parent']][] = $value['cid'];
-                }
-                ksort($Child);
-                $Child = gh_infinity_category($Child, $Pid);
-                while(list($key, $value) = each($Child)){
-                    $Return['content'][] = $Data[$value];
-                }
-            }else{
-                $this->Failue = '没有板块分类';
-            }
-        }
-        $this->_return($Return);
-    }
-    
-    public function get($Type){
-        $Type = trim($Type);
+        $Pid = $this->_Search['parent'];
         $Data = array();
-        if('label' == $Type){
-            if(!($Data = $this->classify_model->select_label())){
-                $this->Failue = '您要获取打标签的板块分类失败!';
+        if(!($Data = $this->classify_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        } else {
+            $Query = $Data['content'];
+            $TmpOne = array();
+            $TmpTwo = array();
+            $Child = array();
+            foreach ($Query as $key => $value){
+                $value = $this->_format($value);
+                $TmpOne[$value['v']] = $value;
+                $Child[$value['parent']][] = $value['v'];
             }
-        }elseif ('parents' == $Type){
-            if(!($Data = $this->classify_model->select_parents())){
-                $this->Failue = '您要获取打标签的板块分类失败!';
+            ksort($Child);
+            $Child = gh_infinity_category($Child, $Pid);
+            while(list($key, $value) = each($Child)){
+                $TmpTwo[] = $TmpOne[$value];
             }
-        }else{
-            $this->Failue = '您要获取的类型不存在!';
+            $Data['content'] = $TmpTwo;
+            unset($Query, $TmpTwo, $TmpOne, $Child);
         }
-        $this->_return($Data);
+        $this->_ajax_return($Data);
     }
 
-    public function add(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+    private function _format($Data) {
+        $Data['class_alien'] = '|';
+        for($I = 0; $I < $Data['class']; $I++) {
+            $Data['class_alien'] .=  '---';
+        }
+        return $Data;
+    }
+    /**
+     *
+     * @return void
+     */
+    public function add() {
+        if ($this->_do_form_validation()) {
+            $this->_set_parent();
             $Post = gh_escape($_POST);
-            $Process = $this->input->post('process');
-            $Process = explode(',', $Process);
-            $Process = array_unique($Process);
-            $Post['process'] = implode(',', $Process);
-            if(!empty($Post['parent'])){
-                if(!!($Parent = $this->classify_model->select_parent($Post['parent']))){
-                    $Post = array_merge($Post, $Parent);
-                }
-            }
-            if(!!($this->classify_model->insert($Post))){
-                $this->Success .= '板块分类新增成功, 刷新后生效!';
+            if(!!($NewId = $this->classify_model->insert($Post))) {
+                $this->Message = '新建成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板块分类新增失败!';
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
-    public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+    /**
+    *
+    * @return void
+    */
+    public function edit() {
+        if ($this->_do_form_validation()) {
+            $this->_set_parent();
             $Post = gh_escape($_POST);
-            $Process = $this->input->post('process');
-            $Process = explode(',', $Process);
-            $Process = array_unique($Process);
-            $Post['process'] = implode(',', $Process);
-            if(empty($Post['process'])){
-                unset($Post['process']);
-            }
-            $Selected = $Post['selected'];
-            unset($Post['selected']);
-            if(!!($this->classify_model->update($Post, $Selected))){
-                $this->Success .= '板块分类信息修改成功, 刷新后生效!';
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->classify_model->update($Post, $Where))){
+                $this->Message = '内容修改成功, 刷新后生效!';
             }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板块分类信息修改失败!';
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
-    public function act($Type){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Selected = $this->input->post('selected', true);
-            if($Selected !== false){
-                if('enable' == $Type){
-                    $Type = 1;
-                }else{
-                    $Type = 0;
-                }
-                if(!!($this->classify_model->able($Selected, $Type))){
-                    $this->Success .= '板块分类信息删除成功, 刷新后生效!';
-                }else{
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板块分类信息删除失败';
-                }
-            }else{
-                $this->Failue .= '没有可删除项!';
+    /**
+     * 根据父类信息设置flag 和class
+     */
+    private function _set_parent () {
+        if ($_POST['parent'] == ZERO) {
+            $_POST['class'] = ZERO;
+        } elseif ($Parent = $this->classify_model->is_exist($_POST['parent'])) {
+            if ($Parent['class'] == ONE) {
+                $_POST['parent'] = $Parent['parent'];
+                $_POST['flag'] = $Parent['flag'];
+                $_POST['production_line'] = $Parent['production_line'];
             }
-        }else{
-            $this->Failue .= validation_errors();
+            $_POST['class'] = ONE;
+        } else {
+            $_POST['parent'] = ZERO;
+            $_POST['class'] = ZERO;
         }
-        $this->_return();
+        return true;
     }
-    public function remove(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            if($Where !== false){
-                if(!!($this->classify_model->delete($Where))){
-                    $this->Success .= '板块分类信息删除成功, 刷新后生效!';
-                }else{
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'板块分类信息删除失败';
-                }
-            }else{
-                $this->Failue .= '没有可删除项!';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+    /**
+     *
+     * @param  int $id
+     * @return void
+     */
+    public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
         }
-        $this->_return();
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->classify_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function stop () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->classify_model->update(array('status' => NO), $Where)) {
+                $this->Message = '停用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error'] : '停用失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+    public function start () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->classify_model->update(array('status' => YES), $Where)) {
+                $this->Message = '起用成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'起用失败!';
+            }
+        }
+        $this->_ajax_return();
     }
 }

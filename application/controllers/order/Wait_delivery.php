@@ -295,13 +295,13 @@ class Wait_delivery extends MY_Controller{
                     unset($Query);
                     if(!empty($Dealer)){
                         $this->load->model('dealer/dealer_model');
-                        $this->dealer_model->update_dealer_deliveried($Dealer);
+                        $this->dealer_model->update_dealer_delivered($Dealer);
                     }
                     
                     $this->load->library('workflow/workflow');
                     if(!empty($Payed)){
                         if($this->workflow->initialize('order', $Payed)){
-                            $this->workflow->deliveried();
+                            $this->workflow->delivered();
                         }else{
                             $this->Failue .= $this->workflow->get_failue();
                         }

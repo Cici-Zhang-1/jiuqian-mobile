@@ -11,4 +11,5 @@ $config['permission/usergroup_model/update'] = array(
 	'name' => 'u_name',
 	'parent' => 'u_parent',
 	'class' => 'u_class',
+    'amount' => 'u_amount'
 );

@@ -14,7 +14,7 @@ $config['permission/menu/add'] = array(
 	array(
 		'field' => 'parent',
 		'label' => '父级',
-		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
+		'rules' => 'trim|numeric|min_length[1]|max_length[4]'
 	),
 	array(
 		'field' => 'url',
@@ -24,7 +24,7 @@ $config['permission/menu/add'] = array(
 	array(
 		'field' => 'displayorder',
 		'label' => '显示顺序',
-		'rules' => 'trim|numeric|min_length[0]|max_length[2]'
+		'rules' => 'trim|numeric|min_length[0]|max_length[4]'
 	),
 	array(
 		'field' => 'img',
@@ -32,20 +32,30 @@ $config['permission/menu/add'] = array(
 		'rules' => 'trim|min_length[0]|max_length[128]'
 	),
 	array(
-		'field' => 'type',
+		'field' => 'page_type_v',
 		'label' => '类型',
 		'rules' => 'trim|min_length[0]|max_length[32]'
 	),
 	array(
-		'field' => 'mobile',
+		'field' => 'mobile_v',
 		'label' => '移动端显示',
 		'rules' => 'trim|numeric|min_length[0]|max_length[1]'
-	)
+	),
+    array(
+        'field' => 'invisible_v',
+        'label' => '菜单内隐藏',
+        'rules' => 'trim|numeric|min_length[0]|max_length[1]'
+    ),
+    array(
+        'field' => 'home',
+        'label' => '首页',
+        'rules' => 'trim|numeric|min_length[0]|max_length[1]'
+    )
 );
 
 $config['permission/menu/edit'] = array(
 	array(
-		'field' => 'selected',
+		'field' => 'v',
 		'label' => '菜单编号',
 		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
@@ -62,7 +72,7 @@ $config['permission/menu/edit'] = array(
 	array(
 		'field' => 'parent',
 		'label' => '父级',
-		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
+		'rules' => 'trim|numeric|min_length[1]|max_length[4]'
 	),
 	array(
 		'field' => 'url',
@@ -72,28 +82,38 @@ $config['permission/menu/edit'] = array(
 	array(
 		'field' => 'displayorder',
 		'label' => '显示顺序',
-		'rules' => 'trim|numeric|min_length[0]|max_length[2]'
+		'rules' => 'trim|numeric|min_length[0]|max_length[4]'
 	),
 	array(
 		'field' => 'img',
 		'label' => '图像',
 		'rules' => 'trim|min_length[0]|max_length[128]|gh_str_replace'
 	),
-	array(
-		'field' => 'type',
-		'label' => '类型',
-		'rules' => 'trim|min_length[0]|max_length[32]'
-	),
-	array(
-		'field' => 'mobile',
-		'label' => '移动端显示',
-		'rules' => 'trim|numeric|min_length[0]|max_length[1]'
-	)
+    array(
+        'field' => 'page_type_v',
+        'label' => '类型',
+        'rules' => 'trim|min_length[0]|max_length[32]'
+    ),
+    array(
+        'field' => 'mobile_v',
+        'label' => '移动端显示',
+        'rules' => 'trim|numeric|min_length[0]|max_length[1]'
+    ),
+    array(
+        'field' => 'invisible_v',
+        'label' => '菜单内隐藏',
+        'rules' => 'trim|numeric|min_length[0]|max_length[1]'
+    ),
+    array(
+        'field' => 'home',
+        'label' => '首页',
+        'rules' => 'trim|numeric|min_length[0]|max_length[1]'
+    )
 );
 
 $config['permission/menu/remove'] = array(
 	array(
-		'field' => 'selected[]',
+		'field' => 'v[]',
 		'label' => '菜单编号',
 		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	)

@@ -2,13 +2,13 @@
 
 $config['permission/role_menu/edit'] = array(
 	array(
-		'field' => 'rid',
-		'label' => '角色',
-		'rules' => 'trim|required|min_length[1]|max_length[4]'
+		'field' => 'v[]',
+		'label' => '菜单V',
+		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
 	array(
-		'field' => 'mid[]',
-		'label' => '菜单权限',
-		'rules' => 'trim|min_length[1]|max_length[4]'
+		'field' => 'role_v',
+		'label' => '角色',
+		'rules' => 'trim|numeric|min_length[1]|max_length[4]'
 	)
 );

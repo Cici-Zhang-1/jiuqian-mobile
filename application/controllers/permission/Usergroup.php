@@ -49,46 +49,69 @@ class Usergroup extends MY_Controller{
             }
             ksort($Child);
             $Child = gh_infinity_category($Child, $this->session->userdata('ugid'));
+            $TmpDes[] = $TmpSource[$this->session->userdata('ugid')];
             while(list($key, $value) = each($Child)){
-                $TmpDes['content'][] = $TmpSource[$value];
+                $TmpDes[] = $TmpSource[$value];
             }
-            $Data['content'] = $TmpSource;
+            $Data['content'] = $TmpDes;
         }
         $this->_ajax_return($Data);
     }
 
     public function add(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Mid = $this->usergroup_model->insert($Post))){
-                $this->Success .= '用户组新增成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组新增失败!';
+            if ($Parent = $this->usergroup_model->is_exist($Post['parent'])) {
+                $Post['class'] = $Parent['class'] + 1;
             }
-        }else{
-            $this->Failue .= validation_errors();
+            if(!!($Cid = $this->usergroup_model->insert($Post))) {
+                $this->Message = '新建成功, 刷新后生效!';
+            }else{
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                $this->Code = EXIT_ERROR;
+            }
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Where = $Post['selected'];
-            unset($Post['selected']);
-            if(!!($this->usergroup_model->update($Post, $Where))){
-                $this->Success .= '用户组信息修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组信息修改失败!';
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if ($Parent = $this->usergroup_model->is_exist($Post['parent'])) {
+                $Post['class'] = $Parent['class'] + 1;
+                if(!!($this->usergroup_model->update($Post, $Where))){
+                    $this->Message = '内容修改成功, 刷新后生效!';
+                }else{
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '请选择正确的父级用户组';
             }
-        }else{
-            $this->Failue .= validation_errors();
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
+    public function remove(){
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            if ($this->usergroup_model->delete($Where)) {
+                $this->Message = '删除成功，刷新后生效!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
+            }
+        }
+        $this->_ajax_return();
+    }
+    /*
     public function remove(){
         $Item = $this->_Item.__FUNCTION__;
         if($this->form_validation->run($Item)){
@@ -107,5 +130,5 @@ class Usergroup extends MY_Controller{
             $this->Failue .= validation_errors();
         }
         $this->_return();
-    }
+    } */
 }

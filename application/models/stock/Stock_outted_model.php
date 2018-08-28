@@ -1,169 +1,178 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年12月21日
- * @author Zhangcc
- * @version
- * @des
+ * Stock_outted_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Stock_outted_model extends MY_Model{
-    private $_Module = 'stock';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
+class Stock_outted_model extends MY_Model {
     private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-        
-        log_message('debug', 'Model stock/Stock_outted_model start!');
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model stock/Stock_outted_model Start!');
     }
-    
-    public function select($Con){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+
+    /**
+     * Select from table stock_outted
+     */
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
-            if(empty($Con['pn'])){
-                $Con['pn'] = $this->_page($Con);
-            }else{
-                $this->_Num = $Con['num'];
-            }
-            if(!empty($Con['pn'])){
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $this->HostDb->select($Sql, FALSE);
-                $this->HostDb->from('stock_outted');
-                $this->HostDb->join('user', 'u_id = so_creator', 'left');
-                 
-                if(!empty($Con['keyword'])){
-                    $this->HostDb->group_start()
-                                        ->like('so_truck', $Con['keyword'])
-                                        ->or_like('so_train', $Con['keyword'])
-                                    ->group_end();
+                $this->HostDb->select($Sql)->from('stock_outted')
+                    ->join('user AS CREATOR', 'CREATOR.u_id = so_creator', 'left')
+                    ->join('user AS PRINTER', 'PRINTER.u_id = so_printer', 'left');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->like('so_end_datetime', $Search['keyword']);
                 }
-                 
-                $this->HostDb->order_by('so_end_datetime', 'desc');
-                $this->HostDb->order_by('so_truck');
-                $this->HostDb->order_by('so_train');
-                 
-                $this->HostDb->limit($Con['pagesize'], ($Con['p']-1)*$Con['pagesize']);
-                 
-                $Query = $this->HostDb->get();
-                if($Query->num_rows() > 0){
-                    $Return = array(
-                        'content' => $Query->result_array(),
-                        'num' => $this->_Num,
-                        'p' => $Con['p'],
-                        'pn' => $Con['pn']
-                    );
-                    $Query->free_result();
-                    $this->cache->save($Cache, $Return, HOURS);
-                }
-            }else{
-                $GLOBALS['error'] = '没有符合要求发货记录单!';
+                $this->HostDb->where('so_status', $Search['status']);
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('so_end_datetime', 'desc')->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MINUTES);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的出库';
             }
         }
         return $Return;
     }
 
-    private function _page($Con, $Public = false){
+    private function _page_num($Search){
         $this->HostDb->select('count(so_id) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->like('so_end_datetime', $Search['keyword']);
+        }
+        $this->HostDb->where('so_status', $Search['status']);
         $this->HostDb->from('stock_outted');
 
-        if(!empty($Con['keyword'])){
-            $this->HostDb->group_start()
-                            ->like('so_truck', $Con['keyword'])
-                            ->or_like('so_train', $Con['keyword'])
-                        ->group_end();
-        }
-    
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){
             $Row = $Query->row_array();
             $Query->free_result();
             $this->_Num = $Row['num'];
-            if(intval($Row['num']%$Con['pagesize']) == 0){
-                $Pn = intval($Row['num']/$Con['pagesize']);
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
             }else{
-                $Pn = intval($Row['num']/$Con['pagesize'])+1;
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
             }
-            log_message('debug', 'Num is '.$Row['num'].' and Pagesize is'.$Con['pagesize'].' and Page Nums is'.$Pn);
             return $Pn;
         }else{
             return false;
         }
     }
-    
+
     /**
-     * 通过Id号获取信息
-     * @param unknown $Id
+     * 判断是否已经打印了
+     * @param $V
      */
-    public function select_by_id($Id){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Id;
+    public function is_picked ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
+        if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('stock_outted');
-            $this->HostDb->join('user', 'u_id = so_creator', 'left');
-            
-            $this->HostDb->where('so_id', $Id);
-             
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
+            $Query = $this->HostDb->select($Sql)->from('stock_outted')->where('so_id', $V)
+                    ->where('so_status', 2)->limit(1)->get();
+            if ($Query->num_rows() > 0) {
                 $Return = $Query->row_array();
-                $Query->free_result();
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '获取发货记录失败!';
             }
+            $this->cache->save($Cache, $Return, MINUTES);
         }
         return $Return;
     }
+
     /**
-     * 新健订单
-     * @param unknown $Set
+     * Insert data to table stock_outted
+     * @param $Data
+     * @return Insert_id | Boolean
      */
-    public function insert($Set){
-        log_message('debug', "Model Stock_outted_model/insert_stock_outted Start");
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Module);
-        if($this->HostDb->insert('stock_outted', $Set)){
-            log_message('debug', "Model $Item Success!");
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('stock_outted', $Data)){
             $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model $Item Error");
+        } else {
+            $GLOBALS['error'] = '插入出库数据失败!';
             return false;
         }
     }
-    
-    public function update_stock_outted($Data, $Where){
+
+    /**
+     * Insert batch data to table stock_outted
+     */
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+        }
+        if($this->HostDb->insert_batch('stock_outted', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入出库数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table stock_outted
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        if(is_array($Where)){
+        if (is_array($Where)) {
             $this->HostDb->where_in('so_id', $Where);
-        }else{
-            $this->HostDb->where(array('so_id' => $Where));
-        }
-        $this->remove_cache($this->_Module);
-        return $this->HostDb->update('stock_outted', $Data);
-    }
-    
-    /**
-     * 重新发货时，则删除旧的发货记录
-     * @param unknown $Where
-     */
-    public function delete($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('so_id', $Where);
-        }else{
+        } else {
             $this->HostDb->where('so_id', $Where);
         }
+        $this->HostDb->update('stock_outted', $Data);
         $this->remove_cache($this->_Module);
-        return $this->HostDb->delete('stock_outted');
+        return true;
+    }
+
+    /**
+     * 批量更新table stock_outted
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('stock_outted', $Data, 'so_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table stock_outted
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('so_id', $Where);
+        } else {
+            $this->HostDb->where('so_id', $Where);
+        }
+
+        $this->HostDb->delete('stock_outted');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

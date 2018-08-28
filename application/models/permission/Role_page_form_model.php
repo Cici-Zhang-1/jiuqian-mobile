@@ -40,7 +40,8 @@ class Role_page_form_model extends MY_Model {
             $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_page_form')
                 ->join('page_form', 'pf_id = rpf_page_form_id', 'left')
-                ->join('menu', 'm_id = pf_menu_id', 'left')
+                ->join('form_page', 'fp_id = pf_form_page_id', 'left')
+                ->join('menu', 'm_id = fp_menu_id', 'left')
                 ->join('role', 'r_id = rpf_role_id', 'left')
                 ->join('usergroup_role', 'ur_role_id = r_id', 'left')
                 ->where('ur_usergroup_id', $V)
@@ -60,11 +61,25 @@ class Role_page_form_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $FormPageVs = $this->HostDb->select('rfp_form_page_id')->from('role_form_page') // Menu
+                                ->where('rfp_role_id', $V)->get_compiled_select();
+
+            $RolePageForm = $this->HostDb->select('rpf_id, rpf_page_form_id')->from('role_page_form') // RoleFunc
+                                ->where('rpf_role_id', $V)->get_compiled_select();
             $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('page_form')
+                ->join('form_page', 'fp_id = pf_form_page_id', 'left')
+                ->join('menu', 'm_id = fp_menu_id', 'left')
+                ->join('(' . $RolePageForm . ') as A', 'A.rpf_page_form_id = pf_id', 'left')
+                ->where_in('fp_id', $FormPageVs, false)
+                ->order_by('m_displayorder')
+                ->order_by('fp_id')
+                ->get();
+            /*$Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_page_form')
                 ->join('page_form', 'pf_id = rpf_page_form_id', 'left')
                 ->where('rpf_role_id', $V)
-                ->group_by('pf_id')->get();
+                ->group_by('pf_id')->get();*/
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -109,7 +124,7 @@ class Role_page_form_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_psid($Mid){
+    public function delete_by_page_form_v($Mid){
         if(is_array($Mid)){
             $this->HostDb->where_in('rpf_page_form_id', $Mid);
         }else{
@@ -125,7 +140,7 @@ class Role_page_form_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rpf_role_id', $Rid);
         }else{

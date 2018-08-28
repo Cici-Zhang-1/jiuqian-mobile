@@ -42,12 +42,12 @@ class Role extends MY_Controller {
      *
      * @return void
      */
-    public function add()
-    {
-        $data = array();
+    public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($Cid = $this->role_model->insert($Post))) {
+            if(!!($NewId = $this->role_model->insert($Post))) {
+                $this->load->model('permission/usergroup_role_model');
+                $this->usergroup_role_model->insert(array('role_v' => $NewId, 'usergroup_v' => SUPER_NO));
                 $this->Message = '新建成功, 刷新后生效!';
             }else{
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
@@ -82,6 +82,10 @@ class Role extends MY_Controller {
      * @return void
      */
     public function remove() {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('v', true);
             if ($this->role_model->delete($Where)) {

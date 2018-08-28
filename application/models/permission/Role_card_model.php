@@ -61,11 +61,23 @@ class Role_card_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . $V;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $Mids = $this->HostDb->select('rm_menu_id')->from('role_menu') // Menu
+                        ->where('rm_role_id', $V)->get_compiled_select();
+
+            $RoleCard = $this->HostDb->select('rc_id, rc_card_id')->from('role_card') // RoleFunc
+                            ->where('rc_role_id', $V)->get_compiled_select();
             $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('card')
+                ->join('menu', 'm_id = c_menu_id', 'left')
+                ->join('(' . $RoleCard . ') as A', 'A.rc_card_id = c_id', 'left')
+                ->where_in('m_id', $Mids, false)
+                ->order_by('m_displayorder')
+                ->get();
+            /*$Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('role_card')
                 ->join('card', 'c_id = rc_card_id', 'left')
                 ->where('rc_role_id', $V)
-                ->group_by('c_id')->get();
+                ->group_by('c_id')->get();*/
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -109,7 +121,7 @@ class Role_card_model extends MY_Model {
      * @param $Mid
      * @return bool
      */
-    public function delete_by_cid($Mid){
+    public function delete_by_card_v($Mid){
         if(is_array($Mid)){
             $this->HostDb->where_in('rc_card_id', $Mid);
         }else{
@@ -125,7 +137,7 @@ class Role_card_model extends MY_Model {
      * @param $Rid
      * @return boolean
      */
-    public function delete_by_rid($Rid) {
+    public function delete_by_role_v($Rid) {
         if(is_array($Rid)){
             $this->HostDb->where_in('rc_role_id', $Rid);
         }else{

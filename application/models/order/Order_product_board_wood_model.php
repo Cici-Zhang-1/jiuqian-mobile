@@ -1,174 +1,217 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年12月3日
- * @author Zhangcc
- * @version
- * @des
+ * Order_product_board_wood_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Order_product_board_wood_model extends MY_Model{
-    private $_Module = 'order';
-    private $_Model;
-    private $_Item;
-    private $_Cache;
+class Order_product_board_wood_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        log_message('debug', 'Model Order/Order_product_board_wood_model start!');
-        $this->e_cache->open_cache();
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_'.$this->session->userdata('uid').'_';
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model order/Order_product_board_wood_model Start!');
     }
 
     /**
-     * 通过order_product_id 获取板块信息
-     * @param unknown $Opid
+     * Select from table order_product_board_wood
      */
-    public function select_order_product_board_wood_by_opid($Where){
-        $Item = $this->_Item.__FUNCTION__;
-        if(is_array($Where)){
-            $Cache = $this->_Cache.implode('_', $Where).__FUNCTION__;
-        }else{
-            $Cache = $this->_Cache.$Where.__FUNCTION__;
-        }
-        $Return = array();
-        if(!($Return = $this->cache->get($this->_Cache))){
-            $this->HostDb->select('opbw_wood_name,opbw_wood_num,opbw_width,opbw_length,
-                opbw_thick,opbw_area,opbw_amount,opbw_punch,
-                opbw_remark,opbw_core, opbw_center, opb_board', false);
-            $this->HostDb->from('order_product_board_wood');
-            $this->HostDb->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left');
-            if(is_array($Where)){
-                $this->HostDb->where_in('opb_order_product_id', $Where);
-            }else{
-                $this->HostDb->where('opb_order_product_id', $Where);
-            }
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Query->free_result();
-                $Return = $this->_unformat($Return, $Item, $this->_Module);
-                $this->cache->save($Cache, $Return, HOURS);
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $Query = $this->HostDb->select($Sql)->from('order_product_board_wood')
+                    ->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left')
+                    ->where('opb_order_product_id', $Search['order_product_id'])
+                    ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的木框门';
             }
         }
         return $Return;
     }
 
-    public function select_order_product_board_opid($Ids){
-        $this->HostDb->select('op_id', false);
-        $this->HostDb->from('order_product_board_wood');
-        $this->HostDb->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left');
-        $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-        $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-        $this->HostDb->where_in('opbw_id', $Ids);
-        $Query = $this->HostDb->get();
+    private function _page_num($Search){
+        $Query = $this->HostDb->select('count(opbw_id) as num', FALSE)
+            ->from('order_product_board_wood')
+            ->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left')
+            ->where('opb_order_product_id', $Search['order_product_id'])
+            ->get();
+
         if($Query->num_rows() > 0){
             $Row = $Query->row_array();
-            return $Row['op_id'];
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
         }
-        return false;
     }
 
     /**
-     * 获取板材面积和
+     * 通过订单产品编号获取信息
+     * @param $Search
+     * @return array|bool
      */
-    public function select_order_product_board_wood_area($Where){
-        $this->HostDb->select('opb_id, sum(opbw_area) as opb_area, count(opbw_id) as opb_amount', false);
-        $this->HostDb->from('order_product_board_wood');
-        $this->HostDb->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left');
-        $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-        if(is_array($Where)){
-            $this->HostDb->where_in('op_order_id', $Where);
-        }else{
-            $this->HostDb->where(array('op_order_id' => $Where));
+    public function select_by_order_product_id ($Search) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product_board_wood')
+                ->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left')
+                ->where('opb_order_product_id', $Search['order_product_id'])->get();
+            if ($Query->num_rows() > 0) {
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单产品木框门信息';
+            }
         }
-        $this->HostDb->group_by('opb_id');
-        $Query = $this->HostDb->get();
-        if($Query->num_rows() > 0){
-            return $Query->result_array();
-        }
-        return false;
+        return $Return;
     }
 
-
-    public function insert_order_product_board_wood($Set){
+    /**
+     * 通过板材获取板块信息
+     * @param $OrderProductBoardId
+     * @return bool
+     */
+    public function select_by_order_product_board_id ($OrderProductBoardId) {
         $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Module);
-        if($this->HostDb->insert('order_product_board_wood', $Set)){
-            log_message('debug', "Model Order_product_board_wood_model/insert_order_product_board_wood Success!");
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $OrderProductBoardId);
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product_board_wood')
+                ->join('order_product_board', 'opb_id = opbw_order_product_board_id', 'left')
+                ->where_in('opb_id', $OrderProductBoardId)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单产品木框门信息';
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * Insert data to table order_product_board_wood
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('order_product_board_wood', $Data)){
+            $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();
-        }else{
-            log_message('debug', "Model Order_product_board_wood_model/insert_order_product_board_wood Error");
+        } else {
+            $GLOBALS['error'] = '插入木框门数据失败!';
             return false;
         }
     }
 
-    public function insert_batch($Set){
+    /**
+     * Insert batch data to table order_product_board_wood
+     */
+    public function insert_batch($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        foreach ($Set as $key => $value){
-            $Set[$key] = $this->_format($value, $Item, $this->_Module);
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
         }
-        if($this->HostDb->insert_batch('order_product_board_wood', $Set)){
-            log_message('debug', "Model Order_product_board_wood_model/insert_batch Success!");
+        if($this->HostDb->insert_batch('order_product_board_wood', $Data)){
             $this->remove_cache($this->_Module);
             return true;
-        }else{
-            log_message('debug', "Model Order_product_board_wood_model/insert_batch Error");
+        } else {
+            $GLOBALS['error'] = '插入木框门数据失败!';
             return false;
         }
     }
 
-    public function update_order_product_board_wood($Data, $Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('opbw_id', $Where);
-        }else{
-            $this->HostDb->where(array('opbw_id' => $Where));
-        }
-        return $this->HostDb->update('order_product_board_wood', $Data);
-    }
-
-    public function update_order_product_board_wood_board($Data, $Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('opbw_id', $Where);
-        }else{
-            $this->HostDb->where(array('opbw_id' => $Where));
-        }
-        return $this->HostDb->update('order_product_board_wood', array('opbw_order_product_board_id' => $Data));
-    }
     /**
-     * 删除之前的板块(修改后重新生成)
-     * @param unknown $Where
+     * Update the data of table order_product_board_wood
+     * @param $Data
+     * @param $Where
+     * @return boolean
      */
-    public function delete_by_opbid($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('opbw_order_product_board_id', $Where);
-        }else{
-            $this->HostDb->where('opbw_order_product_board_id', $Where);
+    public function update($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('opbw_id', $Where);
+        } else {
+            $this->HostDb->where('opbw_id', $Where);
         }
-        if(!!($this->HostDb->delete('order_product_board_wood'))){
-            $this->remove_cache($this->_Module);
-            return true;
-        }else{
-            return false;
-        }
-    }
-    
-    /**
-     * 删除拼框门相关内容
-     */
-    public function delete_relate($Opid){
-        if(is_array($Opid)){
-            $Where = implode(',', $Opid);
-        }else{
-            $Where = $Opid;
-        }
+        $this->HostDb->update('order_product_board_wood', $Data);
         $this->remove_cache($this->_Module);
-        return $this->HostDb->query("DELETE n9_order_product_board_wood, n9_order_product_board
-            FROM n9_order_product_board_wood LEFT JOIN n9_order_product_board ON opb_id = opbw_order_product_board_id
-            WHERE opb_order_product_id in ($Where)");
+        return true;
     }
-    private function _remove_cache(){
-        $this->load->helper('file');
-        delete_cache_files('(.*'.$this->_Module.'.*)');
+
+    /**
+     * 批量更新table order_product_board_wood
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('order_product_board_wood', $Data, 'opbw_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table order_product_board_wood
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('opbw_id', $Where);
+        } else {
+            $this->HostDb->where('opbw_id', $Where);
+        }
+
+        $this->HostDb->delete('order_product_board_wood');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+    /**
+     * 通过订单产品编号删除木框门板块
+     * @param $OrderProductId
+     * @return bool
+     */
+    public function delete_by_order_product_id ($OrderProductId) {
+        $Query = $this->HostDb->select('opb_id')->from('order_product_board')->where_in('opb_order_product_id', is_array($OrderProductId) ? $OrderProductId : array($OrderProductId))->get_compiled_select();
+        $this->HostDb->where('opbw_order_product_board_id IN (', $Query . ')', false);
+        $this->HostDb->delete('order_product_board_wood');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

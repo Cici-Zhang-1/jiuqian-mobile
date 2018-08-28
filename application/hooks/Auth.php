@@ -28,6 +28,10 @@ class Auth {
 
         /** 获取CI句柄 */
 		$this->_CI = & get_instance();
+        header("Access-Control-Allow-Origin: http://localhost:8080 ");
+        header("Access-Control-Allow-Credentials: true");
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept ");
+        header("Access-Control-Allow-Methods: GET, POST ");
     }
 	
     /**
@@ -41,13 +45,14 @@ class Auth {
 	    if(!$this->_is_sign_page()){ // 如果不是signpage就要判断用户登陆状态
 			$Message = '';
 	        if(is_null(self::$_sign_in)){
-				$Uid = $this->_CI->input->cookie('uid') || $this->_CI->input->post('access2008_cookie_uid'); // Default or Upload
+				$Uid = $this->_CI->input->cookie('uid');
+				$Uid = $Uid ? $Uid : $this->_CI->input->post('access2008_cookie_uid'); // Default or Upload
 				if (empty($Uid)) {
 					self::$_sign_in = false;
 					$Message = '请登陆系统!';
 				}else {
+                    log_message('debug', 'Sign In User Id By ' . $this->_CI->input->cookie('uid'));
 					if (!!($User = $this->_CI->user->signed_in($Uid))) {
-					    log_message('debug', 'Sign In Success By ' . $Uid);
 						self::$_sign_in = true;
 						$this->_global_session_keys();
 					}else {
@@ -59,15 +64,20 @@ class Auth {
 	        }
 
 	        if(!self::$_sign_in){
+                // gh_location('',site_url('sign/index/in'));
                 $Return = array(
                     'code' => EXIT_SIGNIN,
                     'message' => $Message
                 );
-	            if ($GLOBALS['MOBILE']) {
-                    exit(json_encode($Return));
+	            /*if ($GLOBALS['MOBILE']) {*/
+                if (isset($_GET['callback'])) {
+                    exit($_GET['callback'] . '(' .json_encode($Return) . ')');
                 } else {
-                    gh_location($Return['message'],site_url('sign/index/in'));
+                    exit(json_encode($Return));
                 }
+                /*} else {
+                    gh_location($Return['message'],site_url('sign/index/in'));
+                }*/
 	        }
 	    }
 	}
@@ -76,7 +86,8 @@ class Auth {
 	 * 判断是否是执行登录/登出操作
 	 */
 	private function _is_sign_page(){
-	    return preg_match('/^sign\/|^generate/', uri_string());
+	    // return preg_match('/^sign\/|^generate/', uri_string());
+	    return preg_match('/^sign|generate|home$/', $this->_CI->router->class);
 	}
 
     /**

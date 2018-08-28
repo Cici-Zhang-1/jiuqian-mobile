@@ -2,13 +2,13 @@
 
 $config['permission/role_visit/edit'] = array(
 	array(
-		'field' => 'rid',
+		'field' => 'role_v',
 		'label' => '角色',
-		'rules' => 'trim|required|min_length[1]|max_length[4]'
+		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	),
 	array(
-		'field' => 'vid[]',
+		'field' => 'v[]',
 		'label' => '访问控制权限',
-		'rules' => 'trim|min_length[1]|max_length[4]'
+		'rules' => 'trim|required|numeric|min_length[1]|max_length[4]'
 	)
 );

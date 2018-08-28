@@ -1,6 +1,6 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['data/board_thick_model/select_board_thick'] = array(
-	'bt_id' => 'btid',
-	'bt_name' => 'name',
-);
+$config['data/board_thick_model/select'] = array(
+                                'bt_name' => array(
+                                                                    'name',                                                        'v'                                                ),                                        'bt_thicker' => 'thicker'                    );

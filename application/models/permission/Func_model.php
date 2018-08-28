@@ -79,24 +79,6 @@ class Func_model extends MY_Model{
         }
     }
 
-    /* public function select() {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__;
-        $Return = false;
-        if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql)->from('func')
-                            ->join('menu', 'm_id = f_menu_id', 'left')
-                            ->order_by('m_displayorder')
-                            ->order_by('f_displayorder')
-                        ->get();
-            if ($Query->num_rows() > 0) {
-                $Return = $Query->result_array();
-                $this->cache->save($Cache, $Return, MONTHS);
-            }
-        }
-        return $Return;
-    } */
     /**
      * 通过用户组id获取数据
      * @param $Uid
@@ -166,7 +148,6 @@ class Func_model extends MY_Model{
                 ->where("rf_role_id in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = $Ugid)")
                 ->where('f_url', $Operation)
                 ->group_by('f_id')
-                ->order_by('f_displayorder')
                 ->get();
             if ($Query->num_rows() > 0) {
                 $Return = $Query->row_array();
@@ -309,42 +290,5 @@ class Func_model extends MY_Model{
         $this->HostDb->delete('func');
         $this->remove_cache($this->_Module);
         return true;
-    }
-
-    /**
-     * 删除菜单时，需要删除包含的功能
-     * @param $Where
-     */
-    public function delete_by_mid($Where) {
-        if (is_array($Where)) {
-            $Query = $this->HostDb->select('f_id')->from('func')
-                            ->where_in('f_menu_id', $Where)->get();
-        }else {
-            $Query = $this->HostDb->select('f_id')->from('func')
-                            ->where('f_menu_id', $Where)->get();
-        }
-        if ($Query->num_rows() > 0) {
-            $Fids = $Query->result_array();
-            $Query->free_result();
-        }else {
-            $Fids = false;
-        }
-        if(is_array($Where)){
-            $this->HostDb->where_in('f_menu_id', $Where);
-        }else{
-            $this->HostDb->where('f_menu_id', $Where);
-        }
-
-        $this->HostDb->delete('func');
-        if ($Fids) {
-            foreach ($Fids as $key => $value) {
-                $Fids[$key] = $value['f_id'];
-            }
-            $this->load->model('permission/role_func_model');
-            $this->load->model('permission/form_model');
-            return $this->role_func_model->delete_by_fid($Fids) && $this->form_model->delete_by_func_id($Fids);
-        }else {
-            return true;
-        }
     }
 }

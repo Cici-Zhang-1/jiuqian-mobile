@@ -1,97 +1,87 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-/**
- * 2015年12月18日
- * @author Zhangcc
- * @version
- * @des
- */
-class Pack_label extends MY_Controller{
-    private $_Module = 'order';
-    private $_Controller;
-    private $_Item;
-    private $_Cookie;
-    private $_Type;
-    private $_Id;
-    private $_Code;
 
-    public function __construct(){
+/**
+ * Pack label Controller
+ *
+ * @package  CodeIgniter
+ * @category Controller
+ */
+class Pack_label extends MY_Controller {
+    private $_OrderProductClassify = array();
+    private $_OrderProductBoard = array();
+    private $_Classify;
+    private $_Brothers;
+    private $_Together;
+    private $_Pack;
+    private $_Sum;
+    private $_OrderProductId;
+    private $_PackDetail;
+    public function __construct() {
         parent::__construct();
+        log_message('debug', 'Controller order/Pack_label __construct Start!');
         $this->load->model('order/order_product_model');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-        $this->_Cookie = str_replace('/', '_', $this->_Item).'_';
-        
-        log_message('debug', 'Controller Order/Pack_label Start !');
     }
 
-    public function index(){
+    /**
+    *
+    * @return void
+    */
+    public function index() {
         $View = $this->uri->segment(4, 'read');
         if(method_exists(__CLASS__, '_'.$View)){
             $View = '_'.$View;
             $this->$View();
         }else{
-            $Item = $this->_Item.$View;
-            $Data['action'] = site_url($Item);
-            $this->load->view('header2');
-            $this->load->view($Item, $Data);
+            $this->_index($View);
         }
     }
 
-    /**
-     * 读取订单的相关信息
-     */
-    public function read(){
-        $Year = $this->input->get('year', true);
-        $Month = $this->input->get('month', true);
-        $Prefix = $this->input->get('prefix', true);
-        $Middle = $this->input->get('middle', true);
-        $Code = $this->input->get('code', true); /*产品类型*/
-        $Type = $this->input->get('type', true); /*正常单、增补单*/
-        $Year = intval(trim($Year));
-        $Month = intval(trim($Month));
-        $Code = strtoupper(trim($Code));
-        $Type = strtoupper(trim($Type));
-        
+    private function _prints () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Data['action'] = site_url($Item);
+        $this->load->view('header2');
+        $this->load->view($Item, $Data);
+    }
+
+    public function read () {
         $Data = array();
-        if(preg_match('/^[\d]{4,4}$/', $Year) && preg_match('/^[\d]{1,2}$/', $Month)
-            && preg_match('/^[X]|[B]$/', $Type) && preg_match('/^[\d]{1,4}$/', $Prefix)
-            && preg_match('/^[\d]{1,10}$/', $Middle)){
-            $OrderProductNum = sprintf('%s%d%02d%04d-%s%d',$Type,$Year,$Month,$Prefix,$Code,$Middle);
-            if(!!($Data = $this->order_product_model->is_packable($OrderProductNum))){
-                $Tmp = json_decode($Data['pack_detail'], true);
+        if ($this->_do_form_validation()) {
+            $Year = $this->input->post('year', true);
+            $Month = $this->input->post('month', true);
+            $Prefix = $this->input->post('prefix', true);
+            $Middle = $this->input->post('middle', true);
+            $Code = $this->input->post('code', true); /*产品类型*/
+            $Type = $this->input->post('type', true); /*正常单、增补单*/
+            $OrderProductNum = sprintf('%s%d%02d%04d-%s%s',$Type,$Year,$Month,$Prefix,$Code,$Middle);
+            if (!!($OrderProduct = $this->order_product_model->is_exist($OrderProductNum))) {
+                $Data = $OrderProduct;
+                $Tmp = json_decode($OrderProduct['pack_detail'], true);
                 if(is_array($Tmp)){
-                    $Data = array_merge($Data, $Tmp);
+                    $Data = array_merge($OrderProduct, $Tmp);
                 }
-                if('W' == $Code || 'Y' == $Code){
-                    $Data['unscaned'] = $this->_read_unscaned($Data['opid']);
+                if (!!($OrderProductPackable = $this->_is_packable_order_product_classify($OrderProduct['v'])) || !!($OrderProductPackable = $this->_is_packable_order_product_board($OrderProduct['v']))) {
+                    $Data = array_merge($Data, $OrderProductPackable);
                     $OrderProductBrothers = sprintf('%s%d%02d%04d-%s',$Type,$Year,$Month,$Prefix,$Code);
                     $Data['brothers'] = $this->_read_brothers($OrderProductBrothers, $OrderProductNum);
+                    $this->Message= '成功获得要打印包装标签的订单';
+                } else {
+                    $this->Message = $OrderProductNum . '当前订单状态不能打包';
+                    $this->Code = EXIT_ERROR;
                 }
-                $this->Success = '成功获得要打印标签的订单';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有需要打印的清单';
+            } else {
+                $this->Message = $OrderProductNum . '当前订单不存在';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue = '您提供的信息不正确';
         }
-        $this->_return($Data);
+        $this->_ajax_return($Data);
     }
 
     /**
-     * 获得未扫描的板块的信息
-     */
-    private function _read_unscaned($Opid){
-        $this->load->model('order/order_product_board_plate_model');
-        if(!!($Unscaned = $this->order_product_board_plate_model->select_scan_lack(array(),$Opid))){
-            return $Unscaned;
-        }
-        return false;
-    }
-
-
-    /**
-     * 获取同一大订单编号下大小订单
+     * 获取兄弟类订单，用于合包
+     * @param $OrderProductBrothers
+     * @param $OrderProductNum
+     * @return bool
      */
     private function _read_brothers($OrderProductBrothers, $OrderProductNum){
         if(!!($Data = $this->order_product_model->select_brothers($OrderProductBrothers, $OrderProductNum))){
@@ -99,204 +89,264 @@ class Pack_label extends MY_Controller{
                 $Tmp = json_decode($value['pack_detail'], true);
                 if (is_array($Tmp)) {
                     $Data[$key] = array_merge($Data[$key], $Tmp);
-                 }
+                }
+                if (!!($OrderProductClassify = $this->_is_packable_order_product_classify($value['v']))) {
+                    $Data[$key] = array_merge($Data[$key], $OrderProductClassify);
+                } elseif (!!($OrProductBoard = $this->_is_packable_order_product_board($value['v']))) {
+                    $Data[$key] = array_merge($Data[$key], $OrderProductClassify);
+                }
             }
             return $Data;
         }
         return false;
     }
-    
-    private function _print(){
-        $OrderProductNum = $this->input->get('order_product_num', true);
-        $Pack = $this->input->get('pack', true);   /*获得包装件数*/
-        $Classify = $this->input->get('classify', true);    /*获得包装类型*/
-        if(empty($Classify)){
-            $Classify = 'other';
-        }
-//        $Together = $this->input->get('together', true);    /*获得包装类型*/
-//        $Together = intval(trim($Together));
-//        if(1 !== $Together){
-//            $Together = 0;
-//        }
-        $Brothers = $this->input->get('brothers', true);
-        $Brothers = trim($Brothers);
 
-        $OrderProductNum = trim($OrderProductNum);
-        $Data = array();
-        $Data['Pack'] = intval(trim($Pack)); /*包装件数*/
-        $Length = ORDER_PREFIX + ORDER_SUFFIX;
-        if(preg_match("/^(X|B)[\d]{{$Length},{$Length}}\-[A-Z][\d]{1,10}$/", $OrderProductNum) && $Data['Pack'] > 0){
-            $Item = $this->_Item.__FUNCTION__;
-            if(!!($Data['Data'] = $this->order_product_model->is_packable($OrderProductNum))){
-                $Tmp = json_decode($Data['Data']['pack_detail'], true);
-                $Cookie = $this->_Cookie.'pack_detail';
-                if(is_array($Tmp)){
-                    $Data['Data'] = array_merge($Data['Data'], $Tmp);
-                    $this->input->set_cookie(array('name' => $Cookie, 'value' => $Data['Data']['pack_detail'], 'expire' => HOURS));
-                }else{
-        	        $this->load->helper('cookie');
-                    delete_cookie($Cookie);
+    private function _is_packable_order_product_classify ($OrderProductId) {
+        $this->load->model('order/order_product_classify_model');
+        $Data = array('pack_type' => array());
+        if (!!($this->_OrderProductClassify = $this->order_product_classify_model->select_packable_by_order_product_id($OrderProductId))) {
+            foreach ($this->_OrderProductClassify as $Key => $Value) {
+                if ($Value['procedure'] == P_PACK) {
+                    array_push($Data['pack_type'], 'both');
+                    break;
+                } elseif ($Value['procedure'] == P_PACK_THICK) {
+                    array_push($Data['pack_type'], 'thick');
+                } elseif ($Value['procedure'] == P_PACK_THIN) {
+                    array_push($Data['pack_type'], 'thin');
                 }
-                $Cookie = $this->_Cookie.'classify';
-                $this->input->set_cookie(array('name' => $Cookie, 'value' => $Classify, 'expire' => HOURS));
-                $Cookie = $this->_Cookie.'brothers';
-                $this->input->set_cookie(array('name' => $Cookie, 'value' => $Brothers, 'expire' => HOURS));
-                $this->load->view('header2');
-                $this->load->view($Item,$Data);
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有需要打印的清单';
-                gh_alert_back($this->Failue);
             }
-        }else{
-            gh_alert_back('您要打印的标签内容不存在');
+            $Data['un_scanned'] = $this->_read_un_scanned($OrderProductId); // 是否缺板材
+            return $Data;
         }
+        return false;
     }
-    
-    public function edit(){
-        $Id = $this->input->post('id', true);
-        $Id = intval(trim($Id));
-        $Pack = $this->input->post('pack', true);
-        $Pack = intval(trim($Pack));
-        $this->load->helper('cookie');
-        $Cookie = $this->_Cookie.'classify';
-        $Classify = $this->input->cookie($Cookie);
-        $Cookie = $this->_Cookie.'brothers';
-        $Brothers = $this->input->cookie($Cookie);
-        $Brothers = trim($Brothers);
-        if(!empty($Brothers)){
-            $Together = true;       /*说明是合包*/
-        }else{
-            $Together = false;      /*没有合包*/
-        }
-        $Cookie = $this->_Cookie.'pack_detail';
-        $PackDetail = $this->input->cookie($Cookie); 
-        $PackDetail = json_decode($PackDetail, true);
-        unset($Cookie);
-        
-        if('both' == $Classify){   /*如果选择两个一起包, 则重置原先的*/
-            unset($PackDetail);
-        }
 
-//        if(1 === $Together){            /*当是合包的时候记录为-1*/
-//            $PackDetail[$Classify] = -1;
-//        }else{
-//            $PackDetail[$Classify] = $Pack; /*当是非合包的时候正常记录*/
-//        }
-        $PackDetail[$Classify] = $Pack;
-
-        if(in_array(0, $PackDetail)){
-            $Keep = true;
-        }else{
-            $Keep = false;
+    private function _is_packable_order_product_board ($OrderProductId) {
+        $this->load->model('order/order_product_board_model');
+        $Data = array('pack_type' => array());
+        if (!!($this->_OrderProductBoard = $this->order_product_board_model->select_packable_by_order_product_id($OrderProductId))) {
+            array_push($Data['pack_type'], 'both'); // 是否缺板材
+            return $Data;
         }
-        if($Id > 0){
-            $Sum = $PackDetail;
+        return false;
+    }
+
+    private function _read_un_scanned ($OrderProductId) {
+        $this->load->model('order/order_product_board_plate_model');
+        return $this->order_product_board_plate_model->select_un_scanned_by_order_product_id($OrderProductId);
+    }
+
+    public function prints () {
+        $this->_OrderProductId = $this->input->post('order_product_id', true);
+        $this->_Pack = $this->input->post('pack', true);
+        $this->_Classify = $this->input->post('classify', true);
+        $this->_Brothers = $this->input->post('brothers', true);
+        $this->_Together = !empty($this->_Brothers);
+
+        if (!!($OrderProduct = $this->order_product_model->is_exist('', $this->_OrderProductId))) {
+            $PackDetail = json_decode($OrderProduct['pack_detail'], true);
+            if (!is_array($PackDetail)) {
+                $PackDetail = array();
+            }
+            if ('both' == $this->_Classify) {
+                $PackDetail = array();
+                $PackDetail['both'] = $this->_Pack;
+            } else {
+                unset($PackDetail['both']);
+                $PackDetail[$this->_Classify] = $this->_Pack;
+            }
+            $Sum = array_values($PackDetail);
             foreach (array_keys($Sum, -1) as $ivalue){
                 unset($Sum[$ivalue]);
             }
-            $Set = array(
-                'pack' => array_sum($Sum),
-                'pack_detail' => json_encode($PackDetail),
-                'packer' => $this->session->userdata('uid'),
-                'pack_datetime' => date('Y-m-d H:i:s')
-            );
+            $this->_Sum = array_sum($Sum);
+            $this->_PackDetail = json_encode($PackDetail);
             unset($Sum, $PackDetail);
-
-            if(!!($this->order_product_model->update($Set, $Id))){
-                $this->load->library('workflow/workflow');
-                if($this->workflow->initialize('order_product', $Id)){
-                    if('both' == $Classify){
-                        $GLOBALS['workflow_msg'] = '打包所有, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                    }elseif ('thick' == $Classify){
-                        $GLOBALS['workflow_msg'] = '打包厚板, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                    }elseif ('thin' == $Classify){
-                        $GLOBALS['workflow_msg'] = '打包薄板, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                    }else{
-                        $GLOBALS['workflow_msg'] = '打包入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                    }
-                    
-                    if($Together){
-                        $GLOBALS['workflow_msg'] .= ', 这次为合包, 且打印包标签';
-                    }
-
-                    if($Keep){
-                        $this->workflow->pack();
-                    }else{
-                        $this->workflow->packed();
-                    }
-
-                    if ($Together){
-                        $this->_edit_brothers($Brothers, $Classify, $Pack);
-                    }
-                    $this->Success = '包装标签打印保存成功!';
-                }else{
-                    $this->Failue = $this->workflow->get_failue();
-                }
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有需要打印的清单';
+            if (!!($OrderProductClassify = $this->_is_packable_order_product_classify($this->_OrderProductId))) {
+                $this->_edit_order_product_classify();
+            } elseif (!!($OrProductBoard = $this->_is_packable_order_product_board($this->_OrderProductId))) {
+                $this->_edit_order_product_board();
+            } else {
+                $this->Message = $OrderProduct['num'] . '当前订单状态不能打包';
+                $this->Code = EXIT_ERROR;
             }
-        }else{
-            $this->Failue = '您要保存的包装标签不正确, 请检查!';
+            if ($this->Code == EXIT_SUCCESS && $this->_Together) {
+                $this->_edit_brothers();
+            }
+        } else {
+            $this->Message = '您要打包的订单不存在!';
+            $this->Code = EXIT_ERROR;
         }
-        $this->_return();
+        $this->_ajax_return();
     }
 
-    /**
-     * 当出现合包时,兄弟类的都一起处理了
-     * @param $Brothers
-     * @param $Classify
-     * @param $Pack
-     * @return bool
-     */
-    private function _edit_brothers($Brothers, $Classify, $Pack){
-        if(!is_array($Brothers)){
-            $Brothers = explode(',', $Brothers);
-        }
-        if(!!($PackDetails = $this->order_product_model->select_pack_detail_by_opids($Brothers))){
-            foreach ($PackDetails as $key => $value){
-                $PackDetail = json_decode($value['pack_detail'], true);
-                $PackDetail[$Classify] = -1;
-                if(in_array(0, $PackDetail)){
-                    $Keep = true;
-                }else{
-                    $Keep = false;
+    private function _edit_order_product_classify () {
+        $OrderProductClassifyId = array();
+        $Packed = true;
+        if ($this->_Classify == 'thick') {
+            foreach ($this->_OrderProductClassify as $Key => $Value) {
+                if ($Value['procedure'] == P_PACK_THICK) {
+                    array_push($OrderProductClassifyId, $Value['v']);
+                } else {
+                    if ($Value['pack'] == ZERO) {
+                        $Packed = false;
+                    }
                 }
-                $Sum = $PackDetail;
+            }
+        } elseif ($this->_Classify == 'thin') {
+            foreach ($this->_OrderProductClassify as $Key => $Value) {
+                if ($Value['procedure'] == P_PACK_THIN) {
+                    array_push($OrderProductClassifyId, $Value['v']);
+                } else {
+                    if ($Value['pack'] == ZERO) {
+                        $Packed = false;
+                    }
+                }
+            }
+        } else {
+            foreach ($this->_OrderProductClassify as $Key => $Value) {
+                array_push($OrderProductClassifyId, $Value['v']);
+            }
+        }
+        if (!empty($OrderProductClassifyId)) {
+            if ('thick' == $this->_Classify){
+                $Message = '打包厚板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }elseif ('thin' == $this->_Classify){
+                $Message = '打包薄板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }else{
+                $Message = '打包入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }
+            if($this->_Brothers){
+                $Message .= ', 这次为合包, 且打印包标签';
+            }
+            $this->load->library('workflow/workflow');
+            $this->load->model('order/order_product_classify_model');
+            $W = $this->workflow->initialize('order_product_classify');
+            $W->initialize($OrderProductClassifyId);
+            if ($W->packed($Message, array(
+                'pack' => $this->_Sum,
+                'pack_detail' => $this->_PackDetail,
+                'packed' => $Packed
+            ))) {
+                // $this->_edit_order_product();
+                return true;
+            } else {
+                $this->Message = $W->get_failue();
+                $this->Code = EXIT_ERROR;
+                return false;
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '没有找到相应的板块分类!';
+            return false;
+        }
+    }
+    private function _edit_order_product_board () {
+        $OrderProductBoardId = array();
+        foreach ($this->_OrderProductBoard as $Key => $Value) {
+            array_push($OrderProductBoardId, $Value['v']);
+        }
+        if (!empty($OrderProductBoardId)) {
+            if ('thick' == $this->_Classify){
+                $Message = '打包厚板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }elseif ('thin' == $this->_Classify){
+                $Message = '打包薄板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }else{
+                $Message = '打包入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+            }
+            if($this->_Brothers){
+                $Message .= ', 这次为合包, 且打印包标签';
+            }
+            $this->load->library('workflow/workflow');
+            $this->load->model('order/order_product_board_model');
+            $W = $this->workflow->initialize('order_product_board');
+            $W->initialize($OrderProductBoardId);
+            if ($W->packed($Message, array(
+                'pack' => $this->_Sum,
+                'pack_detail' => $this->_PackDetail,
+                'type' => 'other'
+            ))) {
+                // $this->_edit_order_product();
+                return true;
+            } else {
+                $this->Message = $W->get_failue();
+                $this->Code = EXIT_ERROR;
+                return false;
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '没有找到相应的板块分类!';
+            return false;
+        }
+    }
+
+    private function _edit_order_product () {
+        if ('thick' == $this->_Classify){
+            $GLOBALS['workflow_msg'] = '打包厚板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        }elseif ('thin' == $this->_Classify){
+            $GLOBALS['workflow_msg'] = '打包薄板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        }else{
+            $GLOBALS['workflow_msg'] = '打包入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        }
+        if($this->_Brothers){
+            $GLOBALS['workflow_msg'] .= ', 这次为合包, 且打印包标签';
+        }
+        $this->load->library('workflow/workflow');
+        $this->load->model('order/order_product_model');
+        $W = $this->workflow->initialize('order_product');
+        $W->initialize($this->_OrderProductId, array(
+            'pack' => $this->_Sum,
+            'pack_detail' => $this->_PackDetail
+        ));
+        if ($W->packed()) {
+            return true;
+        } else {
+            $this->Message = $W->get_failue();
+            $this->Code = EXIT_ERROR;
+            return false;
+        }
+    }
+
+    private function _edit_brothers () {
+        if(!is_array($this->_Brothers)){
+            $this->_Brothers = explode(',', $this->_Brothers);
+        }
+        $this->_Pack = -1;
+        foreach ($this->_Brothers as $Key => $Value) {
+            $this->_OrderProductId = $Value;
+            if (!!($OrderProduct = $this->order_product_model->is_exist('', $this->_OrderProductId))) {
+                $PackDetail = json_decode($OrderProduct['pack_detail'], true);
+                if (!is_array($PackDetail)) {
+                    $PackDetail = array();
+                }
+                if ('both' == $this->_Classify) {
+                    $PackDetail = array();
+                    $PackDetail['both'] = $this->_Pack;
+                } else {
+                    unset($PackDetail['both']);
+                    $PackDetail[$this->_Classify] = $this->_Pack;
+                }
+                $Sum = array_values($PackDetail);
                 foreach (array_keys($Sum, -1) as $ivalue){
                     unset($Sum[$ivalue]);
                 }
-                $Set = array(
-                    'pack' => array_sum($Sum),
-                    'pack_detail' => json_encode($PackDetail),
-                    'packer' => $this->session->userdata('uid'),
-                    'pack_datetime' => date('Y-m-d H:i:s')
-                );
+                $this->_Sum = array_sum($Sum);
+                $this->_PackDetail = json_encode($PackDetail);
                 unset($Sum, $PackDetail);
-
-                if(!!($this->order_product_model->update($Set, $value['opid']))){
-                    $this->load->library('workflow/workflow');
-                    if($this->workflow->initialize('order_product', $value['opid'])){
-                        if('both' == $Classify){
-                            $GLOBALS['workflow_msg'] = '打包所有, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                        }elseif ('thick' == $Classify){
-                            $GLOBALS['workflow_msg'] = '打包厚板, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                        }elseif ('thin' == $Classify){
-                            $GLOBALS['workflow_msg'] = '打包薄板, 入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                        }else{
-                            $GLOBALS['workflow_msg'] = '打包入库'.$Pack.'件, 总件数'.$Set['pack'].'件';
-                        }
-
-                        $GLOBALS['workflow_msg'] .= ', 这次为合包, 未打印包标签';
-
-                        if($Keep){
-                            $this->workflow->pack();
-                        }else{
-                            $this->workflow->packed();
-                        }
-                    }
+                if (!!($OrderProductClassify = $this->_is_packable_order_product_classify($this->_OrderProductId))) {
+                    $this->_edit_order_product_classify();
+                } elseif (!!($OrProductBoard = $this->_is_packable_order_product_board($this->_OrderProductId))) {
+                    $this->_edit_order_product_board();
+                } else {
+                    $this->Message = $OrderProduct['num'] . '当前订单状态不能打包';
+                    $this->Code = EXIT_ERROR;
+                    break;
                 }
+            } else {
+                $this->Message = '您要打包的订单不存在!';
+                $this->Code = EXIT_ERROR;
+                break;
             }
         }
-        return true;
     }
 }

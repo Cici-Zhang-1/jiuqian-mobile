@@ -7,526 +7,448 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 class Order_product_board_model extends MY_Model{
-	private $_Module = 'order';
-	private $_Model;
-	private $_Item;
-	private $_Cache;
-	private $_Num;
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Model = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_'.$this->session->userdata('uid').'_';
-        
+        parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model Order/Order_product_board_model start!');
     }
-    
-    /**
-     * 获取需要优化的订单产品板材
-     */
-    public function select_optimize($Con){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+
+    public function select ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
-            $Con['optimize'] = explode(',', $Con['optimize']);
-            
-            if(empty($Con['pn'])){
-                $Con['pn'] = $this->_page_optimize($Con);
-            }else{
-                $this->_Num = $Con['num'];
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('order_product_board')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('product', 'p_id = op_product_id', 'left')
+                ->join('workflow_order_product', 'wop_id = op_status', 'left')
+                ->where('op_status > ', OP_REMOVE)
+                ->where_in('op_order_id', is_array($Search['order_id']) ? $Search['order_id']: array($Search['order_id']));
+            if (!empty($Search['product_id'])) {
+                $this->HostDb->where_in('op_product_id', is_array($Search['product_id']) ? $Search['product_id'] : array($Search['product_id']));
             }
-            if(!empty($Con['pn'])){
-                $Sql = $this->_unformat_as($Item);
-                $this->HostDb->select($Sql, FALSE);
-                $this->HostDb->from('order_product_board');
-                $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-                $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-                $this->HostDb->join('user as A', 'A.u_id = opb_optimizer', 'left');
-                $this->HostDb->join('user as B', 'B.u_id = op_dismantler', 'left');
 
-                $this->HostDb->where('o_asure_datetime is not null'); /*已经确认的订单才可以导出优化文件*/
-		$this->HostDb->where('op_status >= 3');
-        	$this->HostDb->where('o_status >= 11');
-
-                $this->HostDb->where("op_product_id in ({$Con['product']})"); /*对应产品*/
-                
-                $this->HostDb->where(array('opb_amount > ' => 0)); /*板块数量大于0*/
-                
-                if(!empty($Con['keyword'])){
-                    $this->HostDb->group_start()
-                                        ->like('op_remark', $Con['keyword'])
-                                        ->or_like('o_remark', $Con['keyword'])
-                                        ->or_like('o_dealer', $Con['keyword'])
-                                        ->or_like('o_owner', $Con['keyword'])
-                                        ->or_like('op_num', $Con['keyword'])
-                                        ->or_like('opb_board', $Con['keyword'])
-                                        ->or_like('opb_optimize_datetime', $Con['keyword'])
-                                    ->group_end();
-                }
-        
-                if(2 !== count($Con['optimize'])){ /*优化状态*/
-                    if(in_array(0, $Con['optimize'])){
-                        $this->HostDb->where("(opb_optimize is null || opb_optimize = '')");
-                    }else{
-                        $this->HostDb->where("(opb_optimize is not null && opb_optimize != '')");
-                    }
-                }
-                
-                if('num' == $Con['sort']){
-                    $this->HostDb->order_by('op_num');
-                    $this->HostDb->order_by('opb_board');
-                }elseif ('board' == $Con['sort']){
-                    $this->HostDb->order_by('opb_board');
-                    $this->HostDb->order_by('op_num');
-                }elseif ('datetime' == $Con['sort']){
-                    $this->HostDb->order_by('opb_optimize_datetime', 'desc');
-                    $this->HostDb->order_by('op_num');
-                    $this->HostDb->order_by('opb_board');
-                }
-                
-                $this->HostDb->limit($Con['pagesize'], ($Con['p']-1)*$Con['pagesize']);
-                $Query = $this->HostDb->get();
-                if($Query->num_rows() > 0){
-                    $Result = $Query->result_array();
-                    $Return = array(
-                        'content' => $Result,
-                        'num' => $this->_Num,
-                        'p' => $Con['p'],
-                        'pn' => $Con['pn']
-                    );
-                    $this->cache->save($Cache, $Return, HOURS);
-                }
-            }else{
-                $GLOBALS['error'] = '没有符合要求需要优化的订单!';
+            $Query = $this->HostDb->order_by('op_product_id')->order_by('op_id')->order_by('opb_board', 'desc')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单板材信息';
             }
         }
         return $Return;
     }
-    
-    private function _page_optimize($Con){
-        $this->HostDb->select('count(opb_id) as num', FALSE);
-        $this->HostDb->from('order_product_board');
-        $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-        $this->HostDb->join('order', 'o_id = op_order_id', 'left');
 
-        $this->HostDb->where('o_asure_datetime is not null');
-	$this->HostDb->where('op_status >= 3');
-        $this->HostDb->where('o_status >= 11');
-
-        $this->HostDb->where("op_product_id in ({$Con['product']})");
-        
-        $this->HostDb->where(array('opb_amount > ' => 0));
-        
-        if(!empty($Con['keyword'])){
-            $this->HostDb->group_start()
-            ->like('op_remark', $Con['keyword'])
-            ->or_like('o_remark', $Con['keyword'])
-            ->or_like('o_dealer', $Con['keyword'])
-            ->or_like('o_owner', $Con['keyword'])
-            ->or_like('op_num', $Con['keyword'])
-            ->or_like('opb_board', $Con['keyword'])
-            ->or_like('opb_optimize_datetime', $Con['keyword'])
-            ->group_end();
-        }
-        
-        if(2 !== count($Con['optimize'])){
-            if(in_array(0, $Con['optimize'])){
-                $this->HostDb->where("(opb_optimize is null || opb_optimize = '')");
-            }else{
-                $this->HostDb->where("(opb_optimize is not null && opb_optimize != '')");
-            }
-        }
-        
-        if('num' == $Con['sort']){
-            $this->HostDb->order_by('op_num');
-            $this->HostDb->order_by('opb_board');
-        }elseif ('board' == $Con['sort']){
-            $this->HostDb->order_by('opb_board');
-            $this->HostDb->order_by('op_num');
-        }elseif ('datetime' == $Con['sort']){
-            $this->HostDb->order_by('opb_optimize_datetime', 'desc');
-            $this->HostDb->order_by('op_num');
-            $this->HostDb->order_by('opb_board');
-        }
-        $Query = $this->HostDb->get();
-        if($Query->num_rows() > 0){
-            $Row = $Query->row_array();
-            $Query->free_result();
-            $this->_Num = $Row['num'];
-            if(intval($Row['num']%$Con['pagesize']) == 0){
-                $Pn = intval($Row['num']/$Con['pagesize']);
-            }else{
-                $Pn = intval($Row['num']/$Con['pagesize'])+1;
-            }
-            log_message('debug', 'Num is '.$Row['num'].' and Pagesize is'.$Con['pagesize'].' and Page Nums is'.$Pn);
-            return $Pn;
-        }else{
-            return false;
-        }
-    }
-    
     /**
-     * 生产中用清单
-     * @param unknown $Con
+     * 根据订单产品编号获取需要确定的板材
+     * @param $OrderProductId
      */
-    public function select_produce($Con){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+    public function select_for_sure ($OrderProductId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $OrderProductId;
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
-            /* if(empty($Con['pn'])){
-                $Con['pn'] = $this->_page($Con);
-            }else{
-                $this->_Num = $Con['num'];
-            }
-            if(!empty($Con['pn'])){ */
-                $Sql = $this->_unformat_as($Item);
-                $this->HostDb->select($Sql, FALSE);
-                $this->HostDb->from('order_product_board');
-                $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-                $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-                
-                if(!empty($Con['start_date'])){  /*已确认时间为标准*/
-                    $this->HostDb->where('o_asure_datetime > ', $Con['start_date']);
-                }
-                if(!empty($Con['end_date'])){
-                    $this->HostDb->where('o_asure_datetime < ', $Con['end_date']);
-                }
-                
-                $this->HostDb->where('op_product_id', $Con['product']); /*对应订单产品*/
-                $this->HostDb->where('o_status > ', 10);   /*对应订单状态*/
-
-                if(!empty($Con['keyword'])){
-                    $this->HostDb->group_start()
-                    ->like('op_remark', $Con['keyword'])
-                    ->or_like('o_remark', $Con['keyword'])
-                    ->or_like('o_dealer', $Con['keyword'])
-                    ->or_like('o_owner', $Con['keyword'])
-                    ->or_like('op_num', $Con['keyword'])
-                    ->or_like('opb_board', $Con['keyword'])
-                    ->group_end();
-                }
-                //$this->HostDb->limit($Con['pagesize'], ($Con['p']-1)*$Con['pagesize']);
-                $Query = $this->HostDb->get();
-                if($Query->num_rows() > 0){
-                    $Result = $Query->result_array();
-                    $Return = array(
-                        'content' => $Result
-                        /* 'num' => $this->_Num,
-                        'p' => $Con['p'],
-                        'pn' => $Con['pn'] */
-                    );
-                    $this->cache->save($Cache, $Return, HOURS);
-                }
-            /* }else{
-                $GLOBALS['error'] = '没有符合要求板块统计!';
-            } */
-        }
-        return $Return;
-    }
-    
-    private function _page($Con){
-        $this->HostDb->select('count(opb_id) as num', FALSE);
-        $this->HostDb->from('order_product_board');
-        $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-        $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-        if(!empty($Con['start_date'])){  /*已确认时间为标准*/
-            $this->HostDb->where('o_asure_datetime > ', $Con['start_date']);
-        }
-        if(!empty($Con['end_date'])){
-            $this->HostDb->where('o_asure_datetime < ', $Con['end_date']);
-        }
-        
-        $this->HostDb->where('op_product_id', $Con['product']); /*对应订单产品*/
-        $this->HostDb->where('o_status > ', 10);   /*对应订单状态*/
-    
-        if(!empty($Con['keyword'])){
-            $this->HostDb->group_start()
-            ->like('op_remark', $Con['keyword'])
-            ->or_like('o_remark', $Con['keyword'])
-            ->or_like('o_dealer', $Con['keyword'])
-            ->or_like('o_owner', $Con['keyword'])
-            ->or_like('op_num', $Con['keyword'])
-            ->or_like('opb_board', $Con['keyword'])
-            ->group_end();
-        }
-        $Query = $this->HostDb->get();
-        if($Query->num_rows() > 0){
-            $Row = $Query->row_array();
-            $Query->free_result();
-            $this->_Num = $Row['num'];
-            if(intval($Row['num']%$Con['pagesize']) == 0){
-                $Pn = intval($Row['num']/$Con['pagesize']);
-            }else{
-                $Pn = intval($Row['num']/$Con['pagesize'])+1;
-            }
-            return $Pn;
-        }else{
-            return false;
-        }
-    }
-    
-    public function select_order_product_board_by_opid($Opid){
-        $Item = $this->_Item.__FUNCTION__;
-        if(is_array($Opid)){
-            $Cache = $this->_Cache.__FUNCTION__.implode('_', $Opid);
-        }else{
-            $Cache = $this->_Cache.__FUNCTION__.$Opid;
-        }
-        if(!($Return = $this->cache->get($Cache))){
-            $this->HostDb->select('opb_id, opb_board, opb_amount, opb_area, opb_unit_price, opb_sum',  FALSE);
-            $this->HostDb->from('order_product_board');
-            if(is_array($Opid)){
-                $this->HostDb->where_in('opb_order_product_id', $Opid);
-            }else{
-                $this->HostDb->where('opb_order_product_id', $Opid);
-            }
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Return = $this->_unformat($Return, $Item, $this->_Module);
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '没有符合要求的订单产品板材';
-            }
-        }
-        return $Return;
-    }
-    
-    /**
-     * 通过订单编号获取板材
-     * @param unknown $Oids
-     * @return Ambigous <multitype:, string, unknown>
-     */
-    public function select_by_oid($Oids){
-        $Item = $this->_Item.__FUNCTION__;
-        if(is_array($Oids)){
-            $Cache = $this->_Cache.__FUNCTION__.implode('_', $Oids);
-        }else{
-            $Cache = $this->_Cache.__FUNCTION__.$Oids;
-        }
-        if(!($Return = $this->cache->get($Cache))){
+        if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql, false);
-            $this->HostDb->from('order_product_board');
-            $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-            $this->HostDb->join('product', 'p_id = op_product_id', 'left');
-            if(is_array($Oids)){
-                $this->HostDb->where_in('op_order_id', $Oids);
-            }else{
-                $this->HostDb->where('op_order_id', $Oids);
-            }
-            $this->HostDb->where('op_status > 0');
-            
+            $this->HostDb->select($Sql)->from('order_product_board')
+                ->where('opb_order_product_id', $OrderProductId);
             $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
+            if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '该订单下没有符合要求的订单产品板材';
-            }
-        }
-        return $Return;
-    }
-    
-    /**
-     * 选择需要核价的板块
-     * @param unknown $Id   订单Id
-     * @param unknown $Pid  产品类型Id
-     */
-    public function select_check_by_opid($Id, $Pid){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Id.$Pid;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql,  FALSE);
-            $this->HostDb->from('order_product_board');
-            $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-            $this->HostDb->join('board', 'b_name = opb_board', 'left');
-            $this->HostDb->where(array('op_order_id' => $Id, 'op_product_id' => $Pid));
-            $this->HostDb->where('op_status != 0');
-            $this->HostDb->order_by('op_num');
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '没有符合要求的订单产品板材';
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单板材信息';
             }
         }
         return $Return;
     }
 
     /**
-     * 板块销售统计
-     * @param unknown $Con
-     */
-    public function select_board_predict($Con){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
-        if(!($Return = $this->cache->get($Cache))){
-            $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item);
-    
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('order_product_board');
-            $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-            $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-    
-            if(!empty($Con['start_date'])){
-                $this->HostDb->where('o_quoted_datetime > ', $Con['start_date']);
-            }
-    
-            if(!empty($Con['end_date'])){
-                $this->HostDb->where('o_quoted_datetime < ', $Con['end_date']);
-            }
-            $this->HostDb->where('op_status > 2'); /*订单产品已经拆单*/
-            $this->HostDb->where('o_status > 8'); /*订单产品已经确认报价*/
-    
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Query->free_result();
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '本月还没有开始销售!';
-                $Return = false;
-            }
-        }
-        return $Return;
-    }
-
-    /**
-     * 拆单面积统计
-     * @param $Con
+     * 获取板块分类是否可以打包
+     * @param $OrderProductId
      * @return bool
      */
-    public function select_dismantle_area($Con) {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
-        if(!($Return = $this->cache->get($Cache))){
-            $Item = $this->_Item.__FUNCTION__;
-            $Sql = $this->_unformat_as($Item);
-
-            $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('order_product_board');
-            $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-            $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-            $this->HostDb->join('product', 'p_id = op_product_id', 'left');
-
-            $this->HostDb->where('op_dismantler', $Con['self']);
-            if(!empty($Con['start_date'])){
-                $this->HostDb->where('o_quoted_datetime > ', $Con['start_date']);
-            }
-
-            if(!empty($Con['end_date'])){
-                $this->HostDb->where('o_quoted_datetime < ', $Con['end_date']);
-            }
-
-            $this->HostDb->where('op_status > 2'); /*已拆订单产品*/
-            $this->HostDb->where('o_status > 6'); /*已拆订单产品*/
-
-            $this->HostDb->group_by('board, op_product_id');
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Query->free_result();
-                $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '在此期间段您没有分解!';
-                $Return = false;
-            }
+    public function select_packable_by_order_product_id ($OrderProductId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where('opb_order_product_id', $OrderProductId)
+            ->where('opb_status >= ', WP_PACK)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
         }
         return $Return;
     }
-
     /**
-     * 拆单面积统计详细
-     * @param $Con
+     * 是否可以转换
+     * @param $Vs
      * @return bool
      */
-    public function select_dismantle_area_detail($Con) {
+    public function are_to_able ($Vs) {
         $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        $Cache = $this->_Cache.__FUNCTION__ . array_to_string($Vs);
+        $Return = false;
         if(!($Return = $this->cache->get($Cache))){
-            $Item = $this->_Item.__FUNCTION__;
             $Sql = $this->_unformat_as($Item);
-
             $this->HostDb->select($Sql, FALSE);
-            $this->HostDb->from('order_product_board');
-            $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-            $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-            $this->HostDb->join('product', 'p_id = op_product_id', 'left');
-
-            $this->HostDb->where('op_dismantler', $Con['self']);
-            if(!empty($Con['start_date'])){
-                $this->HostDb->where('o_quoted_datetime > ', $Con['start_date']);
-            }
-
-            if(!empty($Con['end_date'])){
-                $this->HostDb->where('o_quoted_datetime < ', $Con['end_date']);
-            }
-
-            $this->HostDb->where('op_status > 2'); /*已拆订单产品*/
-            $this->HostDb->where('o_status > 6'); /*已拆订单产品*/
-
-            $this->HostDb->order_by('op_product_id, board');
+            $this->HostDb->from('order_product_board')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->where_in('opb_id', $Vs)
+                ->where('op_status >=', OP_DISMANTLED)
+                ->where('op_status <=', OP_PRE_PRODUCING)
+                ->group_by('opc_order_product_id');
             $Query = $this->HostDb->get();
             if($Query->num_rows() > 0){
                 $Return = $Query->result_array();
-                $Query->free_result();
                 $this->cache->save($Cache, $Return, HOURS);
-            }else{
-                $GLOBALS['error'] = '在此期间段您没有分解!';
-                $Return = false;
             }
+        }
+        return $Return;
+    }
+    /**
+     * 根据订单ID获取面积
+     * @param $OrderV
+     * @return bool
+     */
+    public function select_area_by_order_v($OrderV) {
+        $Query = $this->HostDb->select_sum('opb_area')->from('order_product_board')
+            ->join('board', 'b_name = opb_board', 'left')
+            ->join('board_thick', 'bt_id = b_thick', 'left')
+            ->join('order_product', 'op_id = opb_order_product_id', 'left')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->where('o_id', $OrderV)
+            ->where('o_status >= ', O_CREATE)
+            ->where('op_status >= ', OP_CREATE)
+            ->where('bt_name > ', THICK) // 按厚板面积推荐
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->row_array();
+            return $Return['opb_area'];
+        }
+        return false;
+    }
+
+    /**
+     * 通过订单产品V获取需要走生产流水线的订单产品板块
+     * @param $OrderProductV
+     * @return bool
+     */
+    public function select_produce_process_by_order_product_v ($OrderProductV) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->join('board', 'b_name = opb_board', 'left')
+            ->join('board_thick', 'bt_id = b_thick', 'left')
+            ->where_in('opb_order_product_id', $OrderProductV)
+            ->where('bt_name > ', THICK)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    public function select_order_product_v_by_v ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_id', $V)
+            ->group_by('opb_order_product_id')->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    public function select_next_scan () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where('opb_status', OPB_SCAN)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        } else {
+            $GLOBALS['error'] = '没有等待扫描的订单产品!';
+        }
+        return $Return;
+    }
+
+    public function select_next_pack () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where('opb_status', OPB_PACK)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        } else {
+            $GLOBALS['error'] = '没有等待打包的订单产品!';
         }
         return $Return;
     }
 
     /**
-     * 判断是否存在
-     * @param unknown $Opid
-     * @param unknown $Board
+     * 判断是否是正在封边
+     * @param $V
+     * @return bool
      */
-    public function is_exist($Opid, $Board){
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__.$Opid.$Board;
+    public function is_edging ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where('opb_status', OPB_EDGING)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    public function select_user_current_work ($User, $Status) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->join('n9_workflow_order_product_board_msg', 'wopbm_order_product_board_id = opb_id && wopbm_workflow_order_product_board_id = opb_status', 'left', false)
+            ->where('wopbm_creator', $User)
+            ->where('opb_status', $Status)
+            ->group_by('opb_id')->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+    /**
+     * 判断是否是正在封边
+     * @param $V
+     * @return bool
+     */
+    public function is_status ($Vs, $Status) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where('opb_status', $Status)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    /**
+     * 判断是否是某些状态并获取兄弟
+     * @param $Vs
+     * @param $Status
+     * @return bool
+     */
+    public function is_status_and_brothers ($Vs, $Status) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Status = is_array($Status) ? $Status : array($Status);
+        $S = $this->HostDb->select('opb_order_product_id')->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where_in('opb_status', $Status)
+            ->group_by('opb_order_product_id')->get_compiled_select();
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_order_product_id', $S, false)
+            ->where_in('opb_status', $Status)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    /**
+     * 是否封边
+     * @param $Vs
+     * @return bool
+     */
+    public function are_edged_and_brothers ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $S = $this->HostDb->select('opb_order_product_id')->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where('opb_edge > ', ZERO)
+            ->where('opb_edge_datetime is not null')
+            ->group_by('opb_order_product_id')->get_compiled_select();
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_order_product_id', $S, false)
+            ->where('opb_edge > ', ZERO)
+            ->where('opb_edge_datetime is not null')->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    public function are_scanned_and_brothers ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $S = $this->HostDb->select('opb_order_product_id')->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where('opb_scan > ', ZERO)
+            ->where('opb_scan_datetime is not null')
+            ->group_by('opb_order_product_id')->get_compiled_select();
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_order_product_id', $S, false)
+            ->where('opb_scan > ', ZERO)
+            ->where('opb_scan_datetime is not null')->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+    /**
+     * 是否有兄弟元素
+     * @param $V
+     * @return bool
+     */
+    public function has_brothers ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        if (!!($Self = $this->_select_by_v($V))) {
             $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)
-                                        ->from('order_product_board')
-                                        ->where('opb_order_product_id', $Opid)
-                                        ->where('opb_board', $Board)
-                                        ->limit(1)
-                                    ->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->row_array();
-                $Query->free_result();
-                $this->cache->save($Cache, $Return, HOURS);
+                ->from('order_product_board')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->where('opb_order_product_id', $Self['order_product_id'])
+                ->get();
+            if ($Query->num_rows() > ZERO) {
+                $Return = $Query->result_array();
+            } else {
+                $GLOBALS['error'] = '没有找到相应的板材!';
             }
+        } else {
+            $GLOBALS['error'] = '没有找到相应的板材!';
         }
         return $Return;
     }
+    private function _select_by_v ($V) {
+        $Query = $this->HostDb->select('opb_order_product_id as order_product_id')
+            ->from('order_product_board')
+            ->where('opb_id', $V)
+            ->limit(ONE)
+            ->get();
+        if ($Query->num_rows() > ZERO) {
+            return $Query->row_array();
+        }
+        return false;
+    }
+
     /**
-     * 判断板材是否已经统计
-     * @param unknown $Opid order_product_id
-     * @param unknown $Board  board
-     * @return boolean|Ambigous <unknown>
+     * 获取下一工作流状态
+     * @param $Vs
+     * @return bool
+     */
+    public function select_workflow_next ($Vs) {
+        if ($Now = $this->_select_production_line($Vs)) {
+            $this->load->library('workflow/compute_workflow');
+            $this->compute_workflow->initialize($this->HostDb);
+            foreach ($Now as $Key => $Value) {
+                $Value['displayorder']++; // 下一执行工序
+                $Next = $this->compute_workflow->compute_next($Value['production_line'], $Value['displayorder']);
+                if ($Next !== false) {
+                    $Now[$Key] = array_merge($Now[$Key], $Next);
+                    continue;
+                }
+
+                unset($Now[$Key]);
+            }
+        }
+        return $Now;
+    }
+    private function _select_production_line ($Vs) {
+        $Query = $this->HostDb->select('opb_id as v, opb_production_line as production_line, opb_procedure as procedure, plp_displayorder as displayorder')
+            ->from('order_product_board')
+            ->join('j_production_line_procedure', 'plp_production_line = opb_production_line && plp_procedure = opb_procedure', 'left', false)
+            ->where_in('opb_id', $Vs)
+            ->get();
+        $Return = false;
+        if ($Query->num_rows() > ZERO) {
+            $Return = $Query->result_array();
+            $Query->free_result();
+        } else {
+            $GLOBALS['error'] = '您选择的订单产品板材不存在!';
+        }
+        return $Return;
+    }
+
+    /**
+     * 当前工作流
+     * @param $V
+     * @return bool
+     */
+    public function select_current_workflow($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)
+            ->from('order_product_board')
+            ->join('Workflow_order_product_classify', 'wopb_id = opb_status', 'left')
+            ->where('opb_id', $V)->limit(1)->get();
+        if($Query->num_rows() > 0){
+            $Return = $Query->row_array();
+            $Query->free_result();
+            return $Return;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 获取是柜体的板块
+     * @param $Vs
+     * @return bool
+     */
+    public function select_only_guiti ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)
+            ->from('order_product_board')
+            ->join('order_product', 'op_id = opb_order_product_id', 'left')
+            ->where_in('opb_id', $Vs)
+            ->where_in('op_product_id', array(CABINET, WARDROBE))
+            ->group_by('opb_id')->get();
+        if($Query->num_rows() > 0){
+            $Return = $Query->result_array();
+            $Query->free_result();
+            return $Return;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 判断订单板块是否存在
+     * @param $Opid
+     * @param $Board
+     * @return bool
      */
     public function is_existed($Opid, $Board) {
-        $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__.$Opid.$Board;
         $Return = false;
         if(!($Return = $this->cache->get($Cache))){
             $Query = $this->HostDb->select('opb_id')
-                                ->from('order_product_board')
-                                ->where('opb_order_product_id', $Opid)
-                                ->where('opb_board', $Board)
-                                ->limit(1)
-                            ->get();
+                ->from('order_product_board')
+                ->where('opb_order_product_id', $Opid)
+                ->where('opb_board', $Board)
+                ->limit(1)
+                ->get();
             if($Query->num_rows() > 0){
                 $Row = $Query->row_array();
                 $Query->free_result();
@@ -534,139 +456,84 @@ class Order_product_board_model extends MY_Model{
                 $this->cache->save($Cache, $Return, HOURS);
             }
         }
-    	return $Return;
+        return $Return;
     }
 
-    public function select_status($Ids){
-    	$Query = $this->HostDb->select('opb_id, opb_status')->from('order_product_board')->where_in('opb_id', $Ids)->get();
-    	if($Query->num_rows() > 0){
-    		$Return = $Query->result_array();
-    		$Return = $this->_unformat($Return, $this->_Item.__FUNCTION__, $this->_Module);
-    		return $Return;
-    	}else{
-    		return false;
-    	}
-    }
-    
-    public function insert($Set){
-    	$Item = $this->_Item.__FUNCTION__;
-    	$Set = $this->_format($Set, $Item, $this->_Module);
-    	if($this->HostDb->insert('order_product_board', $Set)){
-    		log_message('debug', "Model $Item Success!");
-    		$this->remove_cache($this->_Module);
-    		return $this->HostDb->insert_id();
-    	}else{
-    		log_message('debug', "Model $Item Error");
-    		return false;
-    	}
-    }
-    
     /**
-     * 删除无用的板材统计(之前有过统计，但现在又修改)
-     * @param unknown $Opid
-     * @param unknown $Opbids
+     * 插入数据
+     * @param $Data
+     * @return bool
      */
-    public function delete_not_in($Opid, $Opbids){
-    	$this->HostDb->where('opb_order_product_id', $Opid);
-    	$this->HostDb->where_not_in('opb_id', $Opbids);
-    	$this->remove_cache($this->_Module);
-    	return $this->HostDb->delete('order_product_board');
-    }
-    
-    public function update($Data, $Where){
+    public function insert ($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Data = $this->_format_re($Data, $Item);
-        if(is_array($Where)){
-            $this->HostDb->where('opb_id', $Where);
-        }else{
-            $this->HostDb->where('opb_id', $Where);
-        }
-        $this->HostDb->update('order_product_board', $Data);
-        log_message('debug', "Model Order_product_board_model/update_batch!");
-        $this->remove_cache($this->_Module);
-        return true;
-    }
-    /**
-     * 更新已统计的板材的信息
-     * @param unknown $Data
-     * @return boolean
-     */
-    public function update_batch($Data){
-    	$Item = $this->_Item.__FUNCTION__;
-    	foreach ($Data as $key => $value){
-    		$Data[$key] = $this->_format_re($value, $Item, $this->_Module);
-    	}
-    	$this->HostDb->update_batch('order_product_board', $Data, 'opb_id');
-    	log_message('debug', "Model Order_product_board_model/update_batch!");
-    	$this->remove_cache($this->_Module);
-    	return true;
-    }
-
-    /**
-     * 由于优化进行更新标志
-     * @param unknown $Ids 订单产品板材id
-     * @param unknown $Time 优化批次
-     * @return array $Return 订单产品编号
-     */
-    public function update_optimize($Ids, $Time){
-        $OrderProductBoard = array();
-        $Shift = array(); /*不同的订单产品进行区分-标志*/
-        $Return = array();
-        $Query = $this->HostDb->select('opb_id, op_id')
-                            ->from('order_product_board')
-                            ->join('order_product', 'op_id = opb_order_product_id', 'left')
-                            ->order_by('op_num')
-                            ->where_in('opb_id', $Ids)
-                            ->get();
-        if($Query->num_rows() > 0){
-            $Oids = $Query->result_array();
-            $Query->free_result();
-            
-            $Num = 1;
-            $Uid = $this->session->userdata('uid');
-            foreach ($Oids as $key => $value){
-                if(!isset($Shift[$value['op_id']])){
-                    $Shift[$value['op_id']] = $Num++;
-                }
-                $OrderProductBoard[] = array(
-                    'opb_id' => $value['opb_id'],
-                    'opb_optimize' => $Shift[$value['op_id']],
-                    'opb_optimizer' => $Uid,
-                    'opb_optimize_datetime' => $Time
-                );
-                $Return[] = $value['op_id'];
-            }
-            $this->HostDb->update_batch('order_product_board', $OrderProductBoard, 'opb_id');
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('order_product_board', $Data)){
             $this->remove_cache($this->_Module);
-            $Return = array_unique($Return);
-            return $Return;
-        }else{
-            $GLOBALS['error'] = '您要查看优化的订单不存在';
+            return $this->HostDb->insert_id();
+        } else {
+            $GLOBALS['error'] = '插入MRP数据失败!';
             return false;
         }
     }
     /**
-     * 增加数据, BD文件导入时，需要一条一条的导入
-     * 如果需要重新导入，则需要清除数据
-     * @param unknown $Data
-     * @param unknown $Where
+     * 更新内容
+     * @param $Data
+     * @param $Where
+     * @return bool
      */
-    public function update_increase($Data, $Where){
-        return $this->HostDb->query("UPDATE n9_order_product_board set opb_amount = opb_amount + {$Data['amount']}
-                                        , opb_area = opb_area + {$Data['area']} where opb_id = {$Where}");
-    }
-    
-    public function update_status($Data){
+    public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
-        foreach ($Data as $key => $value){
-            $Data[$key] = $this->_format($value, $Item, $this->_Module);
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('opb_id', $Where);
+        } else {
+            $this->HostDb->where('opb_id', $Where);
         }
-        $this->_remove_cache();
-        return $this->HostDb->update_batch('order_product_board', $Data, 'opb_id');
+        $this->HostDb->update('order_product_board', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
     }
 
-    private function _remove_cache(){
-    	$this->load->helper('file');
-    	delete_cache_files('(.*'.$this->_Module.'.*)');
+    /**
+     * 批量更新
+     * @param $Data
+     * @return bool
+     */
+    public function update_batch($Data){
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('order_product_board', $Data, 'opb_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 清除板块信息
+     * @param $OrderProductId
+     * @return mixed
+     */
+    public function delete_by_order_product_id ($OrderProductId) {
+        $this->HostDb->where_in('opb_order_product_id', is_array($OrderProductId) ? $OrderProductId : array($OrderProductId));
+        $this->remove_cache($this->_Module);
+        return $this->HostDb->delete('order_product_board');
+    }
+    public function delete_not_in ($OrderProductId, $OrderProductBoardIds) {
+        $this->HostDb->where('opb_order_product_id', $OrderProductId);
+        $this->HostDb->where_not_in('opb_id', $OrderProductBoardIds);
+        $this->remove_cache($this->_Module);
+        return $this->HostDb->delete('order_product_board');
+    }
+
+    public function clear ($Where) {
+        if (is_array($Where)) {
+            $this->HostDb->where_in('opb_order_product_id', $Where);
+        } else {
+            $this->HostDb->where('opb_order_product_id', $Where);
+        }
+        $this->HostDb->update('order_product_board', array('opb_status' => ZERO, 'opb_procedure' => ZERO, 'opb_production_line' => ZERO, 'opb_print' => ZERO, 'opb_print_datetime' => null));
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

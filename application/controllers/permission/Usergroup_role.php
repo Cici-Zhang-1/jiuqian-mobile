@@ -45,6 +45,7 @@ class Usergroup_role extends MY_Controller {
                             }
                         }
                     }
+                    $Data['query']['usergroup_v'] = $Usergroup['v'];
                     $Data['content'] = $ParentUsergroupRole;
                     $Data['num'] = count($ParentUsergroupRole);
                     $Data['p'] = ONE;
@@ -61,65 +62,23 @@ class Usergroup_role extends MY_Controller {
         $this->_ajax_return($Data);
     }
 
-
-    public function add(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Post = gh_escape($_POST);
-            if(!!($Id = $this->usergroup_role_model->insert($Post))){
-                $this->Success .= '用户组-角色新增成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组-角色新增失败';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
-    }
-
     public function edit(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($this->usergroup_role_model->delete_by_uid($Post['uid']))){
-                if (isset($Post['rid'])) {
-                    $Data = array();
-                    foreach ($Post['rid'] as $key => $value) {
-                        $Data[] = array(
-                            'rid' => $value,
-                            'uid' => $Post['uid']
-                        );
-                    }
-                    $this->usergroup_role_model->insert_batch($Data);
-                }
-                $this->Success .= '用户组-角色修改成功, 刷新后生效!';
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组-角色修改失败';
+            $this->usergroup_role_model->delete_by_usergroup_v($Post['usergroup_v']);
+            foreach ($Post['v'] as $Key => $Value) {
+                $Data[] = array(
+                    'usergroup_v' => $Post['usergroup_v'],
+                    'role_v' => $Value
+                );
             }
-        }else{
-            $this->Failue .= validation_errors();
+            $this->usergroup_role_model->insert_batch($Data);
+            $this->Message = '内容修改成功, 刷新后生效!';
         }
-        $this->_return();
-    }
-    /**
-     * 删除
-     */
-    public function remove(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            if($Where !== false && is_array($Where) && count($Where) > 0){
-                if($this->usergroup_role_model->delete($Where)){
-                    $this->Success .= '用户组-角色删除成功, 刷新后生效!';
-                }else {
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'用户组-角色删除失败';
-                }
-            }else{
-                $this->Failue .= '没有可删除项!';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
+        $this->_ajax_return();
     }
 }

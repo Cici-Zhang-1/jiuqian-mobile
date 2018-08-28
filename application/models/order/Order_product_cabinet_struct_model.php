@@ -1,93 +1,175 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- * 2015年11月14日
- * @author Administrator
- * @version
- * @des
+ * Order_product_cabinet_struct_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Order_product_cabinet_struct_model extends MY_Model{
-	private $_Module = 'order';
-	private $_Model = 'order_product_cabinet_struct_model';
-	private $_Item;
-	private $_Cache;
+class Order_product_cabinet_struct_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        log_message('debug', 'Model Order/Order_product_cabinet_struct_model start!');
-        $this->e_cache->open_cache();
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_'.$this->session->userdata('uid').'_';
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model order/Order_product_cabinet_struct_model Start!');
     }
+
     /**
-     * 通过order_product_id获取橱柜柜体结构
-     * @param unknown $Id
+     * Select from table order_product_cabinet_struct
      */
-    public function select_order_product_cabinet_struct_by_opid($Id){
-        $Item =  $this->_Item.__FUNCTION__;
-        if(is_array($Id)){
-            $Cache = $this->_Cache.implode('_', $Id).__FUNCTION__;
-        }else{
-            $Cache = $this->_Cache.$Id.__FUNCTION__;
-        }
-        $Return = array();
-        if(!($Return = $this->cache->get($this->_Cache))){
-            $this->HostDb->select('opcs_id, opcs_order_product_id, b_id, b_name, 
-                opcs_struct,opcs_dgjg, opcs_dgqc, opcs_dghc, opcs_facefb', false);
-            $this->HostDb->from('order_product_cabinet_struct');
-            $this->HostDb->join('board', 'b_id = opcs_board_id', 'left');
-            if(is_array($Id)){
-                $this->HostDb->where_in('opcs_order_product_id', $Id);
-            }else{
-                $this->HostDb->where('opcs_order_product_id', $Id);
-            }
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Query->free_result();
-                $Return = $this->_unformat($Return, $Item, $this->_Module);
-                $Return = array_shift($Return);
-                $this->cache->save($Cache, $Return, HOURS);
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order_product_cabinet_struct');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的橱柜柜体结构';
             }
         }
         return $Return;
     }
-    public function select_order_product_cabinet_struct_opid($Ids){
-        $this->HostDb->select('op_id', false);
-        $this->HostDb->from('order_product_board_plate');
-        $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
-        $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
-        $this->HostDb->join('order', 'o_id = op_order_id', 'left');
-        $this->HostDb->where_in('opbp_id', $Ids);
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(opcs_id) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+        }
+        $this->HostDb->from('order_product_cabinet_struct');
+
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){
             $Row = $Query->row_array();
-            return $Row['op_id'];
-        }
-        return false;
-    }
-
-
-    public function insert($Set){
-        $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Module);
-        if($this->HostDb->insert('order_product_cabinet_struct', $Set)){
-            log_message('debug', "Model Order_product_cabinet_struct_model/insert Success!");
-            $this->remove_cache($this->_Module);
-            return $this->HostDb->insert_id();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
         }else{
-            log_message('debug', "Model Order_product_cabinet_struct_model/insert Error");
             return false;
         }
     }
 
-    public function update($Set, $Where) {
-    	$Item = $this->_Item.__FUNCTION__;
-    	$Set = $this->_format_re($Set, $Item, $this->_Module);
-    	$this->HostDb->where('opcs_id',$Where);
-    	$this->HostDb->update('order_product_cabinet_struct', $Set);
-    	log_message('debug', "Model Order_product_cabinet_struct_model/update");
-    	$this->remove_cache($this->_Module);
-    	return true;
+    /**
+     * 获取单独结构
+     * @param $Search
+     * @return bool
+     */
+    public function select_one ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product_cabinet_struct')
+                        ->where('opcs_order_product_id', $Search['order_product_id'])
+                        ->limit(ONE)
+                        ->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的橱柜柜体结构';
+            }
+        }
+        return $Return;
     }
-    
+    /**
+     * Insert data to table order_product_cabinet_struct
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('order_product_cabinet_struct', $Data)){
+            $this->remove_cache($this->_Module);
+            return $this->HostDb->insert_id();
+        } else {
+            $GLOBALS['error'] = '插入橱柜柜体结构数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Insert batch data to table order_product_cabinet_struct
+     */
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
+        }
+        if($this->HostDb->insert_batch('order_product_cabinet_struct', $Data)){
+            $this->remove_cache($this->_Module);
+            return true;
+        } else {
+            $GLOBALS['error'] = '插入橱柜柜体结构数据失败!';
+            return false;
+        }
+    }
+
+    /**
+     * Update the data of table order_product_cabinet_struct
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('opcs_id', $Where);
+        } else {
+            $this->HostDb->where('opcs_id', $Where);
+        }
+        $this->HostDb->update('order_product_cabinet_struct', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 批量更新table order_product_cabinet_struct
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('order_product_cabinet_struct', $Data, 'opcs_id');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table order_product_cabinet_struct
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('opcs_id', $Where);
+        } else {
+            $this->HostDb->where('opcs_id', $Where);
+        }
+
+        $this->HostDb->delete('order_product_cabinet_struct');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
 }

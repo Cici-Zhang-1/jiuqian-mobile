@@ -8,141 +8,59 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 五金配件
  */
 class Order_product_fitting extends MY_Controller{
-    private $_Module = 'order';
-    private $_Controller;
-    private $_Item;
-
+    private $__Search = array(
+        'order_id' => ZERO,
+        'order_product_id' => ZERO
+    );
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Order_product_fitting Start !');
-        $this->_Controller = strtolower(__CLASS__);
-        $this->_Item = $this->_Module.'/'.$this->_Controller.'/';
-    }
-    
-    public function index(){
-        $View = $this->uri->segment(4, 'read');
-        if(method_exists(__CLASS__, '_'.$View)){
-            $View = '_'.$View;
-            $this->$View();
-        }else{
-            $Item = $this->_Item.$View;
-            $this->data['action'] = site_url($Item);
-            $this->load->view($Item, $this->data);
-        }
-    }
-    
-    private function _read(){
-        $this->_Product = $this->uri->segment(5, false);
-        $this->_Product = trim($this->_Product);
-        $this->_Id = $this->input->get('id', true);
-        $this->_Id = intval(trim($this->_Id));
-        
-        if($this->_Id && $this->_Product){
-            $Item = $this->_Item.__FUNCTION__.'_'.$this->_Product;
-            $Data = array(
-                'Id' => $this->_Id,
-                'Product' => $this->_Product
-            );
-            $this->load->library('d_dismantle');
-            $Data['Fitting'] = $this->d_dismantle->read_detail('fitting', $this->_Id);
-            $this->load->view($Item, $Data);
-        }else{
-            $this->close_tab('您访问的内容不存在!');
-        }
+        $this->load->model('order/order_product_fitting_model');
     }
 
     public function read(){
-        $Oid = $this->input->get('id', true);
-        $Oid = intval(trim($Oid));
+        $this->_page_search();
         $Data = array();
-        if($Oid){
-            $Cache = $Oid.'_order_order_product_fitting';
-            $this->e_cache->open_cache();
-            $Return = array();
-            if(!($Return = $this->cache->get($Cache))){
-                if(!!($Query = $this->order_product_fitting_model->select_order_product_fitting($Oid))){
-                    $this->config->load('dbview/order');
-                    $Dbview = $this->config->item('order/order_product_fitting/read');
-                    foreach ($Query as $key=>$value){
-                        foreach ($Dbview as $ikey=>$ivalue){
-                            $Return[$key][$ivalue] = isset($value[$ikey])?$value[$ikey]:'';
-                        }
-                    }
-                    $this->cache->save($Cache, $Return, HOURS);
-                }else{
-                    $this->Failue .= '该订单暂时没有配件信息';
-                }
+        if (!empty($this->_Search['order_id']) || !empty($this->_Search['order_product_id'])) {
+            if(!($Data = $this->order_product_fitting_model->select($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
             }
-            $Data['content'] = $Return;
-            unset($Return);
+            $Data['query']['order_id'] = $this->_Search['order_id'];
+            $Data['query']['order_product_id'] = $this->_Search['order_product_id'];
+        } else {
+            $this->Message = '请选择订单或订单产品后查看配件信息';
+            $this->Code = EXIT_ERROR;
         }
-        $this->_return($Data);
+
+        $this->_ajax_return($Data);
     }
-    
-    public function edit(){
-        $Item = $this->_Module.'/'.strtolower(__CLASS__);
-        $Run = $Item.'/'.__FUNCTION__;
-        if($this->form_validation->run($Run)){
-            $this->config->load('formview/order');
-            $FormView = $this->config->item($Item);
-            foreach ($FormView as $key=>$value){
-                $tmp = $this->input->post($key, true);
-                if($tmp !== false){
-                    $Set[$value] = $tmp;
-                    unset($tmp);
-                }
-            }
-            $where = $this->input->post('selected');
-            if(isset($Set) && !!($this->order_product_fitting_model->update_order_product_fitting(gh_mysql_string($Set), $where))){
-                $this->Success .= '配件信息修改成功, 刷新后生效!';
-                $this->load->helper('file');
-                delete_cache_files('(.*order.*)');
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'配件信息修改失败&nbsp;&nbsp;';
-            }
-        }else{
-            $this->Failue .= validation_errors();
+
+    private function _page_search () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        if (empty($this->_Search['order_id'])) {
+            $OrderId = $this->input->get('v', true);
+            $this->_Search['order_id'] = intval($OrderId);
         }
-        $this->_return();
+        return $this->_Search;
     }
-    
-    public function remove(){
-        $Item = $this->_Item.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', TRUE);
-        }else{
-            $this->Failue .= validation_errors();
+
+    public function prints () {
+        $this->_page_search();
+        $Data = array();
+        if (!empty($this->_Search['order_id']) || !empty($this->_Search['order_product_id'])) {
+            if(!($Data = $this->order_product_fitting_model->select($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            }
+            $Data['query']['order_id'] = $this->_Search['order_id'];
+            $Data['query']['order_product_id'] = $this->_Search['order_product_id'];
+        } else {
+            $this->Message = '请选择订单或订单产品后查看配件信息';
+            $this->Code = EXIT_ERROR;
         }
-        $this->_return();
+
+        $this->_ajax_return($Data);
     }
-    /* 
-    public function remove(){
-        $Item = $this->_Module.'/'.strtolower(__CLASS__).'/'.__FUNCTION__;
-        if($this->form_validation->run($Item)){
-            $Where = $this->input->post('selected', true);
-            $this->config->load('formview/order');
-            $FormView = $this->config->item($Item);
-            foreach ($FormView as $key=>$value){
-                $tmp = $this->input->post($key, true);
-                if($tmp !== false){
-                    $Set[$value] = $tmp;
-                    unset($tmp);
-                }
-            }
-            if($Set !== false && is_array($Set) && count($Set) > 0){
-                if($this->order_product_fitting_model->delete_order_product_fitting_by_id($Set)){
-                    $this->Success .= '配件信息删除成功, 刷新后生效!';
-                    $this->load->helper('file');
-                    delete_cache_files('(.*order.*)');
-                }else {
-                    $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'配件信息删除失败&nbsp;&nbsp;';
-                }
-            }else{
-                $this->Failue .= '没有可删除项!';
-            }
-        }else{
-            $this->Failue .= validation_errors();
-        }
-        $this->_return();
-    } */
 }

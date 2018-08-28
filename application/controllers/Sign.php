@@ -45,9 +45,9 @@ class Sign extends MY_Controller {
 
 	public function in(){
 	    if ($this->_do_form_validation()) {
-            $username = $this->input->post('username',true);
+            $name = $this->input->post('name',true);
             $password = $this->input->post('password',true);
-            $user = $this->user->check_login($username,$password);
+            $user = $this->user->check_login($name,$password);
             if($user){
                 $this->load->model('manage/signin_model');
                 $Set = array(
@@ -74,8 +74,10 @@ class Sign extends MY_Controller {
 		foreach ($CookieKeys as $value){
 			delete_cookie($value);
 		}
-		Header("Location: ".base_url('/index.php/sign'));
-		exit();
+		$this->Location = base_url('/sign/index/in');
+		$this->_ajax_return();
+		// Header("Location: ".base_url('/index.php/sign'));
+		// exit();
 	}
 	
 	/**

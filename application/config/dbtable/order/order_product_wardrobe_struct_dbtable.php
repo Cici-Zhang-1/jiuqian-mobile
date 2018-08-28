@@ -1,11 +1,24 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['order/order_product_wardrobe_struct_model/update'] = array(
-	'bid' => 'opws_board_id',
-	'struct' => 'opws_struct',
-);
+$config['order/order_product_wardrobe_struct_model'] = array(
+                                'order_product_id' => 'opws_order_product_id',
+                        'board' => 'opws_board'
+                    );
 $config['order/order_product_wardrobe_struct_model/insert'] = array(
-	'opid' => 'opws_order_product_id',
-	'bid' => 'opws_board_id',
-	'struct' => 'opws_struct',
-);
+                                'order_product_id' => 'opws_order_product_id',
+                        'board' => 'opws_board'
+                    );
+$config['order/order_product_wardrobe_struct_model/insert_batch'] = array(
+                                'order_product_id' => 'opws_order_product_id',
+                        'board' => 'opws_board'
+                    );
+$config['order/order_product_wardrobe_struct_model/update'] = array(
+                                'order_product_id' => 'opws_order_product_id',
+                        'board' => 'opws_board'
+                    );
+$config['order/order_product_wardrobe_struct_model/update_batch'] = array(
+                                'order_product_id' => 'opws_order_product_id',
+                                'board' => 'opws_board',
+                        'v' => 'opws_id'
+                    );

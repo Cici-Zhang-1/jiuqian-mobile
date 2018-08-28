@@ -15,6 +15,62 @@ class Signin_model extends MY_Model {
         log_message('debug', 'Model Manage/Signin_model Start');
     }
 
+    /**
+     * Select from table card_type
+     */
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            if(empty($Search['pn'])){
+                $Search['pn'] = $this->_page_num($Search);
+            }else{
+                $this->_Num = $Search['num'];
+            }
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('signin');
+                $this->HostDb->where('s_user_id', $Search['user_v']);
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('s_create_datetime', 'desc')->get();
+                if ($Query->num_rows() > 0) {
+                    $Return = array(
+                        'content' => $Query->result_array(),
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn']
+                    );
+                    $this->cache->save($Cache, $Return, MONTHS);
+                } else {
+                    $GLOBALS['error'] = '没有符合搜索条件的登录记录';
+                }
+            }
+        }
+        return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(s_id) as num', FALSE);
+        $this->HostDb->where('s_user_id', $Search['user_v']);
+        $this->HostDb->from('signin');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+    /*
     function select_self($Con){
         $Item = $this->_Item.__FUNCTION__;
         $Cache = $this->_Cache.__FUNCTION__;
@@ -64,7 +120,7 @@ class Signin_model extends MY_Model {
         }else{
             return false;
         }
-    }
+    }*/
 
     /**
      * @param $Data

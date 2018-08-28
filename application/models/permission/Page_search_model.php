@@ -14,22 +14,67 @@ class Page_search_model extends MY_Model{
         log_message('debug', 'Model permission/Page_search_model Start!');
     }
 
-    public function select() {
+    public function select($Search){
         $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__;
+        $Cache = $this->_Cache.implode('_', $Search).__FUNCTION__;
         $Return = false;
-        if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql)->from('page_search')
-                            ->join('menu', 'm_id = ps_menu_id', 'left')
-                            ->order_by('m_displayorder')
-                        ->get();
-            if ($Query->num_rows() > 0) {
-                $Return = $Query->result_array();
+        if(!($Return = $this->cache->get($Cache))){
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('page_search')
+                    ->join('menu', 'm_id = ps_menu_id', 'left');
+                if (isset($Search['v']) && $Search['v'] != '') {
+                    $this->HostDb->where('ps_menu_id', $Search['v']);
+                }
+                if(!empty($Con['keyword'])){
+                    $this->HostDb->group_start()
+                        ->like('ps_name', $Search['keyword'])
+                        ->group_end();
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
                 $this->cache->save($Cache, $Return, MONTHS);
+            }else{
+                $GLOBALS['error'] = '没有符合搜索条件的卡片页';
             }
         }
         return $Return;
+    }
+
+    private function _page_num($Search){
+        $this->HostDb->select('count(ps_id) as num', FALSE);
+        $this->HostDb->from('page_search');
+        if (isset($Search['v']) && $Search['v'] != '') {
+            $this->HostDb->where('ps_menu_id', $Search['v']);
+        }
+
+        if(!empty($Con['keyword'])){
+            $this->HostDb->group_start()
+                ->like('ps_name', $Search['keyword'])
+                ->group_end();
+        }
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
     }
 
     public function select_allowed($Ugid, $Mid = 0) {
@@ -123,41 +168,5 @@ class Page_search_model extends MY_Model{
         $this->HostDb->delete('page_search');
         $this->remove_cache($this->_Module);
         return true;
-    }
-
-    /**
-     * 删除菜单时，需要删除包含的功能
-     * @param $Where
-     */
-    public function delete_by_mid($Where) {
-        if (is_array($Where)) {
-            $Query = $this->HostDb->select('ps_id')->from('page_search')
-                            ->where_in('ps_menu_id', $Where)->get();
-        }else {
-            $Query = $this->HostDb->select('ps_id')->from('page_search')
-                            ->where('ps_menu_id', $Where)->get();
-        }
-        if ($Query->num_rows() > 0) {
-            $Psids = $Query->result_array();
-            $Query->free_result();
-        }else {
-            $Psids = false;
-        }
-        if(is_array($Where)){
-            $this->HostDb->where_in('ps_menu_id', $Where);
-        }else{
-            $this->HostDb->where('ps_menu_id', $Where);
-        }
-
-        $this->HostDb->delete('func');
-        if ($Psids) {
-            foreach ($Psids as $key => $value) {
-                $Psids[$key] = $value['ps_id'];
-            }
-            $this->load->model('permission/role_page_search_model');
-            return $this->role_page_search_model->delete_by_psid($Psids);
-        }else {
-            return true;
-        }
     }
 }
