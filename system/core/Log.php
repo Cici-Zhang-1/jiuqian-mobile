@@ -230,7 +230,7 @@ class CI_Log {
 
 		if (isset($newfile) && $newfile === TRUE)
 		{
-			chmod($filepath, $this->_file_permissions);
+			@chmod($filepath, $this->_file_permissions);
 		}
 
 		return is_int($result);
