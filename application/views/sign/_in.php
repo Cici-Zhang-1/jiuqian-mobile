@@ -56,8 +56,8 @@
                         <div class="panel-body">
                             <form role="form" id="signInForm" action="<?php echo $action;?>" method="post">
                                 <div class="form-group">
-                                    <label for="username">用户名</label>
-                                    <input type="text" class="form-control" name="username" id="username" placeholder="用户名" required pattern="[\w\d]{1,64}" autofocus>
+                                    <label for="name">用户名</label>
+                                    <input type="text" class="form-control" name="name" id="name" placeholder="用户名" required pattern="[\w\d]{1,64}" autofocus>
                                 </div>
                                 <div class="form-group">
                                     <label for="password">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</label>
@@ -83,7 +83,7 @@
                 $('#signInForm').on('submit', function (e) {
                     e.preventDefault();
                     var Data = {
-                        username: $('#username').val(),
+                        name: $('#name').val(),
                         password: $('#password').val()
                     };
                     $.ajax({
