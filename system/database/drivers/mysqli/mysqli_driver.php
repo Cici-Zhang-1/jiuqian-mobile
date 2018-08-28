@@ -500,6 +500,13 @@ class CI_DB_mysqli_driver extends CI_DB {
 				$retval[$i]->max_length
 			);
 
+			if ($retval[$i]->type == 'enum') { // Extend By Cici 20180803
+			    preg_match('/enum\((.*)\)/', $query[$i]->Type, $Matches);
+                $retval[$i]->list = $Matches[1];
+            } else {
+                $retval[$i]->list = '';
+            }
+
 			$retval[$i]->default		= $query[$i]->Default;
 			$retval[$i]->null           = $query[$i]->Null === 'NO' ? NO : YES;
 			$retval[$i]->primary_key	= (int) ($query[$i]->Key === 'PRI');
