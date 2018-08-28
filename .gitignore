@@ -20,6 +20,8 @@ application/logs/*
 /static/
 /o-static/
 /.idea/
+/upload/
+/source/
 TODO.md
 contributing.md
 readme.rst
