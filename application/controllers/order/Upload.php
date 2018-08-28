@@ -1,4 +1,11 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/8/28
+ * Time: 15:24
+ */
 /**
  * 2015年11月22日
  * @author Zhangcc
@@ -6,7 +13,7 @@
  * @des
  * 上传文件
  */
-class Upload extends MY_Controller{
+class Upload extends MY_Controller {
     private $Success = '';
     private $Failue = '';
 
@@ -38,7 +45,7 @@ class Upload extends MY_Controller{
                 'max_filename' => '64',
                 'remove_spaces' => true
             );
-            
+
             $dirname = ROOTDIR.'upload/'.date('Y', time()).'/'.date('m', time()).'/'.date('d', time()).'/';
             if (!is_dir($dirname) && !mkdir($dirname, 0777, true)) {
                 $this->Failue='权限不足, 目录不可写, 文件上传失败!';
