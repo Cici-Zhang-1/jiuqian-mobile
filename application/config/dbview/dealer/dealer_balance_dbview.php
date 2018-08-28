@@ -1,0 +1,5 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+$config['dealer/dealer_balance_model/select'] = array(
+                                'db_id' => 'v',                                        'db_dealer_id' => 'dealer_id',                                        'db_start' => 'start',                                        'db_end' => 'end',                                        'db_start_date' => 'start_date',                                        'db_end_date' => 'end_date',                                        'db_asured' => 'asured',                                        'db_received' => 'received',                                        'db_orders' => 'orders',                                        'db_finance_received' => 'finance_received',                                        'db_difference' => 'difference',                                        'db_remark' => 'remark',                                        'db_creator' => 'creator',                                        'db_create_datetime' => 'create_datetime'                    );
