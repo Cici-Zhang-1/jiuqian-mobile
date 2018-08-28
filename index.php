@@ -223,6 +223,8 @@ switch (ENVIRONMENT)
  *  Now that we know the path, set the main path constants
  * -------------------------------------------------------------------
  */
+    define('ROOTDIR',  str_replace("\\", "/", dirname(__FILE__)).'/');
+
 	// The name of THIS file
 	define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
 
@@ -305,7 +307,7 @@ switch (ENVIRONMENT)
 
 	define('VIEWPATH', $view_folder.DIRECTORY_SEPARATOR);
 
-date_default_timezone_set("America/New_York");
+date_default_timezone_set('Asia/Shanghai');
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE

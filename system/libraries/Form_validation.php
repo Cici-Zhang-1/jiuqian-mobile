@@ -1369,7 +1369,7 @@ class CI_Form_validation {
 	 */
 	public function decimal($str)
 	{
-		return (bool) preg_match('/^[\-+]?[0-9]+\.[0-9]+$/', $str);
+		return (bool) preg_match('/^[\-+]?[0-9]+(\.[0-9]+)?$/', $str);
 	}
 
 	// --------------------------------------------------------------------
