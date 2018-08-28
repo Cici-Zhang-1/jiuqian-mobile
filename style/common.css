@@ -1,0 +1,202 @@
+::selection{ background-color: #00CCFF; color: white; }
+
+.common-font-small{
+    font-size : 11px;
+}
+
+.common-font-16{
+    font-size : 16px;
+}
+
+.common-font-24{
+    font-size : 24px;
+}
+
+.common-font-32{
+    font-size : 32px;
+}
+
+.common-font-48{
+    font-size : 48px;
+}
+
+.common-font-64{
+    font-size : 64px;
+}
+
+.page-footer{
+	text-align: center;
+}
+/**
+ * 表格列宽格式化
+ */
+table .td-xs{
+	width: 50px;
+}
+table .td-sm{
+	width: 100px;
+}
+
+table .td-md{
+	width: 150px;
+}
+table .td-lg{
+	width: 200px;
+}
+table .td-hide{
+	display:none;
+}
+
+.pc-p1{
+    font-weight: bold;
+    font-size: 18px;
+}
+.pc-p2{
+    font-size: 16px;
+}
+
+.pc-p3{
+    margin-bottom: 2px;
+}
+
+.pc-hr1{
+    margin: 2px;
+}
+
+.pc-span1{
+    font-weight: bold;
+}
+
+.pc-span2{
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.pc-div1{
+    border: 1px solid;
+}
+
+.pc-table1 thead tr td{
+    font-weight: bold;
+}
+
+.my-tools{
+	padding-left: 45px; 
+	padding-right: 45px; 
+	position:absolute; 
+	z-index: 9; 
+	top: 50px; 
+	left: 0px;
+} 
+
+.my-table{
+	margin-top: 50px;
+}
+
+.my-table-condensed{
+	margin-bottom: 0px;
+}
+
+.my-table-ensize{
+	font-size: 25px;
+}
+
+.my-table-desize{
+    font-size: 10px;
+}
+
+.my-echart {
+    margin-top: 50px;
+    min-height: 600px;
+    height: auto;
+}
+
+@media print {
+	.print-none, .print-some-none .tabs-header, .print-some-none .my-tools{
+		display: none;
+	}
+}
+.my-print-data p{
+	margin-bottom: 5px;
+}
+.my-print-data .my-enhance-1{
+	font-size: 20px;
+	font-weight: bold;
+}
+.my-print-data .my-enhance-2{
+	font-size: 18px;
+	font-weight: bold;
+}
+.my-print-data .my-enhance-3{
+	font-size: 16px;
+	font-weight: bold;
+}
+.my-print-data .my-box{
+	border: 1px solid black;
+}
+.my-print-data .page-line{
+	page-break-after: always;
+    page-break-inside: avoid;
+}
+@media print {
+	.my-print-data table{
+		margin: 0px;
+	}
+	.my-print-data table thead tr th{
+		font-size: 16px;
+	}
+	.my-print-data table tbody tr td{
+		font-size: 16px;
+	}
+	.my-print-data table tfoot tr td{
+		font-size: 18px;
+	}
+	.my-print-data table thead tr th.print-xxs{
+		width: 30px;
+	}
+	.my-print-data table thead tr th.print-xs{
+		width: 40px;
+	}
+	.my-print-data table thead tr th.print-sm{
+		width: 80px;
+	}
+	.my-print-data table thead tr th.print-md{
+		width: 150px;
+	}
+}
+.j-remark-list {
+	border: 1px solid #000000;
+}
+
+label.has-success{
+	color: #3c763d;
+}
+label.has-error{
+	color: #a94442;
+}
+label.has-light{
+	color: #ccc;
+}
+
+.fa-color-success {
+   color: #3c763d;
+}
+
+.fa-color-warning {
+    color: #f0ad4e;
+}
+
+.fa-color-danger {
+    color: #c9302c;
+}
+
+p.my-success{
+	color: #3c763d;
+}
+p.my-error{
+	color: #a94442;
+}
+
+table > tbody > tr > td.has-inside-table {
+    padding: 0px;
+}
