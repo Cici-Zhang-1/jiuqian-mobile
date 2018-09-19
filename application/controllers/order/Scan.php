@@ -148,12 +148,6 @@ class Scan extends MY_Controller{
         }
         if ($this->_do_form_validation()) {
             if ($this->_is_user()) {
-                /*$Type = $this->input->post('type', true);
-                if ($Type == ZERO) {
-                    $this->_correct_order_product_classify();
-                } else {
-                    $this->_correct_order_product_board();
-                }*/
                 $this->_parse_type();
                 $this->_correct_order_product_classify();
                 $this->_correct_order_product_board();
@@ -229,11 +223,22 @@ class Scan extends MY_Controller{
     private function _parse_type () {
         $V = $this->input->post('v');
         $Relate = $this->input->post('relate', true);
+        if (empty($Relate)) {
+            $Type = $this->input->post('type', true);
+        }
         foreach ($V as $Key => $Value) {
-            if ($Relate[$Key]['type'] == ZERO) {
-                array_push($this->_Classify, $Value);
+            if (empty($Relate)) {
+                if ($Type == ZERO) {
+                    array_push($this->_Classify, $Value);
+                } else {
+                    array_push($this->_Board, $Value);
+                }
             } else {
-                array_push($this->_Board, $Value);
+                if ($Relate[$Key]['type'] == ZERO) {
+                    array_push($this->_Classify, $Value);
+                } else {
+                    array_push($this->_Board, $Value);
+                }
             }
         }
     }

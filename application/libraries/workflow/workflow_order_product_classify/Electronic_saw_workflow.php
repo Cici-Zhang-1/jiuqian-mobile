@@ -19,8 +19,6 @@ class Electronic_saw_workflow extends Workflow_order_product_classify_abstract {
 
     public function re_shear () {
         return $this->_workflow_previous();
-        /*$this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear']);
-        return $this->_Workflow->shear();*/
     }
 
     public function electronic_sawed() {

@@ -12,7 +12,7 @@ class Edging_workflow extends Workflow_order_product_board_abstract {
         $this->_Source_id = $Source_id;
     }
 
-    public function edging() {
+    /*public function edging() {
         $this->_Workflow->store_message('已安排正在封边');
         return true;
     }
@@ -25,7 +25,7 @@ class Edging_workflow extends Workflow_order_product_board_abstract {
     public function edged() {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_board::$AllWorkflow['edged'], array('edge' => $this->_CI->session->userdata('uid'), 'edge_datetime' => date('Y-m-d H:i:s')));
         return $this->_Workflow->edged();
-    }
+    }*/
 
     public function __call($name, $arguments) {
         ;
