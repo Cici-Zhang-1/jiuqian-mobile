@@ -188,6 +188,8 @@ class Workflow_order_product {
             );
             $this->_CI->workflow_order_product_msg_model->insert($Set);
         }
+        $GLOBALS['workflow_msg'] = '';
+        return true;
     }
 
     public function set_failue($Failue) {
@@ -202,7 +204,7 @@ class Workflow_order_product {
         return $this->_Source_ids;
     }
     public function __call($name, $arguments){
-        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'optimize', 'printed_list', 'pre_produce', 're_shear', 'electronic_sawed', 'producing', 'packing', 'packed', 'inned', 'remove', 'to_board', 'to_classify');
+        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'optimize', 'printed_list', 'pre_produce', 're_shear', 'electronic_sawed', 'edged', 'punched', 'scanned', 'producing', 'packing', 'packed', 'inned', 'remove', 'to_board', 'to_classify');
         if (in_array($name, $Methods)) {
             return $this->_Workflow->{$name}();
         }

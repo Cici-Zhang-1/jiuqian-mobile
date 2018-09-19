@@ -152,6 +152,7 @@ class Workflow_order_product_classify {
             );
             $this->_CI->workflow_order_product_classify_msg_model->insert($Set);
         }
+        return true;
     }
 
     public function set_failue($Failue) {

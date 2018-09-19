@@ -91,6 +91,36 @@ class Workflow_procedure_model extends MY_Model {
         return $Return;
     }
 
+    /**
+     * 是否存在
+     * @param $V
+     * @return bool
+     */
+    public function is_exist ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('workflow_procedure')
+                ->where('wp_id', $V)
+                ->limit('ONE');
+            $Query = $this->HostDb->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的工序工作流';
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 是否存在
+     * @param $Data
+     * @return bool
+     */
     private function _is_exist ($Data) {
         $Query = $this->HostDb->select('wp_id')
             ->from('workflow_procedure')

@@ -1,4 +1,4 @@
-<?php namespace Wopc;
+<?php namespace Wopo;
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 2016年1月6日
@@ -6,25 +6,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des
  */
-abstract class Workflow_order_product_classify_abstract{
+abstract class Workflow_order_product_other_abstract{
     //定义一个环境角色，也就是封装状态的变换引起的功能变化
     protected  $_Workflow;
     protected $_Source_id;
     protected $_Source_ids;
     protected $_CI;
 
-    public function set_workflow(Workflow_order_product_classify $Workflow){
+    public function set_workflow(Workflow_order_product_other $Workflow){
         $this->_Workflow = $Workflow;
         $this->_CI = &get_instance();
     }
 
-    /**
-     * 工作流向父级传递
-     * @param $Method
-     * @param $Msg
-     * @param $Data
-     * @return bool
-     */
     protected function _workflow_propagation ($Method, $Msg = '', $Data = array()) {
         if(!!($OrderProductId = $this->_get_order_product_id())){
             $this->_CI->load->model('order/order_product_model');
@@ -41,6 +34,7 @@ abstract class Workflow_order_product_classify_abstract{
                     return false;
                 }
             }
+
             return true;
         }
         return false;
@@ -50,7 +44,7 @@ abstract class Workflow_order_product_classify_abstract{
      */
     protected function _get_order_product_id(){
         $this->_Source_ids = $this->_Workflow->get_source_ids();
-        if(!!($Ids = $this->_CI->order_product_classify_model->select_order_product_id($this->_Source_ids))){
+        if(!!($Ids = $this->_CI->order_product_other_model->select_order_product_id($this->_Source_ids))){
             return $Ids;
         }
         return false;
@@ -62,27 +56,10 @@ abstract class Workflow_order_product_classify_abstract{
      */
     protected function _workflow_next () {
         $this->_Source_ids = $this->_Workflow->get_source_ids();
-        if(!!($WorkflowNext = $this->_CI->order_product_classify_model->select_workflow_next($this->_Source_ids))){
+        if(!!($WorkflowNext = $this->_CI->order_product_other_model->select_workflow_next($this->_Source_ids))){
             foreach ($WorkflowNext as $Key => $Value) {
                 $this->_Workflow->initialize($Value['v']); // 初始化v
-                $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow[$Value['workflow_procedure_name']], array('procedure' => $Value['procedure']));
-                if ($this->_Workflow->{$Value['workflow_procedure_name']}()) {
-                    continue;
-                } else {
-                    $this->_Workflow->set_failue('执行出错');
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    protected function _workflow_previous () {
-        $this->_Source_ids = $this->_Workflow->get_source_ids();
-        if(!!($WorkflowPrevious = $this->_CI->order_product_classify_model->select_workflow_previous($this->_Source_ids))){
-            foreach ($WorkflowPrevious as $Key => $Value) {
-                $this->_Workflow->initialize($Value['v']); // 初始化v
-                $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow[$Value['workflow_procedure_name']], array('procedure' => $Value['procedure']));
+                $this->_Workflow->edit_current_workflow(Workflow_order_product_other::$AllWorkflow[$Value['workflow_procedure_name']], array('procedure' => $Value['procedure']));
                 $this->_Workflow->{$Value['workflow_procedure_name']}();
             }
         }

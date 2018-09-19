@@ -153,19 +153,16 @@ class Warehouse_order_product_model extends MY_Model {
      * 通过v判断是否存在订单在库存中
      * @param $StockOuttedV
      */
-    public function is_in_by_stock_outted_v($StockOuttedV) {
+    public function is_in_by_order_product_v($OrderProductId) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . $StockOuttedV;
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($OrderProductId);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $OrderProductNum = $this->HostDb->select('op_num')->from('order_product')
-                ->join('order', 'o_id = op_order_id', 'left')
-                ->where('o_stock_outted_id', $StockOuttedV)
-                ->get_compiled_select();
             $Query = $this->HostDb->select($Sql)->from('warehouse_order_product')
-                ->where_in('wop_order_product_num', '(' . $OrderProductNum  . ')', false)
-                ->where('wop_picker', 0)
+                ->join('order_product', 'op_num = wop_order_product_num', 'left')
+                ->where_in('op_id', $OrderProductId)
+                ->where('wop_picker', ZERO)
                 ->get();
             $Return = $Query->result_array();
             $this->cache->save($Cache, $Return, MONTHS);
@@ -179,8 +176,8 @@ class Warehouse_order_product_model extends MY_Model {
      */
     public function is_not_out($Warehouse) {
         $Query = $this->HostDb->select('wop_warehouse_num as warehouse_v')->from('warehouse_order_product')
-            ->where('wop_picker', 0)->where_in('wop_warehouse_num', $Warehouse)->get();
-        if ($Query->num_rows() > 0) {
+            ->where('wop_picker', ZERO)->where_in('wop_warehouse_num', $Warehouse)->get();
+        if ($Query->num_rows() > ZERO) {
             return $Query->result_array();
         } else {
             return false;
@@ -232,7 +229,7 @@ class Warehouse_order_product_model extends MY_Model {
         $Key = '('.implode(',', $Keys).')';
         $Values = implode(',', $Set);
         $this->remove_cache($this->_Cache);
-        return $this->HostDb->query("INSERT IGNORE INTO n9_warehouse_order_product {$Key} VALUES {$Values}");
+        return $this->HostDb->query("INSERT IGNORE INTO j_warehouse_order_product {$Key} VALUES {$Values}");
     }
 
     public function replace_batch($Data){

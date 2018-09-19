@@ -16,6 +16,3 @@ $config['stock/stock_outted_model/select'] = array(
     'CREATOR.u_truename' => 'creator',
     'so_create_datetime' => 'create_datetime'
 );
-$config['stock/stock_outted_model/is_picked'] = array(
-    'so_id' => 'v'
-);

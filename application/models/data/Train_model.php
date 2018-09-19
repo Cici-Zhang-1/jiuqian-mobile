@@ -1,82 +1,151 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 /**
- *  2015-5-13
- * @author ZhangCC
- * @version
- * @description  
+ * Train_model Model
+ *
+ * @package  CodeIgniter
+ * @category Model
  */
-class Train_model extends MY_Model{
-    private $_Module = 'data';
-    private $_Model = 'train_model';
-    private $_Item;
-    private $_Cache;
+class Train_model extends MY_Model {
+    private $_Num;
     public function __construct(){
-        parent::__construct();
-        $this->_Item = $this->_Module.'/'.$this->_Model.'/';
-        $this->_Cache = $this->_Module.'_'.$this->_Model.'_';
-        
-        log_message('debug', 'Model Data/train_model Start!');
+        parent::__construct(__DIR__, __CLASS__);
+        log_message('debug', 'Model data/Train_model Start!');
     }
 
-    public function select_train() {
-        $Item = $this->_Item.__FUNCTION__;
-        $Cache = $this->_Cache.__FUNCTION__;
+    /**
+     * Select from table train
+     */
+    public function select($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
-        if(!($Return = $this->cache->get($Cache))){
-            $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql);
-            $this->HostDb->from('train');
-            $Query = $this->HostDb->get();
-            if($Query->num_rows() > 0){
-                $Return = $Query->result_array();
-                $Query->free_result();
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('train');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
                 $this->cache->save($Cache, $Return, MONTHS);
-            }else{
-                $GLOBALS['error'] = '无任何车次';
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的车次';
             }
         }
         return $Return;
     }
 
-    public function insert_train($Set) {
-        $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format($Set, $Item, $this->_Module);
-        if($this->HostDb->insert('train', $Set)){
-            log_message('debug', "Model $Item Success!");
-            $this->remove_cache($this->_Cache);
-            return $this->HostDb->insert_id();
+    private function _page_num($Search){
+        $this->HostDb->select('count(t_name) as num', FALSE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+        }
+        $this->HostDb->from('train');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
         }else{
-            log_message('debug', "Model $Item Error");
             return false;
         }
     }
 
-    public function update_train($Set, $Where) {
+    /**
+     * Insert data to table train
+     * @param $Data
+     * @return Insert_id | Boolean
+     */
+    public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
-        $Set = $this->_format_re($Set, $Item, $this->_Module);
-        $this->HostDb->where('t_id',$Where);
-        if($this->HostDb->update('train', $Set)){
-            $this->remove_cache($this->_Cache);
-            return true;
-        }else{
+        $Data = $this->_format($Data, $Item);
+        if($this->HostDb->insert('train', $Data)){
+            $this->remove_cache($this->_Module);
+            return $this->HostDb->insert_id();
+        } else {
+            $GLOBALS['error'] = '插入车次数据失败!';
             return false;
         }
     }
+
     /**
-     * 删除异形
-     * @param unknown $Where
+     * Insert batch data to table train
      */
-    public function delete_train($Where){
-        if(is_array($Where)){
-            $this->HostDb->where_in('t_id', $Where);
-        }else{
-            $this->HostDb->where('t_id', $Where);
+    public function insert_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format($value, $Item);
         }
-        if($this->HostDb->delete('train')){
-            $this->remove_cache($this->_Cache);
+        if($this->HostDb->insert_batch('train', $Data)){
+            $this->remove_cache($this->_Module);
             return true;
-        }else{
+        } else {
+            $GLOBALS['error'] = '插入车次数据失败!';
             return false;
         }
+    }
+
+    /**
+     * Update the data of table train
+     * @param $Data
+     * @param $Where
+     * @return boolean
+     */
+    public function update($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('t_name', $Where);
+        } else {
+            $this->HostDb->where('t_name', $Where);
+        }
+        $this->HostDb->update('train', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 批量更新table train
+     */
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('train', $Data, 't_name');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * Delete data from table train
+     * @param $Where
+     * @return boolean
+     */
+    public function delete($Where) {
+        if(is_array($Where)){
+            $this->HostDb->where_in('t_name', $Where);
+        } else {
+            $this->HostDb->where('t_name', $Where);
+        }
+
+        $this->HostDb->delete('train');
+        $this->remove_cache($this->_Module);
+        return true;
     }
 }

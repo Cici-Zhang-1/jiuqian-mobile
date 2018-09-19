@@ -32,7 +32,11 @@ class User_model extends MY_Model{
                 if (isset($Search['usergroup_v']) && $Search['usergroup_v'] != '') {
                     $this->HostDb->where_in('U.u_usergroup_id', explode(',', $Search['usergroup_v']));
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('U.u_usergroup_id')
+                    ->order_by('U.u_group_no')
+                    ->order_by('U.u_name')
+                    ->get();
                 if ($Query->num_rows() > 0) {
                     $Return = array(
                         'content' => $Query->result_array(),

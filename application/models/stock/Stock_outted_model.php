@@ -74,26 +74,6 @@ class Stock_outted_model extends MY_Model {
     }
 
     /**
-     * 判断是否已经打印了
-     * @param $V
-     */
-    public function is_picked ($V) {
-        $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . $V;
-        $Return = false;
-        if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql)->from('stock_outted')->where('so_id', $V)
-                    ->where('so_status', 2)->limit(1)->get();
-            if ($Query->num_rows() > 0) {
-                $Return = $Query->row_array();
-            }
-            $this->cache->save($Cache, $Return, MINUTES);
-        }
-        return $Return;
-    }
-
-    /**
      * Insert data to table stock_outted
      * @param $Data
      * @return Insert_id | Boolean

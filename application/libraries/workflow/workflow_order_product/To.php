@@ -29,6 +29,7 @@ class To {
      */
     public function to_board () {
         $this->_clear_classify();
+        $this->_clear_order_product_board_plate();
         if (!!($this->_OrderProduct = $this->_CI->order_product_model->select_by_v($this->_Source_ids))) {
             $this->_CI->order_product_model->trans_start();
             foreach ($this->_OrderProduct as $Key => $Value) {
@@ -67,7 +68,7 @@ class To {
                 $this->_OrderProduct[$Key] = $Value;
             }
             $this->_CI->order_product_model->trans_complete();
-            if ($this->_CI->order_product_model->trans_status() === FALSE){
+            if ($this->_CI->order_product_model->trans_status() === FALSE) {
                 $this->_ErrorMsg = '这次执行操作, 发生未知错误!';
                 return false;
             }
@@ -84,6 +85,11 @@ class To {
     private function _clear_classify () {
         $this->_CI->load->model('order/order_product_classify_model');
         $this->_CI->order_product_classify_model->clear($this->_Source_ids);
+    }
+
+    private function _clear_order_product_board_plate () {
+        $this->_CI->load->model('order/order_product_board_plate_model');
+        return $this->_CI->order_product_board_plate_model->clear_classify($this->_Source_ids);
     }
 
     private function _clear_board () {
@@ -149,8 +155,9 @@ class To {
                 $Qrcode[$Key] = $Value;
             }
             return $this->_edit_order_product_board_plate($Qrcode) && $this->_edit_order_product_classify();
+        } else {
+            return false;
         }
-        return true;
     }
     private function _edit_order_product_board_plate ($Data) {
         return $this->_CI->order_product_board_plate_model->update_batch($Data);

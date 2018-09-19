@@ -1,4 +1,4 @@
-<?php namespace Wopb;
+<?php namespace Wopf;
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
@@ -7,14 +7,14 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * Date: 2018/6/23
  * Time: 9:26
  */
-require_once 'Workflow_order_product_board_abstract.php';
+require_once 'Workflow_order_product_fitting_abstract.php';
 
-class Workflow_order_product_board {
+class Workflow_order_product_fitting {
     static $AllWorkflow = NULL;
     private $_Workflow;
     private $_V;
-    private $_Type = 'Order_product_board'; // order_product_board
-    private $_Model = 'order_product_board_model';
+    private $_Type = 'Order_product_fitting'; // order_product_fitting
+    private $_Model = 'order_product_fitting_model';
     private $_Source_id;
     private $_Source_ids;
     private $_Dir;
@@ -25,10 +25,10 @@ class Workflow_order_product_board {
 
     public function __construct() {
         $this->_CI = &get_instance();
-        log_message('debug', 'Library Workflow/Workflow_order_product_board __construct Start');
+        log_message('debug', 'Library Workflow/Workflow_order_product_fitting __construct Start');
         $this->_Dir = dirname(__FILE__);
         $this->_CI->load->model('workflow/workflow_procedure_model');
-        $this->_CI->load->model('workflow/workflow_order_product_board_msg_model');
+        $this->_CI->load->model('workflow/workflow_order_product_fitting_msg_model');
     }
 
     /**
@@ -99,11 +99,11 @@ class Workflow_order_product_board {
     private function _set_context($Workflow) {
         $this->_V = $Workflow['v'];
 
-        $File = $this->_Dir . '/workflow_order_product_board/' . $Workflow['file'].'.php';
+        $File = $this->_Dir . '/workflow_order_product_fitting/' . $Workflow['file'].'.php';
         if (file_exists($File)) {
             require_once $File;
-            log_message('debug', 'Library Workflow/workflow_order_product_board _set_content on File = '.$File.' And Source_id'.$this->_Source_id);
-            $Class = '\\Wopb\\' . $Workflow['file'];
+            log_message('debug', 'Library Workflow/workflow_order_product_fitting _set_content on File = '.$File.' And Source_id'.$this->_Source_id);
+            $Class = '\\Wopf\\' . $Workflow['file'];
             $this->_Workflow = new $Class($this->_Source_id);
             $this->_Workflow->set_workflow($this);
             return true;
@@ -138,19 +138,19 @@ class Workflow_order_product_board {
             $Set = array();
             foreach ($this->_Source_ids as $value){
                 $Set[] = array(
-                    'order_product_board_id' => $value,
+                    'order_product_fitting_id' => $value,
                     'msg' => $Msg . $GLOBALS['workflow_msg'],
-                    'workflow_order_product_board_id' => $this->_V
+                    'workflow_order_product_fitting_id' => $this->_V
                 );
             }
-            $this->_CI->workflow_order_product_board_msg_model->insert_batch($Set);
+            $this->_CI->workflow_order_product_fitting_msg_model->insert_batch($Set);
         }else{
             $Set = array(
-                'order_product_board_id' => $this->_Source_id,
+                'order_product_fitting_id' => $this->_Source_id,
                 'msg' => $Msg . $GLOBALS['workflow_msg'],
-                'workflow_order_product_board_id' => $this->_V
+                'workflow_order_product_fitting_id' => $this->_V
             );
-            $this->_CI->workflow_order_product_board_msg_model->insert($Set);
+            $this->_CI->workflow_order_product_fitting_msg_model->insert($Set);
         }
         return true;
     }
@@ -172,7 +172,7 @@ class Workflow_order_product_board {
 
     public function __call($name, $arguments){
         $Methods = array(
-            'create', 'print_list', 'printed_list', 'shear', 'shearing', 'sheared', 'electronic_saw', 'electronic_sawing', 'electronic_sawed', 're_electronic_saw', 're_shear', 'edge', 'edging', 'edged', 're_edge', 'punch', 'punched', 'punching', 're_punch', 'scan',  'scanning', 'scanned', 're_scan', 'pack', 'packing', 'packed', 're_pack'
+            'create', 'print_list', 'printed_list', 'pack', 'packing', 'packed', 're_pack'
         );
         if (in_array($name, $Methods)) {
             return $this->_Workflow->{$name}($arguments);

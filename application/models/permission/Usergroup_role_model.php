@@ -19,7 +19,9 @@ class Usergroup_role_model extends MY_Model{
             $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('usergroup_role')
                 ->join('role', 'r_id = ur_role_id', 'left')
-                ->where('ur_usergroup_id', $V)->get();
+                ->where('ur_usergroup_id', $V)
+                ->order_by('r_name')
+                ->get();
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);

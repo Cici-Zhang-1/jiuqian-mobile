@@ -18,11 +18,11 @@ class Valuated_workflow extends Workflow_order_abstract {
 
         if ($this->_is_over_min_check_sum()) {
             $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['check']);
-            $this->_Workflow->check();
+            return $this->_Workflow->check();
         } else {
             $this->_Workflow->store_message('未达到核价最低金额, 直接通过财务审核');
             $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['checked']);
-            $this->_Workflow->checked();
+            return $this->_Workflow->checked();
         }
     }
 

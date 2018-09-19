@@ -13,18 +13,22 @@ abstract class Workflow_order_product_board_abstract{
     protected $_Source_ids;
     protected $_CI;
 
-    public function set_workflow(Workflow_order_product_classify $Workflow){
+    public function set_workflow(Workflow_order_product_board $Workflow){
         $this->_Workflow = $Workflow;
         $this->_CI = &get_instance();
     }
 
-    protected function _workflow_propagation ($Method) {
+    protected function _workflow_propagation ($Method, $Msg = '', $Data = array()) {
         if(!!($OrderProductId = $this->_get_order_product_id())){
             $this->_CI->load->model('order/order_product_model');
             $W = $this->_CI->workflow->initialize('order_product');
+            if (!empty($Msg)) {
+                $GLOBALS['workflow_msg'] = $Msg;
+            }
             foreach ($OrderProductId as $Key => $Value) {
-                if ($W->initialize($Value['order_product_id'])) {
-                    $W->{$Method}();
+                $W->initialize($Value['order_product_id'], $Data);
+                if ($W->{$Method}()) {
+                    continue;
                 } else {
                     $this->_Workflow->set_failue($W->get_failue());
                     return false;
@@ -39,7 +43,7 @@ abstract class Workflow_order_product_board_abstract{
      */
     protected function _get_order_product_id(){
         $this->_Source_ids = $this->_Workflow->get_source_ids();
-        if(!!($Ids = $this->_CI->order_product_classify_model->select_order_product_id($this->_Source_ids))){
+        if(!!($Ids = $this->_CI->order_product_board_model->select_order_product_id($this->_Source_ids))){
             return $Ids;
         }
         return false;

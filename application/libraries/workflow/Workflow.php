@@ -2,8 +2,10 @@
 use \Wo as Wo;
 use \Wop as Wop;
 use \Wm as Wm;
-use \Wobp as Wopb;
+use \Wopb as Wopb;
 use \Wopc as Wopc;
+use \Wopf as Wopf;
+use \Wopo as Wopo;
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 2016年1月6日
@@ -37,6 +39,14 @@ class Workflow{
             case 'order_product_classify':
                 require_once 'Workflow_order_product_classify.php';
                 $H = new Wopc\Workflow_order_product_classify();
+                break;
+            case 'order_product_fitting':
+                require_once 'Workflow_order_product_fitting.php';
+                $H = new Wopf\Workflow_order_product_fitting();
+                break;
+            case 'order_product_other':
+                require_once 'Workflow_order_product_other.php';
+                $H = new Wopo\Workflow_order_product_other();
                 break;
             case 'mrp':
                 require_once 'Workflow_mrp.php';

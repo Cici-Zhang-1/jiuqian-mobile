@@ -83,15 +83,17 @@ class Supplier_model extends MY_Model {
             ->get();
         return $Query->row_array();
     }
-    private function _is_exist ($Data, $Where) {
-        $Query = $this->HostDb->select('s_id')
+    private function _is_exist ($Data, $Where = array()) {
+        $this->HostDb->select('s_id')
             ->from('supplier')
             ->group_start()
             ->where('s_name', $Data['s_name'])
             ->or_where('s_code', $Data['s_code'])
-            ->group_end()
-            ->where_not_in('s_id', is_array($Where) ? $Where : array($Where))
-            ->get();
+            ->group_end();
+        if (!empty($Where)) {
+            $this->HostDb->where_not_in('s_id', is_array($Where) ? $Where : array($Where));
+        }
+        $Query = $this->HostDb->get();
         return $Query->num_rows() > 0;
     }
     /**
@@ -102,6 +104,10 @@ class Supplier_model extends MY_Model {
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
+        if ($this->_is_exist($Data)) {
+            $GLOBALS['error'] = $Data['s_name'] . $Data['s_code'] . '已经存在!';
+            return false;
+        }
         if($this->HostDb->insert('supplier', $Data)){
             $this->remove_cache($this->_Module);
             return $this->HostDb->insert_id();

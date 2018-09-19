@@ -10,6 +10,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private $_OrderProduct;
     private $_Order;
     private $_NeedPay;
+    private $_VirtualNeedPay;
     private $_PayType;
     private $_PayStatus;
     private $_OnlyServer = true;
@@ -37,9 +38,10 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             if ($this->_edit_pay()) {
                 $this->_Workflow->edit_data(array(
                     'pay_status' => $this->_PayStatus,
-                    'payed' => $this->_NeedPay
+                    'payed' => $this->_NeedPay,
+                    'virtual_payed' => $this->_VirtualNeedPay
                 ));
-                $this->_CI->order_model->trans_start();
+                $this->_CI->order_model->trans_begin();
                 foreach ($this->_OrderProduct as $Key => $Value) {
                     if ($Value['code'] == CABINET_NUM || $Value['code'] == WARDROBE_NUM) {
                         if (!($this->_edit_qrcode_and_classify($Value['order_product_id']))) {
@@ -56,7 +58,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
                             $this->_Workflow->set_failue('设置配件产品流程状态时出错');
                             return false;
                         }
-                    } elseif ($Value['code'] == OTHER) {
+                    } elseif ($Value['code'] == OTHER_NUM) {
                         if (!($this->_edit_other($Value))) {
                             $this->_Workflow->set_failue('设置外购产品流程状态时出错');
                             return false;
@@ -67,8 +69,9 @@ class Wait_sure_workflow extends Workflow_order_abstract {
                 if ($this->_NeedPay > ZERO) {
                     $this->_add_order_finance_flow();
                     $this->_edit_dealer_finance();
+                    $this->_add_dealer_account_book();
                 }
-                if ($this->_OnlyServer()) {
+                if ($this->_OnlyServer) {
                     $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['outed']);
                     $this->_Workflow->outed();
                 } else {
@@ -76,12 +79,19 @@ class Wait_sure_workflow extends Workflow_order_abstract {
                     $this->_Workflow->produce();
                 }
                 $this->_Workflow->set_datetime(array('sure' => $this->_CI->session->userdata('uid'), 'sure_datetime' => date('Y-m-d H:i:s')));
-                $this->_CI->order_model->trans_complete();
-                if ($this->_CI->order_model->trans_status() === FALSE){
+                if ($this->_CI->order_model->trans_status() === FALSE) {
+                    $this->_CI->order_model->trans_rollback();
                     $this->_Workflow->set_failue('这次执行操作, 发生未知错误!');
                     return false;
+                } else {
+                    if (empty($this->_Workflow->get_failue())) {
+                        $this->_CI->order_model->trans_commit();
+                        return true;
+                    } else {
+                        $this->_CI->order_model->trans_rollback();
+                        return false;
+                    }
                 }
-                return true;
             }
             return false;
         } else {
@@ -104,14 +114,17 @@ class Wait_sure_workflow extends Workflow_order_abstract {
      */
     private function _edit_pay () {
         if ($this->_Order['sum'] == ZERO) {
+            $this->_PayStatus = PAYED;
             $this->_NeedPay = ZERO;
+            $this->_VirtualNeedPay = ZERO;
             return true;
         } else {
             if ($this->_OnlyServer) {
                 $this->_Order['down_payment'] = ONE;  // 当只有服务类商品时必须是一次性付款
             }
             $this->_NeedPay = floor($this->_Order['sum'] * $this->_Order['down_payment']);
-            if ($this->_NeedPay < $this->_Order['dealer_balance']) {
+            $this->_VirtualNeedPay = floor($this->_Order['virtual_sum'] * $this->_Order['down_payment']);
+            if ($this->_NeedPay <= $this->_Order['dealer_balance']) {
                 if ($this->_Order['down_payment'] == ONE) {
                     $this->_PayStatus = PAYED;
                     $this->_PayType = PAY_FULL;
@@ -123,9 +136,9 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             } else {
                 $this->_CI->load->model('order/application_model');
                 if (($this->_Order['payterms'] == EASY_PRODUCE || $this->_Order['payterms'] == EASY_DELIVERY) && !!($this->_CI->application_model->is_passed('payterms', $this->_Source_id, $this->_Order['payterms']))) { // 余额不足，余额全部扣除
-
                     $this->_PayType = $this->_Order['payterms'];
                     $this->_NeedPay = $this->_Order['dealer_balance'];
+                    $this->_VirtualNeedPay = $this->_Order['dealer_balance'];
                     if ($this->_NeedPay == ZERO) {
                         $this->_PayStatus = UNPAY;
                     } else {
@@ -147,6 +160,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
         return $this->_CI->order_finance_flow_model->insert(array(
             'order_id' => $this->_Source_id,
             'payed_money' => $this->_NeedPay,
+            'virtual_payed_money' => $this->_VirtualNeedPay,
             'status' => YES,
             'order_status' => $this->_Order['status']
         ));
@@ -158,9 +172,56 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _edit_dealer_finance () {
         $this->_CI->load->model('dealer/dealer_model');
         return $this->_CI->dealer_model->update(array(
-            'balance' => $this->_Order['dealer_balance'] - $this->_Order['sum'],
-            'produce' => $this->_Order['dealer_produce'] + $this->_Order['sum']
+            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
+            'produce' => $this->_Order['dealer_produce'] + $this->_Order['sum'],
+            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
+            'virtual_produce' => $this->_Order['dealer_virtual_produce'] + $this->_Order['virtual_sum'],
+            'last_order' => date('Y-m-d H:i:s')
         ), $this->_Order['dealer_id']);
+    }
+
+    /**
+     * 新建客户流水账
+     */
+    private function _add_dealer_account_book () {
+        $this->_CI->load->model('dealer/dealer_account_book_model');
+        $Data = array(
+            'flow_num' => date('YmdHis' . join('', explode('.', microtime(true)))),
+            'dealer_id' => $this->_Order['dealer_id'],
+            'in' => $this->_NeedPay > ZERO ? NO : YES,
+            'amount' => -1 * $this->_NeedPay,
+            'title' => $this->_Order['order_num'],
+            'category' => $this->_get_category(),
+            'source_id' => $this->_Order['order_id'],
+            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
+            'remark' => '',
+            'virtual_amount' => -1 * $this->_VirtualNeedPay,
+            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay
+        );
+        if ($this->_CI->dealer_account_book_model->insert($Data)) {
+            return true;
+        } else {
+            $this->_Workflow->set_failue('新建客户流水账失败!');
+            return false;
+        }
+    }
+    private function _get_category () {
+        $this->_CI->config->load('defaults/dealer_account_book_category');
+        if ($this->_PayType == '首付') {
+            return $this->_CI->config->item('dabc_first');
+        } elseif ($this->_PayType == '尾款') {
+            return $this->_CI->config->item('dabc_last');
+        } elseif ($this->_PayType == '全款') {
+            return $this->_CI->config->item('dabc_all');
+        } elseif ($this->_PayType == '宽松生产') {
+            return $this->_CI->config->item('dabc_easy_produce');
+        } elseif ($this->_PayType == '宽松发货') {
+            return $this->_CI->config->item('dabc_easy_delivery');
+        } elseif ($this->_PayType == '撤单') {
+            return $this->_CI->config->item('dabc_withdraw');
+        } else {
+            return $this->_CI->config->item('dabc_other');
+        }
     }
 
     /**
@@ -385,7 +446,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _edit_fitting ($OrderProduct) {
         $this->_CI->load->model('order/order_product_fitting_model');
         $ProductionLine = $this->_get_product_production_line($OrderProduct['code']);
-        if (!!($Fitting = $this->_CI->order_product_fitting_model->select_for_sure())) {
+        if (!!($Fitting = $this->_CI->order_product_fitting_model->select_for_sure($OrderProduct['order_product_id']))) {
             foreach ($Fitting as $Key => $Value) {
                 $Fitting[$Key] = array_merge($Value, $ProductionLine);
             }
@@ -402,7 +463,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _edit_other ($OrderProduct) {
         $this->_CI->load->model('order/order_product_other_model');
         $ProductionLine = $this->_get_product_production_line($OrderProduct['code']);
-        if (!!($Other = $this->_CI->order_product_other_model->select_for_sure())) {
+        if (!!($Other = $this->_CI->order_product_other_model->select_for_sure($OrderProduct['order_product_id']))) {
             foreach ($Other as $Key => $Value) {
                 $Other[$Key] = array_merge($Value, $ProductionLine);
             }
@@ -449,6 +510,9 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             if ($this->_Order['payed'] > ZERO) {
                 $this->_clear_dealer_finance();
                 $this->_clear_order_product_finance_flow();
+                $this->_NeedPay = -1 * $this->_Order['payed'];
+                $this->_PayType = '撤单';
+                $this->_add_dealer_account_book();
             }
             if ($this->_Order['payterms'] == EASY_PRODUCE) {
                 $this->_clear_application();
@@ -460,7 +524,9 @@ class Wait_sure_workflow extends Workflow_order_abstract {
         $this->_Workflow->set_data(array(
                 'pay_status' => UNPAY,
                 'payterms' => NORMAL_PAY,
-                'payed' => ZERO));
+                'payed' => ZERO,
+                'virtual_payed' => ZERO
+            ));
         $this->_Workflow->set_datetime(array(
             'sure' => ZERO,
             'sure_datetime' => null));
@@ -470,8 +536,10 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _clear_dealer_finance() {
         $this->_CI->load->model('dealer/dealer_model');
         return $this->_CI->dealer_model->update(array(
-            'balance' => $this->_Order['dealer_balance'] + $this->_Order['sum'],
-            'produce' => $this->_Order['dealer_produce'] - $this->_Order['sum']
+            'balance' => $this->_Order['dealer_balance'] + $this->_Order['payed'],
+            'produce' => $this->_Order['dealer_produce'] - $this->_Order['sum'],
+            'virtual_balance' => $this->_Order['dealer_virtual_balance'] + $this->_Order['virtual_payed'],
+            'virtual_produce' => $this->_Order['dealer_virtual_produce'] - $this->_Order['virtual_sum']
         ), $this->_Order['dealer_id']);
     }
     private function _clear_order_product_finance_flow () {

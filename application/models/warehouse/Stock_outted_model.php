@@ -25,7 +25,16 @@ class Stock_outted_model extends MY_Model {
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)->from('stock_outted')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->select($Sql)
+                    ->from('stock_outted')
+                    ->join('user AS CREATOR', 'CREATOR.u_id = so_creator', 'left')
+                    ->join('user AS PRINTER', 'PRINTER.u_id = so_printer', 'left')
+                    ->join('stock_outted_status', 'sos_name = so_status', 'left')
+                    ->where('so_end_datetime', $Search['start_date'])
+                    ->where('so_status', $Search['status'])
+                    ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('so_end_datetime', 'desc')
+                    ->order_by('so_id', 'desc')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -42,8 +51,10 @@ class Stock_outted_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(so_id) as num', FALSE);
-        $this->HostDb->from('stock_outted');
+        $this->HostDb->select('count(so_id) as num', FALSE)
+            ->from('stock_outted')
+            ->where('so_end_datetime', $Search['start_date'])
+            ->where('so_status', $Search['status']);
 
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){
@@ -61,6 +72,69 @@ class Stock_outted_model extends MY_Model {
         }
     }
 
+    /**
+     * 判断发货单是否存在
+     * @param $V
+     * @return bool
+     */
+    public function is_exist ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)
+            ->from('stock_outted')
+            ->where('so_id', $V)
+            ->limit(ONE)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            return $Query->row_array();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 判断是否已经打印过
+     * @param $V
+     * @return bool
+     */
+    public function is_picked ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('stock_outted')->where('so_id', $V)
+                ->where('so_status', 2)->limit(1)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+            }
+            $this->cache->save($Cache, $Return, MINUTES);
+        }
+        return $Return;
+    }
+
+    /**
+     * 是否是第一次打印
+     * @param $V
+     * @return bool
+     */
+    public function is_pickable ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $V;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('stock_outted')
+                ->join('order_stock_outted', 'oso_stock_outted_id = so_id', 'left')
+                ->where('so_id', $V)
+                ->where('so_status', 1)->limit(1)->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+            }
+            $this->cache->save($Cache, $Return, MINUTES);
+        }
+        return $Return;
+    }
     /**
      * Insert data to table stock_outted
      * @param $Data

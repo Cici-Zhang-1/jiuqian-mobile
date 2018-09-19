@@ -100,6 +100,21 @@ class Workflow_order {
     }
 
     /**
+     * 更新编辑数据，是在状态不更换时但是需要更新数据时使用
+     * @param array $Data
+     * @return bool
+     */
+    public function set_edit_data ($Data = array()) {
+        $Data = array_merge($this->_Data, $Data);
+        $this->_Data = array();
+        if (!empty($Data)) {
+            return $this->_CI->{$this->_Model}->update($Data,$this->_Source_ids);
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * 设置当前环境，引入执行文件，设置执行文件的工作流
      * @param unknown $Workflow
      * @return bool
@@ -163,6 +178,8 @@ class Workflow_order {
             );
             $this->_CI->workflow_order_msg_model->insert($Set);
         }
+        $GLOBALS['workflow_msg'] = '';
+        return true;
     }
 
     public function set_failue($Failue) {
@@ -178,9 +195,12 @@ class Workflow_order {
     }
 
     public function __call($name, $arguments){
-        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'valuate', 'valuating', 'valuated', 're_valuate', 'check', 'checked', 'wait_sure', 're_sure', 'produce', 'pre_produce', 'producing', 'inning', 'inned', 'wait_delivery', 'delivered', 'blank_note', 'money_logistics', 'outed', 'remove');
+        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'valuate', 'valuating', 'valuated', 're_valuate', 'check', 'checked', 'wait_sure', 're_sure', 'produce', 'pre_produce', 'producing', 'inning', 'inned', 'wait_delivery', 'delivering', 'delivered', 're_delivery', 'outed', 'remove');
         if (in_array($name, $Methods)) {
             return $this->_Workflow->{$name}();
+        } else {
+            $this->set_failue('您执行的操作不存在!');
+            return false;
         }
     }
 }

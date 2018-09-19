@@ -150,6 +150,7 @@ class Workflow_mrp {
             );
             $this->_CI->workflow_mrp_msg_model->insert($Set);
         }
+        return true;
     }
 
     public function set_failue($Failue) {
@@ -171,7 +172,7 @@ class Workflow_mrp {
             'shear', 'sheared', 'electronic_saw', 'electronic_sawed', 're_shear', 'remove'
         );
         if (in_array($name, $Methods)) {
-            $this->_Workflow->{$name}();
+            return $this->_Workflow->{$name}();
         }
     }
 }

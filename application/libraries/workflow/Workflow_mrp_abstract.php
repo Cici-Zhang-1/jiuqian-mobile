@@ -30,8 +30,9 @@ abstract class Workflow_mrp_abstract{
             $this->_CI->load->model('order/order_product_classify_model');
             $W = $this->_CI->workflow->initialize('order_product_classify');
             foreach ($OrderProductClassifyId as $Key => $Value) {
-                if ($W->initialize($Value['order_product_classify_id'])) {
-                    $W->{$Method}();
+                $W->initialize($Value['order_product_classify_id']);
+                if ($W->{$Method}()) {
+                    continue;
                 } else {
                     $this->_Workflow->set_failue($W->get_failue());
                     return false;

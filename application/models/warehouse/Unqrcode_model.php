@@ -25,7 +25,11 @@ class Unqrcode_model extends MY_Model {
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)->from('unqrcode')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->select($Sql)
+                    ->from('unqrcode AS U')
+                    ->join('user AS C', 'C.u_id = U.u_creator', 'left')
+                    ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -61,11 +65,20 @@ class Unqrcode_model extends MY_Model {
         }
     }
 
+    /**
+     * 获取发货单包含的无码入库的产品
+     * @param $Search
+     * @return array|bool
+     */
     public function select_pick_sheet_detail ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
+            $Search['order_id'] = $this->HostDb->select('oso_order_id')
+                ->from('order_stock_outted')
+                ->where('oso_stock_outted_id', $Search['v'])
+                ->get_compiled_select();
             $Search['pn'] = $this->_page_pick_sheet_detail_num($Search);
             if(!empty($Search['pn'])){
                 $Scanned = $this->HostDb->select('ps_order_product_num, ps_stock_outted_id, count(ps_stock_outted_id) as scanned')
@@ -77,8 +90,7 @@ class Unqrcode_model extends MY_Model {
                 $Query = $this->HostDb->select($Sql)->from('unqrcode')
                     ->join('order', 'o_id = u_order_id', 'left')
                     ->join('(' . $Scanned . ') as A', 'A.ps_order_product_num = u_num', 'left')
-                    ->where('o_stock_outted_id', $Search['v'])
-                    ->where('o_status > ', O_PRODUCE)
+                    ->where_in('o_id', '(' . $Search['order_id'] . ')', false)
                     ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
                     ->order_by('u_num')->get();
                 $Return = array(
@@ -98,9 +110,7 @@ class Unqrcode_model extends MY_Model {
 
     private function _page_pick_sheet_detail_num($Search){
         $Query = $this->HostDb->select('count(u_id) as num', FALSE)->from('unqrcode')
-            ->join('order', 'o_id = u_order_id', 'left')
-            ->where('o_stock_outted_id', $Search['v'])
-            ->where('o_status > ', O_PRODUCE)
+            ->where_in('u_order_id', '(' . $Search['order_id'] . ')', false)
             ->get();
 
         if($Query->num_rows() > 0){
@@ -124,21 +134,24 @@ class Unqrcode_model extends MY_Model {
      */
     public function select_pick_sheet_print ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
-            $Sql = $this->_unformat_as($Item);
+            $Search['order_id'] = $this->HostDb->select('oso_order_id')
+                ->from('order_stock_outted')
+                ->where('oso_stock_outted_id', $Search['v'])
+                ->get_compiled_select();
             $Scanned = $this->HostDb->select('ps_order_product_num, ps_stock_outted_id, count(ps_stock_outted_id) as scanned')
                 ->from('pick_scan')
                 ->where('ps_stock_outted_id', $Search['v'])
                 ->group_by('ps_order_product_num')
                 ->get_compiled_select();
+            $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('unqrcode')
                 ->join('order', 'o_id = u_order_id', 'left')
-                ->join('stock_outted', 'so_id = o_stock_outted_id', 'left')
+                ->join('pay_status', 'ps_name = o_pay_status', 'left')
                 ->join('(' . $Scanned . ') as A', 'A.ps_order_product_num = u_num', 'left')
-                ->where('o_stock_outted_id', $Search['v'])
-                ->where('o_status > ', O_PRODUCE)
+                ->where_in('o_id', '(' . $Search['order_id'] . ')', false)
                 ->order_by('u_num')->get();
             $Return = $Query->result_array();
             $this->cache->save($Cache, $Return, MINUTES);
