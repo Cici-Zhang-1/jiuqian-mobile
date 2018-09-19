@@ -219,104 +219,97 @@ class Mrp_model extends MY_Model {
      * @param $Search
      * @return array|bool
      */
-    public function select_produce_process_tracking ($Search) {
-        $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
-        $Return = false;
-        if (!($Return = $this->cache->get($Cache))) {
-            $Search['pn'] = $this->_page_num_produce_process_tracking($Search);
-            if(!empty($Search['pn'])){
-                $Sql = $this->_unformat_as($Item);
-                /*$this->HostDb->select($Sql)->from('mrp')
-                    ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
-                    ->join('n9_order_product_classify', 'opc_optimize_datetime = m_batch_num && opc_board = m_board', 'left', false)*/
-                $this->HostDb->select($Sql)->from('n9_order_product_classify')
-                    ->join('n9_mrp', 'm_batch_num = opc_batch_num && m_board = opc_board', 'left', false)
-                    ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
-                    ->join('order_product', 'op_id = opc_order_product_id', 'left')
-                    ->join('order', 'o_id = op_order_id', 'left')
-                    ->join('user', 'u_id = o_creator', 'left');
-                if (isset($Search['keyword']) && $Search['keyword'] != '') {
-                    $this->HostDb->group_start()
-                        ->like('op_num', $Search['keyword'])
-                        ->or_like('o_dealer', $Search['keyword'])
-                        ->or_like('o_owner', $Search['keyword'])
-                        ->group_end();
-                }
-                if (isset($Search['order_type']) && $Search['order_type'] != '') {
-                    $this->HostDb->where('o_order_type', $Search['order_type']);
-                }
-                if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
-                    $this->HostDb->where('wmm_create_datetime <= ', $Search['warn_date']);
-                }
-                $this->HostDb->where_in('m_status', array(M_ELECTRONIC_SAW, M_ELECTRONIC_SAWED));
-                $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKED, OP_PACKING));
-                $this->HostDb->where('o_status > ', O_PRODUCE);
-                $this->HostDb->where('o_status < ', O_INED);
-                $this->HostDb->group_by('op_id');
-                $this->HostDb->order_by('wmm_create_datetime');
+//    public function select_produce_process_tracking ($Search) {
+//        $Item = $this->_Item . __FUNCTION__;
+//        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+//        $Return = false;
+//        if (!($Return = $this->cache->get($Cache))) {
+//            $Search['pn'] = $this->_page_num_produce_process_tracking($Search);
+//            if(!empty($Search['pn'])){
+//                $Sql = $this->_unformat_as($Item);
+//                $this->HostDb->select($Sql)->from('n9_order_product_classify')
+//                    ->join('n9_mrp', 'm_batch_num = opc_batch_num && m_board = opc_board', 'left', false)
+//                    ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
+//                    ->join('order_product', 'op_id = opc_order_product_id', 'left')
+//                    ->join('order', 'o_id = op_order_id', 'left')
+//                    ->join('user', 'u_id = o_creator', 'left');
+//                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+//                    $this->HostDb->group_start()
+//                        ->like('op_num', $Search['keyword'])
+//                        ->or_like('o_dealer', $Search['keyword'])
+//                        ->or_like('o_owner', $Search['keyword'])
+//                        ->group_end();
+//                }
+//                if (isset($Search['order_type']) && $Search['order_type'] != '') {
+//                    $this->HostDb->where('o_order_type', $Search['order_type']);
+//                }
+//                if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
+//                    $this->HostDb->where('wmm_create_datetime <= ', $Search['warn_date']);
+//                }
+//                $this->HostDb->where_in('m_status', array(M_ELECTRONIC_SAW, M_ELECTRONIC_SAWED));
+//                $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKED, OP_PACKING));
+//                $this->HostDb->where('o_status > ', O_PRODUCE);
+//                $this->HostDb->where('o_status < ', O_INED);
+//                $this->HostDb->group_by('op_id');
+//                $this->HostDb->order_by('wmm_create_datetime');
+//
+//                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+//                $Return = array(
+//                    'content' => $Query->result_array(),
+//                    'num' => $this->_Num,
+//                    'p' => $Search['p'],
+//                    'pn' => $Search['pn'],
+//                    'pagesize' => $Search['pagesize']
+//                );
+//                $this->cache->save($Cache, $Return, MONTHS);
+//            } else {
+//                $GLOBALS['error'] = '没有符合搜索条件的生产过程跟踪';
+//            }
+//        }
+//        return $Return;
+//    }
 
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
-                $Return = array(
-                    'content' => $Query->result_array(),
-                    'num' => $this->_Num,
-                    'p' => $Search['p'],
-                    'pn' => $Search['pn'],
-                    'pagesize' => $Search['pagesize']
-                );
-                $this->cache->save($Cache, $Return, MONTHS);
-            } else {
-                $GLOBALS['error'] = '没有符合搜索条件的生产过程跟踪';
-            }
-        }
-        return $Return;
-    }
-
-    private function _page_num_produce_process_tracking ($Search) {
-        /*$this->HostDb->select('op_id', FALSE)
-            ->from('mrp')
-            ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
-            ->join('n9_order_product_classify', 'opc_optimize_datetime = m_batch_num && opc_board = m_board', 'left', false)*/
-        $this->HostDb->select('op_id', FALSE)->from('n9_order_product_classify')
-            ->join('n9_mrp', 'm_batch_num = opc_batch_num && m_board = opc_board', 'left', false)
-            ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
-            ->join('order_product', 'op_id = opc_order_product_id', 'left')
-            ->join('order', 'o_id = op_order_id', 'left')
-            ->join('user', 'u_id = o_creator', 'left');
-        if (isset($Search['keyword']) && $Search['keyword'] != '') {
-            $this->HostDb->group_start()
-                ->like('op_num', $Search['keyword'])
-                ->or_like('o_dealer', $Search['keyword'])
-                ->or_like('o_owner', $Search['keyword'])
-                ->group_end();
-        }
-        if (isset($Search['order_type']) && $Search['order_type'] != '') {
-            $this->HostDb->where('o_order_type', $Search['order_type']);
-        }
-        if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
-            $this->HostDb->where('wmm_create_datetime <= ', $Search['warn_date']);
-        }
-        $this->HostDb->where_in('m_status', array(M_ELECTRONIC_SAW, M_ELECTRONIC_SAWED));
-        $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKED, OP_PACKING));
-        $this->HostDb->where('o_status > ', O_PRODUCE);
-        $this->HostDb->where('o_status < ', O_INED);
-        $this->HostDb->group_by('op_id');
-
-        $Query = $this->HostDb->get();
-        if($Query->num_rows() > 0){
-            $Row = $Query->num_rows();
-            $Query->free_result();
-            $this->_Num = $Row;
-            if(intval($Row%$Search['pagesize']) == 0){
-                $Pn = intval($Row/$Search['pagesize']);
-            }else{
-                $Pn = intval($Row/$Search['pagesize'])+1;
-            }
-            return $Pn;
-        }else{
-            return false;
-        }
-    }
+//    private function _page_num_produce_process_tracking ($Search) {
+//        $this->HostDb->select('op_id', FALSE)->from('n9_order_product_classify')
+//            ->join('n9_mrp', 'm_batch_num = opc_batch_num && m_board = opc_board', 'left', false)
+//            ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
+//            ->join('order_product', 'op_id = opc_order_product_id', 'left')
+//            ->join('order', 'o_id = op_order_id', 'left')
+//            ->join('user', 'u_id = o_creator', 'left');
+//        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+//            $this->HostDb->group_start()
+//                ->like('op_num', $Search['keyword'])
+//                ->or_like('o_dealer', $Search['keyword'])
+//                ->or_like('o_owner', $Search['keyword'])
+//                ->group_end();
+//        }
+//        if (isset($Search['order_type']) && $Search['order_type'] != '') {
+//            $this->HostDb->where('o_order_type', $Search['order_type']);
+//        }
+//        if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
+//            $this->HostDb->where('wmm_create_datetime <= ', $Search['warn_date']);
+//        }
+//        $this->HostDb->where_in('m_status', array(M_ELECTRONIC_SAW, M_ELECTRONIC_SAWED));
+//        $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKED, OP_PACKING));
+//        $this->HostDb->where('o_status > ', O_PRODUCE);
+//        $this->HostDb->where('o_status < ', O_INED);
+//        $this->HostDb->group_by('op_id');
+//
+//        $Query = $this->HostDb->get();
+//        if($Query->num_rows() > 0){
+//            $Row = $Query->num_rows();
+//            $Query->free_result();
+//            $this->_Num = $Row;
+//            if(intval($Row%$Search['pagesize']) == 0){
+//                $Pn = intval($Row/$Search['pagesize']);
+//            }else{
+//                $Pn = intval($Row/$Search['pagesize'])+1;
+//            }
+//            return $Pn;
+//        }else{
+//            return false;
+//        }
+//    }
 
     public function select_user_current_work ($User, $Status) {
         $Item = $this->_Item . __FUNCTION__;

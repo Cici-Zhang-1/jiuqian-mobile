@@ -27,8 +27,9 @@ class Board_nature_model extends MY_Model {
                 $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql)->from('board_nature');
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->like('bn_name', $Search['keyword']);
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->order_by('convert(bn_name using gbk)')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -47,6 +48,7 @@ class Board_nature_model extends MY_Model {
     private function _page_num($Search){
         $this->HostDb->select('count(bn_name) as num', FALSE);
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->like('bn_name', $Search['keyword']);
         }
         $this->HostDb->from('board_nature');
 

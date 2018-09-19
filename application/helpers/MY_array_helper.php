@@ -25,11 +25,15 @@ if(! function_exists('array_to_string')) {
      * @return array|string
      */
     function array_to_string($Param = array()) {
-        if (is_array($Param) && count($Param) > 0) {
-            foreach ($Param as $Key => $Value) {
-                $Param[$Key] = array_to_string($Value);
+        if (is_array($Param)) {
+            if (!empty($Param)) {
+                foreach ($Param as $Key => $Value) {
+                    $Param[$Key] = array_to_string($Value);
+                }
+                $String = implode('', $Param);
+            } else {
+                $String = '';
             }
-            $String = implode('', $Param);
             return $String;
         } else {
             return $Param;

@@ -149,6 +149,7 @@ class Order_product_board_plate_model extends MY_Model {
         $this->HostDb->select($Sql, false)
             ->from('order_product_board_plate')
             ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
+            ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
             ->join('order_product', 'op_id = opb_order_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left');
         if (!empty($Qrcode)) {
@@ -211,16 +212,20 @@ class Order_product_board_plate_model extends MY_Model {
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
                 $Query = $this->HostDb->select($Sql)->from('order_product_board_plate')
+                    ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
                     ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
-                    ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                    ->join('order_product', 'op_id = opc_order_product_id', 'left')
                     ->join('order', 'o_id = op_order_id', 'left')
-                    ->join('user', 'u_id = o_creator', 'left')
+                    ->join('order_datetime', 'od_order_id = o_id', 'left')
+                    ->join('user', 'u_id = od_creator', 'left')
                     ->where('o_order_type', $Search['order_type'])
-                    ->where('op_scan_status', SCANNING)
-                    ->where_in('op_product_id', array(WARDROBE, CABINET))
-                    ->where('(opbp_scan_datetime = "0000-00-00 00:00:00" || opbp_scan_datetime is null)')
-                    ->where('op_scan_start > ', $Search['start_date'])
-                    ->group_by('opb_id')
+                    ->where('opbp_scanner', ZERO)
+                    // ->where('op_producing_datetime > ', $Search['start_date'])
+                    ->group_start()
+                        ->where('opc_status', WP_SCANNING)
+                        ->or_where('opb_status', WP_SCANNING)
+                    ->group_end()
+                    ->group_by('op_id')
                     ->having('lack <= ', $Search['lack'])
                     ->order_by('op_num')
                     ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
@@ -233,24 +238,27 @@ class Order_product_board_plate_model extends MY_Model {
                 );
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的订单产品板材板块';
+                $GLOBALS['error'] = '没有符合搜索条件的差板块';
             }
         }
         return $Return;
     }
 
     private function _page_num_scan_lack($Search) {
-        $this->HostDb->select('count(opb_id) as lack', FALSE)
+        $this->HostDb->select('count(op_id) as lack', FALSE)
             ->from('order_product_board_plate')
+            ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
             ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
-            ->join('order_product', 'op_id = opb_order_product_id', 'left')
+            ->join('order_product', 'op_id = opc_order_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->where('o_order_type', $Search['order_type'])
-            ->where('op_scan_status', SCANNING)
-            ->where_in('op_product_id', array(WARDROBE, CABINET))
-            ->where('(opbp_scan_datetime = "0000-00-00 00:00:00" || opbp_scan_datetime is null)')
-            ->where('op_scan_start > ', $Search['start_date'])
-            ->group_by('opb_id')
+            ->where('opbp_scanner', ZERO)
+            // ->where('op_producing_datetime > ', $Search['start_date'])
+            ->group_start()
+                ->where('opc_status', WP_SCANNING)
+                ->or_where('opb_status', WP_SCANNING)
+            ->group_end()
+            ->group_by('op_id')
             ->having('lack <= ', $Search['lack']);
 
         $Query = $this->HostDb->get();
@@ -282,9 +290,13 @@ class Order_product_board_plate_model extends MY_Model {
             $Sql = $this->_unformat_as($Item);
             $Query = $this->HostDb->select($Sql)->from('order_product_board_plate')
                 ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
+                ->join('workflow_procedure AS B', 'B.wp_id = opb_status', 'left')
+                ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
+                ->join('workflow_procedure AS C', 'C.wp_id = opc_status', 'left')
                 ->join('user', 'u_id = opbp_scanner', 'left')
-                ->where('opb_id', $Search['v'])
-                ->order_by('opbp_scan_datetime')->get();
+                ->where('opc_order_product_id', $Search['v'])
+                ->order_by('opbp_scan_datetime')
+                ->order_by('opbp_qrcode')->get();
             if ($Query->num_rows() > 0) {
                 $Return = array(
                     'content' => $Query->result_array(),
@@ -317,7 +329,8 @@ class Order_product_board_plate_model extends MY_Model {
                 ->where('opb_order_product_id', $OrderProductId)
                 ->where('opbp_scanner', ZERO)
                 ->where('(opbp_scan_datetime = "0000-00-00 00:00:00" || opbp_scan_datetime is null)')
-                ->order_by('opbp_qrcode')->get();
+                ->group_by('opb_id')
+                ->get();
             if ($Query->num_rows() > ZERO) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -481,6 +494,27 @@ class Order_product_board_plate_model extends MY_Model {
         }
         return $Return;
     }
+
+    /**
+     * 获取bd文件
+     * @param $Ids
+     * @return bool
+     */
+    public function select_bd_files($Ids){
+        $Query = $this->HostDb->select('opbp_qrcode as qrcode, opbp_bd_file as bd_file', false)
+            ->from('order_product_board_plate')
+            ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
+            ->where_in('opb_order_product_id', $Ids)
+            ->where('opbp_bd_file is not null')
+            ->where('opbp_bd_file != ""')
+            ->get();
+        if($Query->num_rows() > 0){
+            $Return = $Query->result_array();
+            return $Return;
+        }else{
+            return false;
+        }
+    }
     /**
      * Insert data to table order_product_board_plate
      * @param $Data
@@ -622,6 +656,19 @@ class Order_product_board_plate_model extends MY_Model {
             ->or_where('opbp_bd_file is null')
             ->group_end();
         $this->HostDb->update('order_product_board_plate', array('opbp_qrcode' => null, 'opbp_order_product_classify_id' => ZERO));
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
+     * 清除classifyId
+     * @param $OrderProductId
+     * @return bool
+     */
+    public function clear_classify ($OrderProductId) {
+        $Query = $this->HostDb->select('opb_id')->from('order_product_board')->where_in('opb_order_product_id', is_array($OrderProductId) ? $OrderProductId : array($OrderProductId))->get_compiled_select();
+        $this->HostDb->where('opbp_order_product_board_id IN (', $Query . ')', false);
+        $this->HostDb->update('order_product_board_plate', array('opbp_order_product_classify_id' => ZERO));
         $this->remove_cache($this->_Module);
         return true;
     }

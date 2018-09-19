@@ -16,7 +16,7 @@ class Edge_model extends MY_Model {
     }
 
     public function select ($Search) {
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -27,7 +27,7 @@ class Edge_model extends MY_Model {
                 if ($Search['status'] == WP_EDGED) {
                     $Sql = $Sql . ' ORDER BY edge_datetime desc LIMIT ' . ($Search['p']-1)*$Search['pagesize'] . ', ' . $Search['pagesize'];
                 } else {
-                    $Sql = $Sql . ' ORDER BY num LIMIT ' . ($Search['p']-1)*$Search['pagesize'] . ', ' . $Search['pagesize'];
+                    $Sql = $Sql . ' ORDER BY sort_datetime, num LIMIT ' . ($Search['p']-1)*$Search['pagesize'] . ', ' . $Search['pagesize'];
                 }
                 $Query = $this->HostDb->query($Sql);
                 $Return = array(
@@ -39,7 +39,7 @@ class Edge_model extends MY_Model {
                 );
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
+                $GLOBALS['error'] = '没有符合搜索条件的封边订单';
             }
         }
         return $Return;

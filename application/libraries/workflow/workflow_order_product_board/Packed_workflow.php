@@ -12,8 +12,24 @@ class Packed_workflow extends Workflow_order_product_board_abstract {
         $this->_Source_id = $Source_id;
     }
 
-    public function ppacked() {
+    public function packed($arguments) {
+        if (count($arguments) == TWO) {
+            $Msg = $arguments[0];
+            $Data = $arguments[1];
+        } else {
+            $arguments = array_pop($arguments);
+            if (is_array($arguments)) {
+                $Data = $arguments;
+                $Msg = '';
+            } else {
+                $Msg = $arguments;
+                $Data = array();
+            }
+        }
         $this->_Workflow->store_message('==分类板块已经打包');
+        // $Packed = $Data['packed'];
+        unset($Data['packed']);
+        return $this->_workflow_propagation('packed', $Msg, $Data);
     }
 
     public function __call($name, $arguments){

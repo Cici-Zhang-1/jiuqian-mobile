@@ -89,7 +89,7 @@ END;
     <td>$value[m_length]</td>
     <td>$value[m_width]</td>
     <td>$value[thick]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
     <td>$value[area]</td>
     <td>$value[center]</td>
     <td>$value[punch]</td>
@@ -103,7 +103,7 @@ END;
 											'good' => $value['good'],
 											'length' => $value['width'] - $BoardWidth*2,
 											'width' => $BoardWidth,
-											'num' => $value['num']
+											'amount' => $value['amount']
 										);
 										$CenterFlag = 1;
 									}elseif (preg_match('/四六/', $value['center'])) {
@@ -113,7 +113,7 @@ END;
 											'good' => $value['good'],
 											'length' => $value['width'] - $BoardWidth*2,
 											'width' => $BoardWidth,
-											'num' => $value['num']
+											'amount' => $value['amount']
 										);
 										$CenterFlag = 2;
 									}else {
@@ -126,7 +126,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['width'] - $BoardWidth*2,
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 			                            $S[] = array(
 			                                'flag' => $K,
@@ -134,7 +134,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['length'],
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 
 										if (1 == $CenterFlag) {
@@ -144,7 +144,7 @@ END;
 												'good' => $value['good'],
 												'length' => $value['width'] - $BoardWidth*2 + 12,
 												'width' => $ItemWidth,
-												'num' => $value['num'] * ceil((($value['length'] - $BoardWidth*3)/2 + 12)/$ItemWidth) * 2
+												'amount' => $value['amount'] * ceil((($value['length'] - $BoardWidth*3)/2 + 12)/$ItemWidth) * 2
 											);
 										}elseif (2 == $CenterFlag) {
 											$X[] = array(
@@ -153,7 +153,7 @@ END;
 												'good' => $value['good'],
 												'length' => $value['width'] - $BoardWidth*2 + 12,
 												'width' => $ItemWidth,
-												'num' => $value['num'] * (ceil((($value['length']*3/5 - $BoardWidth*3/2) + 12)/$ItemWidth) + ceil((($value['length']*2/5 - $BoardWidth*3/2) + 12)/$ItemWidth))
+												'amount' => $value['amount'] * (ceil((($value['length']*3/5 - $BoardWidth*3/2) + 12)/$ItemWidth) + ceil((($value['length']*2/5 - $BoardWidth*3/2) + 12)/$ItemWidth))
 											);
 										}else {
 											$X[] = array(
@@ -162,7 +162,7 @@ END;
 												'good' => $value['good'],
 												'length' => $value['width'] - $BoardWidth*2 + 12,
 												'width' => $ItemWidth,
-												'num' => $value['num']*ceil(($value['length'] - $BoardWidth*2 + 12)/$ItemWidth)
+												'amount' => $value['amount']*ceil(($value['length'] - $BoardWidth*2 + 12)/$ItemWidth)
 											);
 										}
 			                        }elseif (preg_match('/玻璃/', $value['wood_name'])){
@@ -172,7 +172,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['width'] - $BoardWidth*2,
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 			                            $S[] = array(
 			                                'flag' => $K,
@@ -180,7 +180,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['length'],
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 
 										if (1 == $CenterFlag) {
@@ -190,7 +190,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length'] - $BoardWidth*3)/2 + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num'] * 2
+												'amount' => $value['amount'] * 2
 											);
 										}elseif (2 == $CenterFlag) {
 											$X[] = array(
@@ -199,7 +199,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*3/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 											$X[] = array(
 												'flag' => $K,
@@ -207,7 +207,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*2/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}else {
 											$X[] = array(
@@ -216,7 +216,7 @@ END;
 												'good' => $value['core'],
 												'length' => $value['length'] - $BoardWidth*2 + 12,
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}
 			                        }elseif (preg_match('/平板/', $value['wood_name'])){
@@ -226,7 +226,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['width'] - $BoardWidth*2,
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 			                            $S[] = array(
 			                                'flag' => $K,
@@ -234,7 +234,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['length'],
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 
 										if (1 == $CenterFlag) {
@@ -244,7 +244,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length'] - $BoardWidth*3)/2 + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num'] * 2
+												'amount' => $value['amount'] * 2
 											);
 										}elseif (2 == $CenterFlag) {
 											$X[] = array(
@@ -253,7 +253,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*3/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 											$X[] = array(
 												'flag' => $K,
@@ -261,7 +261,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*2/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}else {
 											$X[] = array(
@@ -270,7 +270,7 @@ END;
 												'good' => $value['core'],
 												'length' => $value['length'] - $BoardWidth*2 + 12,
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}
 			                        }else{
@@ -280,7 +280,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['width'] - $BoardWidth*2,
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 			                            $S[] = array(
 			                                'flag' => $K,
@@ -288,7 +288,7 @@ END;
 			                                'good' => $value['good'],
 			                                'length' => $value['length'],
 			                                'width' => $BoardWidth,
-			                                'num' => $value['num']*2
+			                                'amount' => $value['amount']*2
 			                            );
 
 										if (1 == $CenterFlag) {
@@ -298,7 +298,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length'] - $BoardWidth*3)/2 + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num'] * 2
+												'amount' => $value['amount'] * 2
 											);
 										}elseif (2 == $CenterFlag) {
 											$X[] = array(
@@ -307,7 +307,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*3/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 											$X[] = array(
 												'flag' => $K,
@@ -315,7 +315,7 @@ END;
 												'good' => $value['core'],
 												'length' => ceil(($value['length']*2/5 - $BoardWidth*3/2) + 12),
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}else {
 											$X[] = array(
@@ -324,7 +324,7 @@ END;
 												'good' => $value['core'],
 												'length' => $value['length'] - $BoardWidth*2 + 12,
 												'width' => $value['width'] - $BoardWidth*2 + 12,
-												'num' => $value['num']
+												'amount' => $value['amount']
 											);
 										}
 			                        }
@@ -359,7 +359,7 @@ END;
     <td>$value[good]</td>
     <td>$value[length]</td>
     <td>$value[width]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
 </tr>
 END;
 			                    }
@@ -373,7 +373,7 @@ END;
     <td>$value[good]</td>
     <td>$value[length]</td>
     <td>$value[width]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
 </tr>
 END;
 			                    }
@@ -387,7 +387,7 @@ END;
     <td>$value[good]</td>
     <td>$value[length]</td>
     <td>$value[width]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
 </tr>
 END;
 								}
@@ -401,7 +401,7 @@ END;
     <td>$value[good]</td>
     <td>$value[length]</td>
     <td>$value[width]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
 </tr>
 END;
 			                    }

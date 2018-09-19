@@ -13,23 +13,24 @@ class Electronic_saw_workflow extends Workflow_order_product_classify_abstract {
     }
 
     public function electronic_saw () {
-        $this->_Workflow->store_message('等待下料');
-        $this->_workflow_propagation(__FUNCTION__);
+        $this->_Workflow->store_message('++等待下料');
+        return true;
     }
 
     public function re_shear () {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear']);
-        $this->_Workflow->shear();
+        return $this->_workflow_previous();
+        /*$this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear']);
+        return $this->_Workflow->shear();*/
     }
 
     public function electronic_sawed() {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['electronic_sawed'], array('saw' => $this->_CI->session->userdata('uid'), 'saw_datetime' => date('Y-m-d H:i:s')));
-        $this->_Workflow->electronic_sawed();
+        return $this->_Workflow->electronic_sawed();
     }
 
     public function electronic_sawing() {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['electronic_sawing']);
-        $this->_Workflow->electronic_sawing();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['electronic_sawing'], array('saw' => $this->_CI->session->userdata('uid')));
+        return $this->_Workflow->electronic_sawing();
     }
 
     public function __call($name, $arguments){

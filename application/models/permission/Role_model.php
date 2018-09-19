@@ -25,7 +25,8 @@ class Role_model extends MY_Model {
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)->from('role')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->select($Sql)->from('role')
+                    ->order_by('r_name')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,

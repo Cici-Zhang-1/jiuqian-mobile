@@ -109,7 +109,9 @@ class D_k extends D_abstract{
                     'unit_price' => $value['unit_price'],
                     'amount' => 1,
                     'area' => $value['area'],
-                    'sum' => $value['sum']
+                    'virtual_area' => $value['area'],
+                    'sum' => $value['sum'],
+                    'virtual_sum' => $value['sum']
                 );
                 if(!($Board[$value['board']]['v'] = $this->_CI->order_product_board_model->is_existed($OrderProductId, gh_escape($value['board'])))){
                     /*如果不存在则插入订单产品板材*/
@@ -121,7 +123,9 @@ class D_k extends D_abstract{
             }else{
                 $Board[$value['board']]['amount']++;
                 $Board[$value['board']]['area'] += $value['area'];
+                $Board[$value['board']]['virtual_area'] += $value['area'];
                 $Board[$value['board']]['sum'] += $value['sum'];
+                $Board[$value['board']]['virtual_sum'] += $value['sum'];
             }
             $value['order_product_board_id'] = $Board[$value['board']]['v'];
 
@@ -167,6 +171,10 @@ class D_k extends D_abstract{
             if (!!($Query = $this->_CI->order_product_board_wood_model->select_by_order_product_id(array('order_product_id' => $OrderProductId)))) {
                 $BoardPlate = $Query['content'];
                 unset($Query);
+                foreach ($BoardPlate as $Key => $Value) {
+                    $Value['sum'] = ceil(($Value['area'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR;
+                    $BoardPlate[$Key] = $Value;
+                }
                 self::$_BoardPlate = $BoardPlate;
             } else {
                 return false;

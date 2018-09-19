@@ -14,13 +14,12 @@ class Sheared_workflow extends Workflow_order_product_classify_abstract {
 
     public function re_shear () {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear']);
-        $this->_Workflow->shear();
+        return $this->_Workflow->shear();
     }
 
     public function sheared(){
-        $this->_Workflow->store_message('已安排生产下料');
-        $this->_workflow_propagation(__FUNCTION__);
-        $this->_workflow_next();
+        $this->_Workflow->store_message('++已安排生产下料');
+        return $this->_workflow_next();
     }
 
     public function __call($name, $arguments){

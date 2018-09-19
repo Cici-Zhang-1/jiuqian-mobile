@@ -5,6 +5,7 @@ $config['order/order_product_model/select'] = array(
     'op_product_id' => 'product_id',
     'op_product' => 'product',
     'op_remark' => 'remark',
+    'op_design_atlas' => 'design_atlas',
     'o_id' => 'order_id',
     'o_dealer' => 'dealer',
     'o_owner' => 'owner',
@@ -14,21 +15,29 @@ $config['order/order_product_model/select'] = array(
     'C.u_truename' => 'creator',
     'D.u_truename' => 'dismantle',
     'op_dismantle_datetime' => 'dismantle_datetime',
-    'wop_label' => 'status_label'
+    'wop_label' => 'status_label',
+    'tl_icon' => 'icon'
 );
 $config['order/order_product_model/select_by_order_id'] = array(
     'op_id' => 'order_product_id',
     'op_num' => 'num',
     'p_code' => 'code',
     'o_id' => 'order_id',
+    'o_num' => 'order_num',
     'o_payterms' => 'payterms',
     'o_down_payment' => 'down_payment',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
     'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
     'o_pay_status' => 'pay_status',
+    'd_id' => 'dealer_id',
     'd_balance' => 'dealer_balance',
     'd_produce' => 'dealer_produce',
     'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_produce' => 'dealer_virtual_produce',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
     'o_status' => 'status'
 );
 $config['order/order_product_model/select_by_v'] = array(
@@ -48,6 +57,7 @@ $config['order/order_product_model/select_dismantle'] = array(
     'op_remark' => 'remark',
     'op_status' => 'status',
     'op_bd' => 'bd',
+    'op_design_atlas' => 'design_atlas',
     'wop_label'=> 'status_label',
     'p_code' => 'code',
     'o_id' => 'order_id'
@@ -61,6 +71,7 @@ $config['order/order_product_model/select_detail'] = array(
     'op_num' => 'num',
     'op_product' => 'product',
     'op_remark' => 'remark',
+    'op_design_atlas' => 'design_atlas',
     'o_id' => 'order_id',
     'o_dealer' => 'dealer',
     'o_owner' => 'owner',
@@ -68,6 +79,18 @@ $config['order/order_product_model/select_detail'] = array(
     'o_remark' => 'order_remark',
     'wo_label' => 'status_label',
     'od_sure_datetime' => 'sure_datetime'
+);
+
+$config['order/order_product_model/select_produce_process_tracking'] = array(
+    'op_id' => 'v',
+    'op_num' => 'order_product_num',
+    'op_product' => 'product',
+    'op_producing_datetime' => 'producing_datetime',
+    'o_id' => 'order_id',
+    'o_dealer' => 'dealer',
+    'o_owner' => 'owner',
+    'u_truename' => 'producing',
+    'm_batch_num' => 'batch_num'
 );
 
 $config['order/order_product_model/select_brothers'] = array(
@@ -110,11 +133,27 @@ $config['order/order_product_model/is_all_inned'] = array(
     'p_code' => 'code'
 );
 
+$config['order/order_product_model/select_work_out'] = array(
+    'op_id' => 'v',
+    'op_num' => 'num',
+    'op_product' => 'product',
+    'op_pack' => 'pack',
+    'op_pack_detail' => 'pack_detail',
+    'op_delivered' => 'delivered',
+    '(op_pack - op_delivered)' => 'wait_delivery',
+    'op_remark' => 'remark',
+    'o_id' => 'order_id',
+    'o_dealer' => 'dealer',
+    'o_owner' => 'owner',
+    'o_remark' => 'order_remark',
+    'o_collection' => 'collection'
+);
+
 $config['order/order_product_model/select_warehouse_waiting_in'] = array(
     'op_id' => 'v',
     'op_num' => 'order_product_num',
     'op_pack_detail' => 'pack_detail',
-    'op_pack_datetime' => 'pack_datetime',
+    'op_inned_datetime' => 'inned_datetime',
     'o_dealer' => 'dealer'
 );
 
@@ -124,9 +163,9 @@ $config['order/order_product_model/select_pick_sheet_detail'] = array(
     'A.scanned' => 'scanned',
     'convert(substr(op_num, 14), signed)' => 'no',
     'op_warehouse_num' => 'warehouse_v',
+    'op_pack' => 'pack',
     'op_pack_detail' => 'pack_detail',
-    'op_pack_datetime' => 'pack_datetime',
-    'o_dealer' => 'dealer',
+    'o_dealer' => 'dealer'
 );
 
 $config['order/order_product_model/select_pick_sheet_print'] = array(
@@ -137,7 +176,6 @@ $config['order/order_product_model/select_pick_sheet_print'] = array(
     'op_warehouse_num' => 'warehouse_v',
     'op_pack' => 'order_product_pack',
     'op_pack_detail' => 'pack_detail',
-    'op_pack_datetime' => 'pack_datetime',
     'op_product' => 'product',
     'o_id' => 'order_v',
     'o_dealer' => 'dealer',
@@ -149,12 +187,10 @@ $config['order/order_product_model/select_pick_sheet_print'] = array(
     'o_logistics' => 'logistics',
     'o_owner' => 'owner',
     'o_sum' => 'sum',
-    'if(o_payed_datetime is not null && o_payed_datetime > 0, "已付", o_payterms)' => 'payed',
-    'so_end_datetime' => 'end_datetime',
-    'so_truck' => 'truck',
-    'so_train' => 'train',
-    'so_pack' => 'pack',
-    'so_collection' => 'collection'
+    'o_virtual_sum' => 'virtual_sum',
+    'o_dealer_remark' => 'dealer_remark',
+    'ps_label' => 'payed',
+    'o_collection' => 'collection'
 );
 
 $config['order/order_product_model/select_current_workflow'] = array(
@@ -172,6 +208,7 @@ $config['order/order_product_model/is_exist'] = array(
     'op_pack_detail' => 'pack_detail',
     'op_status' => 'status',
     'op_warehouse_num' => 'order_product_warehouse_num',
+    'op_design_atlas' => 'design_atlas',
     'p_name' => 'product_name',
     'p_code' => 'code',
     'o_id' => array(
@@ -202,10 +239,16 @@ $config['order/order_product_model/is_order_dismantlable'] = array(
     'o_owner' => 'owner',
     'o_status' => 'status',
     'o_sum' => 'sum',
-    'op_id' => 'order_product_id',
+    'o_virtual_sum' => 'virtual_sum',
+    'op_id' => array(
+        'v',
+        'order_product_id'
+    ),
+    'op_num' => 'order_product_num',
     'op_product_id' => 'product_id',
     'op_product' => 'product',
     'op_remark' => 'remark',
+    'op_design_atlas' => 'design_atlas',
     'p_code' => 'code'
 );
 
@@ -219,4 +262,23 @@ $config['order/order_product_model/are_dismantlable'] = array(
 
 $config['order/order_product_model/are_status'] = array(
     'op_id' => 'order_product_id'
+);
+
+$config['order/order_product_model/select_delivered'] = array(
+    'op_order_id' => 'order_id',
+    'sum(op_delivered)' => ' delivered'
+);
+$config['order/order_product_model/select_delivered_by_v'] = array(
+    'op_id' => 'v',
+    'op_order_id' => 'order_id',
+    'op_delivered' => 'delivered'
+);
+
+$config['order/order_product_model/select_bd'] = array(
+    'op_id' => 'v',
+    'op_num' => 'num',
+    'op_product' => 'product',
+    'op_remark' => 'remark',
+    'u_truename' => 'dismantle',
+    'o_remark' => 'order_remark'
 );

@@ -5,9 +5,11 @@ $config['order/order_product_board_model/select'] = array(
     'opb_board' => array('board', 'name'),
     'opb_amount' => 'amount',
     'opb_area' => 'area',
+    'opb_virtual_area' => 'virtual_area',
     'opb_purchase' => 'purchase',
     'opb_unit_price' => 'unit_price',
     'opb_sum' => 'sum',
+    'opb_virtual_sum' => 'virtual_sum',
     'opb_open_hole' => 'open_hole',
     'opb_open_hole_unit_price' => 'open_hole_unit_price',
     'opb_invisibility' => 'invisibility',
@@ -96,6 +98,8 @@ $config['order/order_product_board_model/select_check_by_opid'] = array(
 	'if(opb_unit_price = 0, b_unit_price, opb_unit_price)' => 'unit_price',
 	'opb_sum' => 'sum',
 	'opb_sum_diff' => 'sum_diff',
+    'opb_virtual_area' => 'virtual_area',
+    'opb_virtual_sum' => 'virtual_sum',
 	'opb_invisibility' => 'invisibility',
 	'opb_open_hole' => 'open_hole',
 	'opb_invisibility_unit_price' => 'invisibility_unit_price',
@@ -110,26 +114,29 @@ $config['order/order_product_board_model/select_order_product_board_by_opid'] = 
 	'opb_area' => 'area',
 	'opb_unit_price' => 'unit_price',
 	'opb_sum' => 'sum',
+    'opb_virtual_area' => 'virtual_area',
+    'opb_virtual_sum' => 'virtual_sum'
 );
 $config['order/order_product_board_model/select_board_predict'] = array(
 	'opb_area' => 'area',
 	'opb_board' => 'board',
+	'b_thick' => 'thick',
 	'op_num' => 'order_product_num',
-	'op_product_id' => 'pid',
+	'op_product_id' => 'product_id',
 	'o_status' => 'status',
 );
-$config['order/order_product_board_model/select_dismantle_area'] = array(
-	'sum(opb_area)' => 'area',
-	'CONVERT(opb_board,SIGNED)' => 'board',
-	'p_name' => 'name',
-);
-$config['order/order_product_board_model/select_dismantle_area_detail'] = array(
-	'op_num' => 'num',
-	'opb_area' => 'area',
+$config['order/order_product_board_model/select_dismantled'] = array(
+    'opb_id' => 'v',
 	'opb_board' => 'board',
-	'p_name' => 'name',
-	'o_dismantled_datetime' => 'dismantled_datetime',
+	'opb_area' => 'area',
+	'b_thick' => 'thick',
+	'op_id' => 'order_product_id',
+	'op_num' => 'order_product_num',
+	'op_dismantle_datetime' => 'dismantle_datetime',
+	'p_id' => 'product_id',
+	'p_name' => 'product'
 );
+
 $config['order/order_product_board_model/select_by_oid'] = array(
 	'opb_id' => 'opbid',
 	'opb_board' => 'board',
@@ -197,13 +204,15 @@ $config['order/order_product_board_model/select_order_product_v_by_v'] = array(
     'opb_order_product_id' => 'order_product_v'
 );
 
+$config['order/order_product_board_model/select_order_product_id'] = array(
+    'opb_order_product_id' => 'order_product_id'
+);
+
 $config['order/order_product_board_model/select_current_workflow'] = array(
-    'wopb_id' => 'v',
-    'wopb_name' => 'name',
-    'wopb_label' => 'label',
-    'wopb_previous' => 'previous',
-    'wopb_next' => 'next',
-    'wopb_file' => 'file'
+    'wp_id' => 'v',
+    'wp_name' => 'name',
+    'wp_label' => 'label',
+    'wp_file' => 'file'
 );
 
 $config['order/order_product_board_model/select_only_guiti'] = array(
@@ -245,4 +254,19 @@ $config['order/order_product_board_model/select_packable_by_order_product_id'] =
     'opb_id' => 'v',
     'opb_status' => 'status',
     'opb_procedure' => 'procedure'
+);
+
+$config['order/order_product_board_model/select_sales'] = array(
+    'opb_id' => 'v',
+    'opb_sum' => 'sum',
+    'opb_area' => 'area',
+    'opb_virtual_area' => 'virtual_area',
+    'opb_virtual_sum' => 'virtual_sum',
+    'o_dealer_id' => 'dealer_id',
+    'o_dealer' => 'dealer',
+    'b_thick' => 'thick',
+    'b_nature' => 'nature',
+    'b_color' => 'color',
+    'p_id' => 'product_id',
+    'p_name' => 'product'
 );

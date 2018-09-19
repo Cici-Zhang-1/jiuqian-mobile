@@ -19,7 +19,8 @@ $config['permission/card_model/select_allowed'] = array(
     'ct_name' => 'card_type_name',
     'c_card_setting' => 'card_setting_v',
     'c_lazy_load' => 'lazy_load',
-    'cs_name' => 'card_setting_name'
+    'cs_name' => 'card_setting_name',
+    'c_menu_id' => 'menu_id'
 );
 $config['permission/card_model/select_by_mid'] = array(
 	'c_id' => 'v',

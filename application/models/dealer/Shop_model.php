@@ -89,7 +89,7 @@ class Shop_model extends MY_Model {
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql)->from('shop')
+            $this->HostDb->select($Sql, false)->from('shop')
                 ->join('dealer', 'd_id = s_dealer_id', 'left')
                 ->join('j_dealer_linker_shop', 'dls_shop_id = s_id && dls_primary = ' . YES, 'left', false)
                 ->join('dealer_linker', 'dl_id = dls_dealer_linker_id', 'left')

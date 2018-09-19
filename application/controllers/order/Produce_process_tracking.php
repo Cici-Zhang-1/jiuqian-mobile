@@ -15,7 +15,7 @@ class Produce_process_tracking extends MY_Controller {
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller order/Produce_process_tracking __construct Start!');
-        $this->load->model('order/mrp_model');
+        $this->load->model('order/order_product_model');
     }
 
     /**
@@ -37,7 +37,7 @@ class Produce_process_tracking extends MY_Controller {
         $this->get_page_search();
         $this->_Search['warn_date'] = date('Y-m-d', strtotime('-' . $this->_Search['warn_date'] . ' days'));
         $Data = array();
-        if(!($Data = $this->mrp_model->select_produce_process_tracking($this->_Search))){
+        if(!($Data = $this->order_product_model->select_produce_process_tracking($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }

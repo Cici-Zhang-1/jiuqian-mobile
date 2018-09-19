@@ -27,6 +27,7 @@ class Order_product_board_door_model extends MY_Model {
                 $Sql = $this->_unformat_as($Item);
                 $Query = $this->HostDb->select($Sql)->from('order_product_board_door')
                     ->join('order_product_board', 'opb_id = opbd_order_product_board_id', 'left')
+                    ->join('workflow_procedure', 'wp_id = opb_status', 'left')
                     ->where('opb_order_product_id', $Search['order_product_id'])
                     ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
 

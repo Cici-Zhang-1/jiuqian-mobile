@@ -13,7 +13,7 @@ $config['data/abnormity/add'] = array(
             'rules' => 'trim|numeric|max_length[1]'
         ),
                                 array (
-            'field' => 'ScanPlate',
+            'field' => 'scan',
             'label' => '扫描',
             'rules' => 'trim|numeric|max_length[1]'
         )
@@ -36,7 +36,7 @@ $config['data/abnormity/edit'] = array(
             'rules' => 'trim|numeric|max_length[1]'
         ),
                                 array (
-            'field' => 'ScanPlate',
+            'field' => 'scan',
             'label' => '扫描',
             'rules' => 'trim|numeric|max_length[1]'
         )

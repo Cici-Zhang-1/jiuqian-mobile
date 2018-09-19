@@ -13,7 +13,7 @@ class Inned_workflow extends Workflow_order_product_abstract {
     }
     
     public function inned(){
-        $this->_Workflow->store_message('该订单产品已全部入库');
+        $this->_Workflow->store_message('该订单产品已全部入库!');
         return $this->_workflow_propagation(__FUNCTION__);
     }
 

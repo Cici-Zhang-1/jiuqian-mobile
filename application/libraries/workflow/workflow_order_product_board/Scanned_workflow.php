@@ -12,9 +12,10 @@ class Scanned_workflow extends Workflow_order_product_board_abstract {
         $this->_Source_id = $Source_id;
     }
 
-    public function sscanned() {
+    public function scanned() {
         $this->_Workflow->store_message('==已扫描');
-        $this->_workflow_next();
+        $this->_workflow_propagation(__FUNCTION__); // 下料后向上层传递
+        return $this->_workflow_next();
     }
 
     public function __call($name, $arguments){

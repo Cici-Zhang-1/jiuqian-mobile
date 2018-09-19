@@ -16,3 +16,15 @@ $config['workflow/workflow_procedure_model/select_by_name'] = array(
     'wp_next' => 'next',
     'wp_file' => 'file'
 );
+
+$config['workflow/workflow_procedure_model/is_exist'] = array(
+    'wp_id' => array(
+        'id',
+        'v'
+    ),
+    'wp_name' => 'name',
+    'wp_label' => 'label',
+    'wp_previous' => 'previous',
+    'wp_next' => 'next',
+    'wp_file' => 'file'
+);

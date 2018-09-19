@@ -134,9 +134,11 @@ class D_m extends D_abstract{
                     'unit_price' => $value['unit_price'],
                     'amount' => 1,
                     'area' => $value['area'],
+                    'virtual_area' => $value['area'],
                     'open_hole' => $value['open_hole'],
                     'invisibility' => $value['invisibility'],
-                    'sum' => $value['sum']
+                    'sum' => $value['sum'],
+                    'virtual_sum' => $value['sum']
                 );
                 if(!($Board[$value['board']]['v'] = $this->_CI->order_product_board_model->is_existed($OrderProductId, gh_escape($value['board'])))){
                     /*如果不存在则插入订单产品板材*/
@@ -148,9 +150,11 @@ class D_m extends D_abstract{
             }else{
                 $Board[$value['board']]['amount']++;
                 $Board[$value['board']]['area'] += $value['area'];
+                $Board[$value['board']]['virtual_area'] += $value['area'];
                 $Board[$value['board']]['open_hole'] += $value['open_hole'];
                 $Board[$value['board']]['invisibility'] += $value['invisibility'];
                 $Board[$value['board']]['sum'] += $value['sum'];
+                $Board[$value['board']]['virtual_sum'] += $value['sum'];
             }
             $value['order_product_board_id'] = $Board[$value['board']]['v'];
 
@@ -231,6 +235,10 @@ class D_m extends D_abstract{
             if (!!($Query = $this->_CI->order_product_board_door_model->select_by_order_product_id(array('order_product_id' => $OrderProductId)))) {
                 $BoardPlate = $Query['content'];
                 unset($Query);
+                foreach ($BoardPlate as $Key => $Value) {
+                    $Value['sum'] = ceil(($Value['area'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR;
+                    $BoardPlate[$Key] = $Value;
+                }
                 self::$_BoardPlate = $BoardPlate;
             } else {
                 return false;
@@ -263,9 +271,10 @@ class D_m extends D_abstract{
             $Return['left_edge'] = $Return['right_edge'] = $Return['up_edge'] = $Return['down_edge'] = 1;
             if('定尺拉手' == $Handle){
                 $Return['left_edge'] = $Return['right_edge'] = 1.5;
-            }
-            if($Invisibility > 0){
-                $Return['left_edge'] = $Return['right_edge'] = 18.5;
+            } else {
+                if($Invisibility > 0){
+                    $Return['left_edge'] = $Return['right_edge'] = 18.5;
+                }
             }
         }elseif (preg_match('/哑光窄边/',$Value) || preg_match('/碰角/',$Value)){
             $Return['left_edge'] = $Return['right_edge'] = $Return['up_edge'] = $Return['down_edge'] = 2;

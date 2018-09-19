@@ -63,7 +63,7 @@ class Order_product_classify_model extends MY_Model {
 
     public function select_optimize ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             if (!is_array($Search['status'])) {
@@ -184,6 +184,7 @@ class Order_product_classify_model extends MY_Model {
         $Return = false;
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order_product_classify')
+            ->join('user', 'u_id = opc_pack', 'left')
             ->where('opc_order_product_id', $OrderProductId)
             ->where('opc_status >= ', WP_PACK)
             ->get();
@@ -444,6 +445,22 @@ class Order_product_classify_model extends MY_Model {
         return $Now;
     }
 
+    public function select_workflow_previous ($Vs) {
+        if ($Now = $this->_select_production_line($Vs)) {
+            $this->load->library('workflow/compute_workflow');
+            $this->compute_workflow->initialize($this->HostDb);
+            foreach ($Now as $Key => $Value) {
+                $Value['displayorder']--; // 下一执行工序
+                $Next = $this->compute_workflow->compute_next($Value['production_line'], $Value['displayorder']);
+                if ($Next !== false) {
+                    $Now[$Key] = array_merge($Now[$Key], $Next);
+                    continue;
+                }
+                unset($Now[$Key]);
+            }
+        }
+        return $Now;
+    }
     private function _select_production_line ($Vs) {
         $Query = $this->HostDb->select('opc_id as v, opc_production_line as production_line, opc_procedure as procedure, plp_displayorder as displayorder')
             ->from('order_product_classify')

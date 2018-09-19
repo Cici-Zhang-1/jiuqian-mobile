@@ -24,7 +24,8 @@ $config['order/order_model/is_dismantlable'] = array(
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
 	'o_status' => 'status',
-	'o_sum' => 'sum'
+	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum'
 );
 
 $config['order/order_model/is_re_dismantlable'] = array(
@@ -35,6 +36,7 @@ $config['order/order_model/is_re_dismantlable'] = array(
 $config['order/order_model/is_redeliveriable'] = array(
 	'o_id' => 'v',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer_id' => 'did',
 );
 
@@ -44,11 +46,12 @@ $config['order/order_model/select_current_workflow'] = array(
 	'wo_label' => 'label',
 	'wo_file' => 'file',
 );
-
+/*
 $config['order/order_model/select_delivered'] = array(
 	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
 	'o_delivery_area' => 'delivery_area',
@@ -62,7 +65,7 @@ $config['order/order_model/select_delivered'] = array(
 	'so_truck' => 'truck',
 	'so_train' => 'train',
 	'u_truename' => 'creator',
-);
+);*/
 
 $config['order/order_model/select'] = array(
 	'o_id' => 'v',
@@ -74,8 +77,10 @@ $config['order/order_model/select'] = array(
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_sum_detail' => 'sum_detail',
 	'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
 	'o_pay_status' => 'pay_status',
 	'ps_label' => 'pay_status_label',
 	'A.u_truename' => 'creator',
@@ -103,6 +108,7 @@ $config['order/order_model/select_valuate'] = array(
     'o_owner' => 'owner',
     'o_sum' => 'sum',
     'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
     'A.u_truename' => 'creator',
     'o_request_outdate' => 'request_outdate',
     'wo_label' => 'status_label',
@@ -118,6 +124,7 @@ $config['order/order_model/select_check'] = array( //财务核价
     'o_dealer' => 'dealer',
     'o_owner' => 'owner',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
     'o_remark' => 'remark',
     'od_valuate_datetime' => 'valuate_datetime',
     'od_check_remark' => 'check_remark',
@@ -133,6 +140,7 @@ $config['order/order_model/select_wait_sure'] = array(
     'o_shop_id' => 'shop_id',
     'o_owner' => 'owner',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
     'ps_label' => 'pay_status_label',
     'o_request_outdate' => 'request_outdate',
     'o_payer' => 'payer',
@@ -140,8 +148,11 @@ $config['order/order_model/select_wait_sure'] = array(
     'o_remark' => 'remark',
     'od_check_datetime' => 'check_datetime',
     'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance',
     'o_payterms' => 'payterms',
     'o_down_payment' => 'down_payment',
+    'ifnull(a_id, "")' => 'application_id',
+    'ifnull(as_label, "")' => 'application_status_label'
 );
 
 $config['order/order_model/select_produce'] = array( //财务核价
@@ -166,11 +177,14 @@ $config['order/order_model/select_detail'] = array(
     'o_shop_id' => 'shop_id',
     'o_owner' => 'owner',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payterms' => 'payterms',
+    'o_down_payment' => 'down_payment',
     'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
+    'o_pay_status' => 'pay_status',
     'ps_label' => 'pay_status_label',
-    'u_truename' => 'creator',
     'o_request_outdate' => 'request_outdate',
-    'wo_label' => 'status_label',
     'o_checker' => 'checker',
     'o_checker_phone' => 'checker_phone',
     'o_payer' => 'payer',
@@ -183,9 +197,18 @@ $config['order/order_model/select_detail'] = array(
     'o_delivery_phone' => 'delivery_phone',
     'o_remark' => 'remark',
     'o_dealer_remark' => 'dealer_remark',
-    'C.wom_create_datetime' => 'create_datetime',
-    'A.wom_create_datetime' => 'produce_datetime',
-    'ifnull(D.wom_create_datetime, ifnull(M.wom_create_datetime, ifnull(B.wom_create_datetime, "")))' => 'end_datetime'
+    'o_status' => 'status',
+    'C.u_truename' => 'creator',
+    'od_create_datetime' => 'create_datetime',
+    'od_sure_datetime' => 'produce_datetime',
+    'od_delivery_datetime' => 'end_datetime',
+    'wo_label' => 'status_label',
+    'd_balance' => 'dealer_balance',
+    'd_produce' => 'dealer_produce',
+    'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
+    'd_virtual_produce' => 'dealer_virtual_produce'
 );
 
 $config['order/order_model/select_details'] = array(
@@ -222,13 +245,21 @@ $config['order/order_model/select_order_detail'] = array(
 	'o_asure_datetime' => 'asure_datetime',
 	'o_sum' => 'sum',
 	'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_status' => 'status',
 	'w_name' => 'workflow',
 );
 $config['order/order_model/select_wait_delivery'] = array(
 	'o_id' => 'v',
-	'o_num' => 'order_num',
+	'o_num' => 'num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+	'o_payed' => 'payed',
+	'o_virtual_payed' => 'virtual_payed',
+	'o_pay_status' => 'pay_status',
+	'o_collection' => 'collection',
+	'o_payterms' => 'payterms',
+	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
 	'o_delivery_area' => 'delivery_area',
 	'o_delivery_address' => 'delivery_address',
@@ -238,16 +269,21 @@ $config['order/order_model/select_wait_delivery'] = array(
 	'o_request_outdate' => 'request_outdate',
 	'o_pack' => 'pack',
 	'o_pack_detail' => 'pack_detail',
+	'o_delivered' => 'delivered',
+	'(o_pack - o_delivered)' => 'wait_delivery',
 	'o_logistics' => 'logistics',
-	'if(o_payed_datetime > 0, "已付", o_payterms)' => 'payed',
-	'd_id' => 'did',
-	'd_balance - d_debt2' => 'balance',
-	'tl_icon' => 'icon',
+	'd_id' => 'dealer_id',
+	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance',
+    'ps_label' => 'pay_status_label',
+    'a_id' => 'application_id',
+    'a_status' => 'application_status'
 );
 $config['order/order_model/select_wait_delivery_by_ids'] = array(
 	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer_id' => 'did',
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
@@ -261,11 +297,13 @@ $config['order/order_model/select_wait_delivery_by_ids'] = array(
 	'o_logistics' => 'logistics',
 	'if(o_payed_datetime > 0, "已付", o_payterms)' => 'payed',
 	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance'
 );
 $config['order/order_model/select_by_soid'] = array(
 	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer_id' => 'did',
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
@@ -279,6 +317,7 @@ $config['order/order_model/select_by_soid'] = array(
 	'o_logistics' => 'logistics',
 	'if(o_payed_datetime > 0, "已付", o_payterms)' => 'payed',
 	'd_balance' => 'balance',
+	'd_virtual_balance' => 'virtual_balance',
 	'o_stock_outted_id' => 'soid',
 	'o_cargo_no' => 'cargo_no',
 );
@@ -300,24 +339,29 @@ $config['order/order_model/select_order_stock_logistics'] = array(
 	'o_request_outdate' => 'request_outdate',
 	'o_asure_datetime' => 'asure_datetime',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'd_debt1' => 'debt1',
 	'd_debt2' => 'debt2',
 	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance'
 );
 $config['order/order_model/select_order_dealer_by_id'] = array(
 	'o_id' => 'v',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer_id' => 'did',
 );
 $config['order/order_model/select_order_num'] = array(
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'ifnull(o_payed_datetime, "")' => 'payed_datetime',
 );
 $config['order/order_model/select_order_num_by_cargo_no'] = array(
 	'o_id' => 'v',
 	'o_num' => 'order_num',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'o_dealer_id' => 'did',
 	'o_dealer' => 'dealer',
 	'ifnull(o_payed_datetime, "")' => 'payed_datetime',
@@ -368,10 +412,82 @@ $config['order/order_model/are_status'] = array(
 
 $config['order/order_model/are_applicable'] = array(
     'o_id' => 'v',
+    'o_num' => 'num',
     'o_dealer_id' => 'dealer_id',
     'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
     'o_down_payment' => 'down_payment',
     'o_status' => 'status',
     'd_balance' => 'dealer_balance',
+    'd_virtual_balance' => 'dealer_virtual_balance',
     'o_payterms' => 'payterms'
+);
+
+$config['order/order_model/select_delivered'] = array(
+    'o_id' => 'v',
+    'o_delivered' => 'delivered'
+);
+
+$config['order/order_model/select_order_sorter'] = array(
+    'o_id' => 'v',
+    'o_num' => 'num',
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_dealer_id' => 'dealer_id',
+    'o_dealer' => 'dealer'
+);
+
+$config['order/order_model/select_after_wait_sure'] = array(
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_status' => 'status'
+);
+
+$config['order/order_model/select_after_produce'] = array(
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_status' => 'status'
+);
+
+$config['order/order_model/select_everyday_sured'] = array(
+    'o_id' => array(
+        'v',
+        'order_id'
+    ),
+    'o_num' => 'num',
+    'o_dealer' => 'dealer',
+    'o_owner' => 'owner',
+    'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+    'A.thick' => 'thick',
+    'u_truename' => 'sure',
+    'od_sure_datetime' => 'sure_datetime'
+);
+
+$config['order/order_model/are_removable'] = array(
+    'o_id' => array(
+        'v',
+        'order_id'
+    ),
+    'o_num' => 'order_num',
+    'o_payterms' => 'payterms',
+    'o_down_payment' => 'down_payment',
+    'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
+    'o_pay_status' => 'pay_status',
+    'd_id' => 'dealer_id',
+    'd_balance' => 'dealer_balance',
+    'd_produce' => 'dealer_produce',
+    'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_produce' => 'dealer_virtual_produce',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
+    'o_status' => 'status'
 );

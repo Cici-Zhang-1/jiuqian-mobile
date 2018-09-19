@@ -14,6 +14,7 @@ class Remove_workflow extends Workflow_order_product_abstract {
     
     public function remove(){
         $this->_Workflow->store_message('订单产品已经作废');
+        return true;
     }
 
     public function __call($name, $arguments){

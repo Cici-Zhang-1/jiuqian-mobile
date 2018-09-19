@@ -53,8 +53,11 @@ class Warehouse extends MY_Controller {
         if (preg_match(REG_RECOMMEND, $Recommend, $Matches)
             && !!($OrderProduct = $this->order_product_model->is_exist($Matches[1]))) { // 同一订单编号下的库位
             $this->load->model('order/order_product_board_model');
-            if (!!($Area = $this->order_product_board_model->select_area_by_order_v($OrderProduct['order_v']))) {   // 获取板材面积
-                if (empty($OrderProduct['warehouse_v'])) {
+            if (!($Area = $this->order_product_board_model->select_area_by_order_v($OrderProduct['order_v']))) {   // 获取板材面积
+                $Area = $this->order_product_board_model->select_area_by_order_v($OrderProduct['order_v'], false);
+            }
+            if ($Area) {
+                if (empty($OrderProduct['warehouse_v'])) { // 如果这个订单之前没有入库，则直接推荐库位
                     $Data['content'] = $this->_compute_warehouse($Area);
                     $Data['num'] = count($Data['content']);
                 } else {
@@ -71,23 +74,11 @@ class Warehouse extends MY_Controller {
                     $Data['content'] = $OrderProduct['warehouse_v'];
                     $Data['num'] = count($Data['content']);
                 }
+                $Data['p'] = $Data['pn'] = ONE;
             } else {
                 $this->Code = EXIT_ERROR;
-                $this->Message = '订单板材信息不准确，无法推荐';
+                $this->Message = '这个订单缺少板材面积信息，无法推荐库位';
             }
-            /*if (empty($OrderProduct['warehouse_v'])) {
-                $this->load->model('order/order_product_board_model');
-                $WarehouseV = array();
-                if (!!($Area = $this->order_product_board_model->select_area_by_order_v($OrderProduct['order_v']))) {
-
-                    $Data['content'] = $WarehouseV;
-                    $Data['num'] = count($Data['content']);
-                }
-            } else {
-                $Data['content'] = json_decode($OrderProduct['warehouse_v'], true);
-                $Data['num'] = count($Data['content']);
-            }*/
-            $Data['p'] = $Data['pn'] = ONE;
         } else {
             $this->Code = EXIT_ERROR;
             $this->Message = '信息不准确，无法推荐';
@@ -105,7 +96,7 @@ class Warehouse extends MY_Controller {
         $Area = ceil($Area);
         $Num = floor($Area/100) + floor(($Area%80)/80);
         if ($Num > 0) {
-            if (!!($Able = $this->warehouse_model->select_height(array(1), $Num))) {
+            if (!!($Able = $this->warehouse_model->select_height(array(ONE), $Num))) { // 一层
                 $WarehouseV = array_merge($WarehouseV, $Able) ;
                 $M = count($Able);
                 $Area = $Area - $M * 100;
@@ -114,7 +105,7 @@ class Warehouse extends MY_Controller {
         if ($Area > 0) {
             $Num = floor($Area/80) + floor(($Area%50)/50);
             if ($Num > 0) {
-                if (!!($Able = $this->warehouse_model->select_height(array(2), $Num))) {
+                if (!!($Able = $this->warehouse_model->select_height(array(TWO), $Num))) { // 二层
                     $WarehouseV = array_merge($WarehouseV, $Able) ;
                     $M = count($Able);
                     $Area = $Area - $M * 80;
@@ -127,7 +118,7 @@ class Warehouse extends MY_Controller {
                 $Num++;
             }
             if ($Num > 0) {
-                if (!!($Able = $this->warehouse_model->select_height(array(3, 4), $Num))) {
+                if (!!($Able = $this->warehouse_model->select_height(array(THREE, FOUR), $Num))) { // 三、四层
                     $WarehouseV = array_merge($WarehouseV, $Able) ;
                 }
             }

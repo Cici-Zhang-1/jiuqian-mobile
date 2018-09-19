@@ -24,6 +24,6 @@ class Packing_workflow extends Workflow_order_product_abstract {
     }
 
     public function __call($name, $arguments){
-        $this->_execute_record($name);
+        return $this->_execute_record($name);
     }
 }

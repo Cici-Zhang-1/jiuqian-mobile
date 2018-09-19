@@ -14,7 +14,10 @@ class Punched_workflow extends Workflow_order_product_classify_abstract {
 
     public function punched() {
         $this->_Workflow->store_message('已经完成打孔');
-        $this->_workflow_next();
+        if ($this->_workflow_propagation(__FUNCTION__)) {
+            return $this->_workflow_next();
+        }
+        return false;
     }
 
     public function __call($name, $arguments){

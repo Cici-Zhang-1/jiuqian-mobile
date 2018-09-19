@@ -14,11 +14,12 @@ class Remove_workflow extends Workflow_mrp_abstract {
 
     public function remove () {
         $this->_Workflow->store_message('MRP作废');
+        return true;
     }
 
     public function re_shear () {
         $this->_Workflow->edit_current_workflow(Workflow_mrp::$AllWorkflow['shear'], array('distribution' => ZERO));
-        $this->_Workflow->re_shear();
+        return $this->_Workflow->re_shear();
     }
 
     public function __call($name, $arguments){

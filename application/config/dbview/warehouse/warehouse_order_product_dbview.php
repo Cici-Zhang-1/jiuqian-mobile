@@ -33,7 +33,7 @@ $config['warehouse/warehouse_order_product_model/is_in'] = array(
     'o_warehouse_num' => 'order_warehouse_num'
 );
 
-$config['warehouse/warehouse_order_product_model/is_in_by_stock_outted_v'] = array(
+$config['warehouse/warehouse_order_product_model/is_in_by_order_product_v'] = array(
     'wop_id' => 'v',
     'wop_warehouse_num' => 'warehouse_v'
 );

@@ -12,11 +12,19 @@ class Warehouse_order_product extends MY_Controller {
         'v' => 0,
         'status' => 0
     );
+    private $_OrderProductNum;
+    private $_OrderProduct;
+    private $_ParsedNum; // 正则解析后的订单产品编号
+    private $_WarehouseV;
+    private $_OrderProductWarehouseInned = array(); // 订单产品占用的库位
+    private $_WarehouseInned = array(); // 订单占用的库位
+    private $_ChangedWarehouseV = array();
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller  __construct Start!');
         $this->load->model('warehouse/warehouse_order_product_model');
         $this->load->model('warehouse/warehouse_model');
+        $this->config->load('defaults/warehouse_status');
     }
 
     public function read () {
@@ -33,85 +41,43 @@ class Warehouse_order_product extends MY_Controller {
 
     /**
      * 入库，一次入一个订单，但是可以进多个库
+     * X2018080034-Y1-3-1-thick
      * @return void
      */
     public function in() {
         $WarehouseV = $this->input->post('warehouse_v');
-        if (!is_array($WarehouseV)) {
+        if (!is_array($WarehouseV)) { // 推荐库位
             $_POST['warehouse_v'] = explode(',', $WarehouseV);
         }
-        $WarehouseVHand = $this->input->post('warehouse_v_hand');
+        $WarehouseVHand = $this->input->post('warehouse_v_hand'); // 手动选择库位
         if (!is_array($WarehouseVHand)) {
             $_POST['warehouse_v_hand'] = explode(',', $WarehouseVHand);
         }
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $WarehouseV = array_merge($Post['warehouse_v'], $Post['warehouse_v_hand']);
-            if (!!($WarehouseV = $this->warehouse_model->is_exist($WarehouseV))) {  // 判断库位是否可用
-                $Data = array();
-                $ChangedWarehouseV = array();
-// $PubUrl = pub_url($Data['order_product_num'] . '-' . $Pack . '-' . $I . '-' . $Classify);
-                $this->load->model('order/order_product_model');
-                if (preg_match(REG_PACK_LABEL_UNSTRICT, $Post['order_product_num'], $Matches)
-                    && !!($OrderProduct = $this->order_product_model->is_exist($Matches[1]))) { // 需要入库的订单信息
-                    $OrderProductWarehouseInned = json_decode($OrderProduct['order_product_warehouse_num'], true); // 订单产品所在库位
-                    $WarehouseInned = json_decode($OrderProduct['warehouse_v'], true);  // 订单所在库位
-                    if (is_array($OrderProductWarehouseInned)) {
-                        foreach ($OrderProductWarehouseInned as $Key => $Value) {
-                            $OrderProductWarehouseInned[$Key] = $Value['v'];
-                        }
-                    } else {
-                        $OrderProductWarehouseInned = array();
-                    }
-                    // $WarehouseInnedTmp = array();
-                    if (is_array($WarehouseInned)) {
-                        foreach ($WarehouseInned as $Key => $Value) {
-                            $WarehouseInned[$Key] = $Value['v'];
-                            // array_push($WarehouseInnedTmp, $Value['v']);
-                        }
-                    } else {
-                        $WarehouseInned = array();
-                    }
-
-                    $Classify = isset($Matches[6]) ? ($Matches[6] == 'thick' ? '柜体' : ($Matches[6] == 'thin' ? '背板' : $Matches[6])) : '';
-                    foreach ($WarehouseV as $Key => $Value) {
-                        $Data[] = array(
-                            'warehouse_v' => $Value['v'],
-                            'order_product_num' => $Matches[1],
-                            'order_num' => $Matches[2],
-                            'amount' => isset($Matches[4]) ? $Matches[4] : 0,
-                            'classify' => $Classify
-                        );
-                        if (!in_array($Value['v'], $OrderProductWarehouseInned)) {  // 如果不在已入库的库位中，则新增插入
-                            array_push($ChangedWarehouseV, $Value['v']);
-                            array_push($OrderProductWarehouseInned, $WarehouseV[$Key]['v']);
-                            if (!in_array($Value['v'], $WarehouseInned)) { // 如果是新增且没有其他订单产品编号使用过，则加入到产品订单推荐中
-                                array_push($WarehouseInned, $WarehouseV[$Key]['v']);
-                            }
-                        } else {    // 如果在则不用新增插入
-                            unset($WarehouseV[$Key]);
-                        }
-                    }
+            $this->_WarehouseV = array_merge($Post['warehouse_v'], $Post['warehouse_v_hand']); // 合并所有选择的库位
+            if (!!($this->_WarehouseV = $this->warehouse_model->is_exist($this->_WarehouseV))) {  // 判断库位是否可用
+                $this->_OrderProductNum = $Post['order_product_num'];
+                if ($this->_parse_inned_warehouse()) {
+                    $Data = $this->_parse_warehouse();
                     if (empty($Data)) {
+                        $this->warehouse_model->update(array('status' => $this->config->item('warehouse_occupy')), $this->_ChangedWarehouseV); // 跟新库位状态
                         $this->Message = $Post['order_product_num'] . '已经入库';
                     } else {
                         if(!!($NewId = $this->warehouse_order_product_model->insert_ignore_batch($Data))) {
-                            if (count($ChangedWarehouseV) > 0) {
-                                $this->warehouse_model->update(array('status' => 2), $ChangedWarehouseV); // 跟新库位状态
+                            if (count($this->_ChangedWarehouseV) > 0) {
+                                $this->warehouse_model->update(array('status' => $this->config->item('warehouse_occupy')), $this->_ChangedWarehouseV); // 跟新库位状态
                             }
                             $this->load->model('order/order_model');
-                            $this->order_model->update(array('warehouse_v' => $this->_encode_warehouse($WarehouseInned)), $OrderProduct['order_v']); // 更新订单库位状态
+                            $this->order_model->update(array('warehouse_v' => $this->_encode_warehouse($this->_WarehouseInned)), $this->_OrderProduct['order_v']); // 更新订单库位状态
                             $this->load->model('order/order_product_model');
-                            $this->order_product_model->update(array('warehouse_v' => $this->_encode_warehouse($OrderProductWarehouseInned)), $OrderProduct['v']); // 更新订单产品库位状态
+                            $this->order_product_model->update(array('warehouse_v' => $this->_encode_warehouse($this->_OrderProductWarehouseInned)), $this->_OrderProduct['v']); // 更新订单产品库位状态
                             $this->Message = '入库成功, 刷新后生效!';
-                        }else{
+                        } else {
                             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
                             $this->Code = EXIT_ERROR;
                         }
                     }
-                } else {
-                    $this->Message = $Post['order_product_num'] . '不符合入库条件';
-                    $this->Code = EXIT_ERROR;
                 }
             } else {
                 $this->Code = 1;
@@ -119,6 +85,60 @@ class Warehouse_order_product extends MY_Controller {
             }
         }
         $this->_ajax_return();
+    }
+
+    /**
+     * 解析当前订单已经占用过的库位
+     */
+    private function _parse_inned_warehouse () {
+        $this->load->model('order/order_product_model');
+        if (preg_match(REG_PACK_LABEL_UNSTRICT, $this->_OrderProductNum, $this->_ParsedNum)
+            && !!($this->_OrderProduct = $this->order_product_model->is_exist($this->_ParsedNum[1]))) { // 需要入库的订单信息
+            $OrderProductWarehouseInned = json_decode($this->_OrderProduct['order_product_warehouse_num'], true); // 订单产品所在库位
+            $WarehouseInned = json_decode($this->_OrderProduct['warehouse_v'], true);  // 订单所在库位
+            if (is_array($OrderProductWarehouseInned)) {
+                foreach ($OrderProductWarehouseInned as $Key => $Value) {
+                    $this->_OrderProductWarehouseInned[$Key] = $Value['v'];
+                }
+            } else {
+                $this->_OrderProductWarehouseInned = array();
+            }
+            if (is_array($WarehouseInned)) {
+                foreach ($WarehouseInned as $Key => $Value) {
+                    $this->_WarehouseInned[$Key] = $Value['v'];
+                }
+            } else {
+                $this->_WarehouseInned = array();
+            }
+            return true;
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = $this->_OrderProductNum . '不正确, 请扫描包装上的二维码!';
+            return false;
+        }
+    }
+    private function _parse_warehouse () {
+        $Classify = isset($this->_ParsedNum[6]) ? ($this->_ParsedNum[6] == 'thick' ? '柜体' : ($this->_ParsedNum[6] == 'thin' ? '背板' : $this->_ParsedNum[6])) : '';
+        $Data = array();
+        foreach ($this->_WarehouseV as $Key => $Value) {
+            array_push($this->_ChangedWarehouseV, $Value['v']);
+            if (!in_array($Value['v'], $this->_OrderProductWarehouseInned)) {  // 如果不在已入库的库位中，则新增插入
+                $Data[] = array(
+                    'warehouse_v' => $Value['v'],
+                    'order_product_num' => $this->_ParsedNum[1],
+                    'order_num' => $this->_ParsedNum[2],
+                    'amount' => isset($this->_ParsedNum[4]) ? $this->_ParsedNum[4] : 0,
+                    'classify' => $Classify
+                );
+                array_push($this->_OrderProductWarehouseInned, $Value['v']);
+                if (!in_array($Value['v'], $this->_WarehouseInned)) { // 如果是新增且没有其他订单产品编号使用过，则加入到产品订单推荐中
+                    array_push($this->_WarehouseInned, $Value['v']);
+                }
+            } else {    // 如果在则不用新增插入
+                unset($this->_WarehouseV[$Key]);
+            }
+        }
+        return $Data;
     }
 
     private function _encode_warehouse ($Warehouse) {
@@ -153,7 +173,7 @@ class Warehouse_order_product extends MY_Controller {
                 if(!!($this->warehouse_order_product_model->update($Data, $In['v']))){
                     $this->_out($In['warehouse_v']);
                     $this->Message = '内容修改成功, 刷新后生效!';
-                }else{
+                } else {
                     $this->Code = EXIT_ERROR;
                     $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
                 }
@@ -184,7 +204,7 @@ class Warehouse_order_product extends MY_Controller {
                 if ($this->warehouse_model->is_exist($Post['to'])) {
                     if(!!($this->warehouse_order_product_model->update_move(array('warehouse_v' => $Post['to']), $In['v']))){ //移动到对应库位
                         $this->_out($In['warehouse_v']);
-                        $this->warehouse_model->update(array('status' => 2), $Post['to']);
+                        $this->warehouse_model->update(array('status' => $this->config->item('warehouse_occupy')), $Post['to']);
                         $this->_order($In['order_num']);
                         $this->_order_product($In['order_product_num']);
                         $this->Message = '移库成功, 刷新后生效!';
@@ -245,7 +265,7 @@ class Warehouse_order_product extends MY_Controller {
                 $WarehouseV = array_diff($WarehouseV, [$Value['warehouse_v']]);
             }
             if (count($WarehouseV) > 0) {
-                $this->warehouse_model->update(array('status' => 1), $WarehouseV);
+                $this->warehouse_model->update(array('status' => $this->config->item('warehouse_able')), $WarehouseV);
             }
         }
         return true;

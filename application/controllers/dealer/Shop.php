@@ -78,8 +78,6 @@ class Shop extends MY_Controller {
         if(!($Data = $this->shop_model->select_my_shop($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
-        } else {
-
         }
         $Data['query']['dealer_id'] = $this->_Search['v'];
         $this->_ajax_return($Data);

@@ -40,6 +40,9 @@ class Pack extends MY_Controller{
                 $this->_Search['pack'] = $this->session->userdata('uid');
             }
         }
+        if ($this->_Search['status'] == WP_PACKED && $this->_Search['start_date'] == '') {
+            $this->_Search['start_date'] = date('Y-m-01');
+        }
         $Data = array();
         if(!($Data = $this->pack_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取打包任务信息失败';

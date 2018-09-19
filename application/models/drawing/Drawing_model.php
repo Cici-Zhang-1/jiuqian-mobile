@@ -87,6 +87,31 @@ class Drawing_model extends MY_Model {
     }
 
     /**
+     * 通过订单产品获得图纸
+     * @param $OrderProductId
+     * @return array|bool
+     */
+    public function select_by_order_product_id ($OrderProductId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $OrderProductId;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('drawing')
+                ->join('order_product', 'op_id = d_order_product_id', 'left')
+                ->where('d_order_product_id', $OrderProductId)
+                ->get();
+
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的图纸';
+            }
+        }
+        return $Return;
+    }
+    /**
      * 判断是否存在图纸
      * @param $Name
      * @return bool

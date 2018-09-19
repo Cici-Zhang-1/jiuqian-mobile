@@ -49,26 +49,6 @@ class Myself extends MY_Controller{
             }
         }
         $this->_ajax_return();
-
-	    /* $Item = $this->_Item.__FUNCTION__;
-	    if($this->form_validation->run($Item)){
-	        $Post = gh_escape($_POST);
-	        unset($Post['selected']);
-	        $Password = $this->input->post('password', true);
-	        if(empty($Password)){
-	            unset($Post['password']);
-	        }
-	        $where = $this->input->post('selected');
-	        if(!!($this->user_model->update($Post, $where))){
-	            $this->Success .= '个人信息修改成功, 请重新登录';
-	            $this->Location = site_url('sign/out');
-	        }else{
-	            $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'个人信息修改失败';
-	        }
-	    }else{
-	        $this->Failue .= validation_errors();
-	    }
-	    $this->_return(); */
 	}
 
     public function start () {

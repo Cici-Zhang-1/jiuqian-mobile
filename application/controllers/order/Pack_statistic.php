@@ -12,7 +12,8 @@ class Pack_statistic extends MY_Controller{
         'pack' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_PACKED
+        'status' => WP_PACKED,
+        'paging' => NO
     );
     public function __construct() {
         parent::__construct();

@@ -123,10 +123,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 top: 4mm;
                 left: 69mm;
             }
+            .j-list-group-item {
+                padding: 2px 15px;
+                font-size: 1.5em;
+            }
         </style>
         <div class="container-fluid hidden-print">
             <div class="row" id="packLabelSelect">
-                <div class="col-md-offset-2 col-md-8">
+                <div class="col-md-3">
+                    <div class="form-group form-group-lg">
+                        <select class="form-control" name="packer" id="packer"></select>
+                    </div>
+                    <h2>今日打包记录：</h2>
+                    <ul class="list-group" id="todayPacked"></ul>
+                </div>
+                <div class="col-md-8">
                     <ul class="nav nav-tabs" role="tablist" id="packLabelNavs">
                         <li role="presentation" class="active">
                             <a href="#cabinetThick" aria-controls="cabinetThick" role="tab" data-toggle="tab">橱柜-厚板</a>
@@ -163,612 +174,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </li>
                     </ul>
                     <div class="tab-content" id="packLabel">
-                        <div role="tabpanel" class="tab-pane active" id="cabinetThick">
-                            <form class="my-label-color-1 my-label form-horizontal" role="form" method="get" action="<?php echo site_url('order/pack_label/prints')?>">
-                                <input type="hidden" name="code" value="w" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" name="classify" value="thick" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static">橱柜-厚板</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="wThickDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="wThickYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="wThickMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="hide brothers"></div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error"></p>
-                                    </div>
-                                </div>
-                                <div class="hide form-group form-group-lg">
-                                    <div class="col-md-3">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input type="radio" value="thick" name="classify" checked="checked" ><span>厚板</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >橱柜厚板打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="cabinetThin">
-                            <form class="my-label-color-7 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="w" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" name="classify" value="thin" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >橱柜-薄板</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="wThinDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="wThinYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="wThinMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="brothers"></div>
-                                <hr />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="hide form-group form-group-lg">
-                                    <div class="col-md-3">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input type="radio" value="thin" name="classify" checked="checked"><span>薄板</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >橱柜薄板打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="cabinetAll">
-                            <form class="my-label-color-8 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="w" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" name="classify" value="both" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >橱柜-所有</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="wAllDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="wAllYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="wAllMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="hide brothers"></div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >橱柜所有打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="wardrobeThick">
-                            <form class="my-label-color-2 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="y" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="thick" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >衣柜-厚板</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="yThickDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="yThickYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="yThickMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="hide brothers"></div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >衣柜厚板打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="wardrobeThin">
-                            <form class="my-label-color-9 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="y" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="thin" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >衣柜-薄板</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="yThinDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="yThinYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="yThinMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="brothers"></div>
-                                <hr />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >衣柜薄板打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="wardrobeAll">
-                            <form class="my-label-color-10 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="y" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="both" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >衣柜-所有</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="yAllDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="yAllYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="yAllMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="hide brothers"></div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >衣柜所有打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="door">
-                            <form class="my-label-color-3 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="m" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="both" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >门板</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="mDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="mYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="mMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error"></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-9">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >门板打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="wood">
-                            <form class="my-label-color-4 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="k" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="both" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >拼框门</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance ">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance ">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="kDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="kYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="kMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error"></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-9">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >拼框门打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="fitting">
-                            <form class="my-label-color-5 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="p" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="both" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static" >配件</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance ">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label class="my-label-enhance ">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="pDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="pYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="pMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error" ></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-9">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >配件打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="other">
-                            <form class="my-label-color-6 my-label form-horizontal" role="form" action="<?php echo site_url('order/pack_label/read')?>">
-                                <input type="hidden" name="code" value="g" />
-                                <input type="hidden" name="num" value="" />
-                                <input type="hidden" value="both" name="classify" />
-                                <input type="hidden" name="order_product_id" value="" />
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-title form-control-static">外购</p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label  class="my-label-enhance ">
-                                                <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="radio">
-                                            <label  class="my-label-enhance ">
-                                                <input class="" type="radio" value="b" name="type"><span>补单</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg" id="gDate">
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="year" id="gYear"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" name="month" id="gMonth"></select>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="prefix" placeholder="大号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="middle" placeholder="小号" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input class="form-control" type="text" name="pack" placeholder="包装件数" />
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-12">
-                                        <p class="my-label-enhance form-control-static error"></p>
-                                    </div>
-                                </div>
-                                <div class="form-group form-group-lg">
-                                    <div class="col-md-9">
-                                        <a class="btn btn-primary btn-lg" href="<?php echo site_url('order/pack_label/prints');?>" >外购打印</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                        <?php
+                            require_once '_cabinet_thick.php';
+                            require_once '_cabinet_thin.php';
+                            require_once '_cabinet_all.php';
+                            require_once '_wardrobe_thick.php';
+                            require_once '_wardrobe_thin.php';
+                            require_once '_wardrobe_all.php';
+                            require_once '_door.php';
+                            require_once '_wood.php';
+                            require_once '_fitting.php';
+                            require_once '_other.php';
+                        ?>
                         <div role="tabpanel" class="tab-pane" id="setting">
                             <div class="checkbox">
                                 <label>
@@ -897,6 +314,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         let SiteUrl = '<?php echo site_url(); ?>';
 
         (function($){
+            let joinTodayPacked = function (TodayPacked, Packer) {
+                let lists = []
+                if (TodayPacked[Packer] !== undefined) {
+                    TodayPacked[Packer].map(__ => {
+                        lists.push('<li class="j-list-group-item list-group-item">' + __.num + '</li>')
+                    })
+                    $('#todayPacked').html(lists.join(''))
+                } else {
+                    $('#todayPacked').html('')
+                }
+            }
             $("#wThickDate").DateSelector({
                 ctlYearId: 'wThickYear',
                 ctlMonthId: 'wThickMonth',
@@ -948,10 +376,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                   minYear: 2014
             });
 
+            $.ajax({
+                async: true,
+                type: 'get',
+                url: '<?php echo site_url('manage/user/ppacker');?>',
+                dataType: 'json',
+                success: function(res){
+                    if(res.code > 0) {
+                        alert('没有获取到打包人员信息, 请刷新!');
+                        return false
+                    }else{
+                        let lists = ['<option value="0">---</option>']
+                        res.contents.content.map(__ => {
+                            lists.push('<option value="' + __.v + '">' + __.truename + '</option>')
+                        });
+                        $('#packer').html(lists.join(''));
+                        return true;
+                    }
+                },
+                error: function(x,t,e){
+                    alert('没有获取到打包人员信息, 请刷新!');
+                }
+            });
+            let TodayPacked = {};
+            let today = new Date().Format("yyyy-MM-dd");
+            if(!(TodayPacked = $.localStorage('today_packed'))){
+                TodayPacked = {}
+                TodayPacked[today] = {}
+            } else {
+                TodayPacked = JSON.parse(TodayPacked);
+                if (TodayPacked[today] === undefined) {
+                    TodayPacked = {}
+                    TodayPacked[today] = {}
+                }
+            }
+            let Packer = 0;
+            joinTodayPacked(TodayPacked[today], Packer)
+            $('#packer').on('change', function (e) {
+                Packer = e.target.value;
+                joinTodayPacked(TodayPacked[today], Packer)
+            });
             let OrderProduct = {};
             let Pack = 0;
             let Classify = '';
             let Brothers;
+            let IsPacked = false;
             $('#packLabel').find('form').each(function(i, v){
                 var $Form = $(this);
                 $Form.find('input[name = "prefix"], input[name="middle"]').on('focusout', function(e){
@@ -974,12 +443,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     let Text = res.contents.num+'   [   '+ res.contents.pack+'   ]件<br />';
                                     let Brothers='';
                                     let Classify = $Form.find('input[name="classify"]').val();
-                                    if ($.inArray(Classify, res.contents['pack_type']) < 0) {
-                                        if ($.inArray('both', res.contents['pack_type']) >= 0) {
+                                    if ($.inArray(Classify, res.contents['pack_type']) < 0) { // 当前分类不在打包类型中
+                                        if ($.inArray('both', res.contents['pack_type']) >= 0) { // 如果是合包类型
                                             $Form.find('p.error').html('该订单不包含对应打包类型');
                                             return false
                                         } else {
-                                            Text += '推荐使用分包'
+                                            if (Classify === 'both') {
+                                                Text += '建议厚薄各自打包...<br />'
+                                            } else {
+                                                $Form.find('p.error').html('该订单不包含对应打包类型');
+                                                return false
+                                            }
+                                        }
+                                    } else {
+                                        if (res.contents['packer'][Classify] !== undefined) {
+                                            $Form.find('p.warning').html(res.contents['packer'][Classify] + '已经打包该订单');
+                                            IsPacked = true
                                         }
                                     }
                                     $Form.find('input[name="num"]').val(res.contents.num);
@@ -990,8 +469,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         Text += '厚板[   '+ res.contents.thick +'   ]包';
                                     }
                                     if(undefined !== res.contents.un_scanned && false !==  res.contents.un_scanned){
-                                        for(var i in res.contents.un_scanned){
-                                            Text += '<br />' + res.contents.un_scanned[i]['board']+'[   '+res.contents.un_scanned[i]['amount']+'   ]块未扫描';
+                                        let tmp = []
+                                        const THICK = 13 // 厚板和薄板厚度分界线
+                                        let Thick = []
+                                        let Thin = []
+                                        let msg = ''
+                                        res.contents.un_scanned.map(__ => {
+                                            msg = '<br />' + __['board'] + '[   ' + __['amount'] + '   ]块未扫描';
+                                            tmp.push(msg)
+                                            if (__.thick > THICK) {
+                                                Thick.push(msg)
+                                            } else {
+                                                Thin.push(msg)
+                                            }
+                                            return __
+                                        })
+                                        if (Classify === 'both') { // 如果是合包存在未扫描的，则不能进行合包
+                                            Text = tmp.join('') + '<br />还有板块没有扫描不能打包'
+                                            $Form.find('p.error').html(Text);
+                                            return false;
+                                        } else if (Classify === 'thick' && Thick.length > 0) { // 有厚板未扫描的不能打包
+                                            Text = Thick.join('') + '<br />还有板块没有扫描不能打包'
+                                            $Form.find('p.error').html(Text);
+                                            return false;
+                                        } else if (Classify === 'thin' && Thin.length > 0) { // 有薄板未扫描的不能打包
+                                            Text = Thin.join('') + '<br />还有板块没有扫描不能打包'
+                                            $Form.find('p.error').html(Text);
+                                            return false;
+                                        } else {
+                                            Text += tmp.join('')
                                         }
                                     }
                                     if(undefined !== res.contents.brothers && false !==  res.contents.brothers){
@@ -1016,12 +522,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     }else{
                         $Form.find('input[name="num"]').val('');
                         $Form.find('p.error').text('');
+                        $Form.find('p.warning').text('');
+                        IsPacked = false
                     }
                 }).on('focusin', function(e){
                     OrderProduct = {};
                     $Form.find('input[name="num"]').val('');
                     $Form.find('div.brothers').text('');
                     $Form.find('p.error').text('');
+                    $Form.find('p.warning').text('');
+                    IsPacked = false
                 });
                 $Form.find('a').click(function(e){
                     e.preventDefault();
@@ -1096,35 +606,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             });
                         });
                     }
-                    /*var Pack = $Form.find('input[name="pack"]').val();
-                    if('' == Pack || parseInt(Pack) <= 0){
-                        $Form.find('input[name="pack"]').focus();
-                        $Form.find('p.error').html('请填写包装件数');
-                        return false;
-                    }
-                    var OrderProductNum = $Form.find('input[name="num"]').val();
-                    let OrderProductId = Form.find('input[name="order_product_id"]').val();
-                    var Classify = $Form.find('input[name="classify"]').val();
-                    if(undefined == Classify){
-                        Classify = 'other';
-                    }
-                    var Brothers = $.map($Form.find('input[name="brothers"]:checked'), function(n){return $(n).val();}).join(',');
-                    if(undefined == Brothers){
-                        Brothers = '';
-                    }
-                    if('' != OrderProductNum){
-                        $(this).attr('href', function(ii,vv){
-                            if(vv.lastIndexOf('?') >= 0){
-                                return vv.substr(0,vv.lastIndexOf('?'))+'?order_product_id='+OrderProductId+'&&pack='+Pack+'&&classify='+Classify+'&&brothers='+Brothers;
-                            }else{
-                                return vv+'?order_product_id='+OrderProductId+'&&pack='+Pack+'&&classify='+Classify+'&&brothers='+Brothers;
-                            }
-                        });
-                        return true;
-                    }else{
-                        $Form.find('p.error').html('没有找到相应订单, 请重新查找');
-                        return false;
-                    }*/
                 });
             });
             $('#back').click(function(e){
@@ -1139,12 +620,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $('#packLabelInfoPhone').text('');
                 $('#packLabelLabel').html('');
                 Pack = 0;
+                IsPacked = false;
             });
             $('#print').on('click', function(e){
                 $Btn = $(this);
                 $.ajax({
                     async: false,
-                    data: {order_product_id: OrderProduct['v'], pack: Pack, classify: Classify, brothers: Brothers},
+                    data: {order_product_id: OrderProduct['v'], pack: Pack, classify: Classify, brothers: Brothers, packer: Packer},
                     type: 'post',
                     url: SiteUrl + 'order/pack_label/prints',
                     dataType: 'json',
@@ -1154,9 +636,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     complete: function () {
                         $Btn.prop('disabled', false);
                     },
-                    success: function(msg){
-                        window.print();
-                        return true;
+                    success: function(res){
+                        if (res.code > 0) {
+                            window.alert(res.message);
+                        } else {
+                            if (!IsPacked) {
+                                if (TodayPacked[today][Packer] === undefined) {
+                                    TodayPacked[today][Packer] = []
+                                }
+                                TodayPacked[today][Packer].unshift(OrderProduct)
+                                joinTodayPacked(TodayPacked[today], Packer)
+                                $.localStorage('today_packed', JSON.stringify(TodayPacked));
+                            }
+                            window.print();
+                            return true;
+                        }
                     },
                     error: function(x,t,e){
                         alert(x.responseText);
@@ -1197,7 +691,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 });
                 $.sessionStorage('pack_label_setting', Content);
             }
-
         })(jQuery);
     </script>
 </html>

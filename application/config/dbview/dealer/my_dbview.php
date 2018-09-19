@@ -20,4 +20,8 @@ $config['dealer/my_dealer/read'] = array(
 	'd_delivered' => 'delivered',
 	'd_received' => 'received',
 	'd_balance' => 'balance',
+    'd_virtual_produce' => 'virtual_produce',
+    'd_virtual_delivered' => 'virtual_delivered',
+    'd_virtual_balance' => 'virtual_balance',
+    'd_virtual_received' => 'virtual_received',
 );

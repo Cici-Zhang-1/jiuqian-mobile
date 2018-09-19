@@ -14,8 +14,10 @@ class Electronic_sawed_workflow extends Workflow_order_product_classify_abstract
 
     public function electronic_sawed () {
         $this->_Workflow->store_message('已经完成下料');
-        $this->_workflow_propagation(__FUNCTION__); // 下料后向上层传递
-        $this->_workflow_next();
+        if ($this->_workflow_propagation(__FUNCTION__)) {
+            return $this->_workflow_next();
+        }
+        return false;
     }
 
     public function __call($name, $arguments){

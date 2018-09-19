@@ -14,15 +14,51 @@ class Pre_produce_workflow extends Workflow_order_product_abstract {
 
     public function pre_produce () {
         $this->_Workflow->store_message('订单产品正在进行生产准备');
-        $this->_workflow_propagation(__FUNCTION__);
+        return $this->_workflow_propagation(__FUNCTION__);
     }
 
     /**
      * 已经确认下料的状态转换为正在生产
      */
     public function electronic_sawed () {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['producing']);
-        $this->_Workflow->producing();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['producing'], array(
+            'producing' => $this->_CI->session->userdata('uid'),
+            'producing_datetime' => date('Y-m-d H:i:s')
+        ));
+        return $this->_Workflow->producing();
+    }
+
+    /**
+     * 确认封边的状态转换为正在生产
+     */
+    public function edged () {
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['producing'], array(
+            'producing' => $this->_CI->session->userdata('uid'),
+            'producing_datetime' => date('Y-m-d H:i:s')
+        ));
+        return $this->_Workflow->producing();
+    }
+
+    /**
+     * 确认打孔的状态转换为正在生产
+     */
+    public function punched () {
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['producing'], array(
+            'producing' => $this->_CI->session->userdata('uid'),
+            'producing_datetime' => date('Y-m-d H:i:s')
+        ));
+        return $this->_Workflow->producing();
+    }
+
+    /**
+     * 确认扫描的状态转换为正在生产
+     */
+    public function scanned () {
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['producing'], array(
+            'producing' => $this->_CI->session->userdata('uid'),
+            'producing_datetime' => date('Y-m-d H:i:s')
+        ));
+        return $this->_Workflow->producing();
     }
 
     /**
@@ -76,7 +112,7 @@ class Pre_produce_workflow extends Workflow_order_product_abstract {
     public function __call($name, $arguments){
         $Methods = array('optimize', 'printed_list');
         if (in_array($name, $Methods)) {
-            return $this->_execute_record($name);
+            return true;
         }
     }
 }

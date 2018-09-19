@@ -14,16 +14,17 @@ class Edging_workflow extends Workflow_order_product_classify_abstract {
 
     public function edging () {
         $this->_Workflow->store_message('已安排正在封边');
+        return true;
     }
 
     public function re_edge () {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['edge']);
-        $this->_Workflow->re_edge();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['edge'], array('edge' => ZERO, 'edge_datetime' => null));
+        return $this->_Workflow->re_edge();
     }
 
     public function edged() {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['edged']);
-        $this->_Workflow->edged();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['edged'], array('edge' => $this->_CI->session->userdata('uid'), 'edge_datetime' => date('Y-m-d H:i:s')));
+        return $this->_Workflow->edged();
     }
 
     public function __call($name, $arguments) {

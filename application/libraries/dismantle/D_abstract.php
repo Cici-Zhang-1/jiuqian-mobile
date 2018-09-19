@@ -127,7 +127,7 @@ abstract class  D_abstract {
     
     abstract public function read();
 
-    abstract public function edit($Save);
+    abstract public function edit($Save, $Code);
     
     /**
      * 清除已经拆单保存的内容

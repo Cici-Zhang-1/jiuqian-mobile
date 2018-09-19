@@ -12,7 +12,8 @@ class Scan_statistic extends MY_Controller{
         'scan' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_SCANNED
+        'status' => WP_SCANNED,
+        'paging' => NO
     );
     public function __construct(){
         parent::__construct();

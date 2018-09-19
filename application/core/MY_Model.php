@@ -9,7 +9,7 @@
 class MY_Model extends CI_Model
 {
     public $HostDb;
-    public $X;
+    // public $X;
 
     protected $_Module;
     protected $_Model;
@@ -33,7 +33,7 @@ class MY_Model extends CI_Model
 
     private function _init() {
 	    $this->HostDb = $this->db;
-        $this->X = $this->load->database('x', true);
+        // $this->X = $this->load->database('x', true);
 
         $this->_Module = str_replace("\\", "/", $this->_Module);
         $this->_Module = substr($this->_Module, strrpos($this->_Module, '/')+1);
@@ -152,7 +152,7 @@ class MY_Model extends CI_Model
 	protected function _default($name, $tmp=''){
 	    switch ($name){
 	        case 'creator':
-	            $Return = $this->session->userdata('uid');
+	            $Return = isset($GLOBALS['creator']) ? $GLOBALS['creator'] : $this->session->userdata('uid');
 	            break;
 	        case 'create_datetime':
 	            $Return = date('Y-m-d H:i:s');
@@ -170,10 +170,19 @@ class MY_Model extends CI_Model
 	public function trans_start () {
         $this->HostDb->trans_start();
     }
+    public function trans_begin () {
+	    $this->HostDb->trans_begin();
+    }
     public function trans_complete () {
         $this->HostDb->trans_complete();
     }
     public function trans_status () {
 	    return $this->HostDb->trans_status();
+    }
+    public function trans_commit () {
+	    $this->HostDb->trans_commit();
+    }
+    public function trans_rollback () {
+	    $this->HostDb->trans_rollback();
     }
 }//end Base_Model

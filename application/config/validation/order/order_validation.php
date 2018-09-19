@@ -206,3 +206,16 @@ $config['order/order/re_dismantle'] = array(
         'rules' => 'required|numeric|min_length[1]|max_length[10]'
     )
 );
+
+$config['order/order/collection'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '订单编号',
+        'rules' => 'required|numeric|min_length[1]|max_length[10]'
+    ),
+    array(
+        'field' => 'collection',
+        'label' => '代收金额',
+        'rules' => 'required|numeric|min_length[1]|max_length[10]'
+    )
+);

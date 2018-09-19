@@ -15,6 +15,8 @@ class Dealer extends MY_Controller {
         'status' => ONE,
         'public' => YES
     );
+    private $_CurrentSheet;
+    private $_Import = false;
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller dealer/Dealer __construct Start!');
@@ -50,6 +52,23 @@ class Dealer extends MY_Controller {
     }
 
     /**
+     * 远程调用数据
+     */
+    public function remote () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Data = array();
+        if (!empty($this->_Search['keyword'])) {
+            if(!($Data = $this->dealer_model->select_remote($this->_Search))){
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+                $this->Code = EXIT_ERROR;
+            }
+        }
+        array_unshift($Data, array('v' => 0, 'name' => '---无---'));
+
+        $this->_ajax_return($Data);
+    }
+    /**
      *
      * @return void
      */
@@ -81,6 +100,10 @@ class Dealer extends MY_Controller {
             'area_id' => $this->input->post('area_id'),
             'address' => $this->input->post('address')
         );
+        if ($this->_Import) {
+            $Set['creator'] = $_POST['creator'];
+            $Set['create_datetime'] = $_POST['create_datetime'];
+        }
         $Set = gh_escape($Set);
         $this->load->model('dealer/shop_model');
 
@@ -105,14 +128,20 @@ class Dealer extends MY_Controller {
             'phone' => $DealerDeliveryPhone != '' ? $DealerDeliveryPhone : $this->input->post('dealer_linker_mobilephone'),
             'area_id' => ($DealerDeliveryArea != 0 || $DealerDeliveryAddress != '') ? $DealerDeliveryArea : $this->input->post('area_id'),
             'address' => ($DealerDeliveryArea != 0 || $DealerDeliveryAddress != '') ? $DealerDeliveryAddress : $this->input->post('address'),
-            'out_method' => $this->input->post('dealer_delivery_out_method')
+            'out_method' => $this->input->post('dealer_delivery_out_method'),
+            'primary' => YES
         );
+        if ($this->_Import) {
+            $Set['creator'] = $_POST['dealer_delivery_creator'];
+            $Set['create_datetime'] = $_POST['dealer_delivery_create_datetime'];
+        }
         $Set = gh_escape($Set);
         $this->load->model('dealer/dealer_delivery_model');
         if(!!($NewId = $this->dealer_delivery_model->insert($Set))){
             $Set = array(
                 'dealer_delivery_id' => $NewId,
-                'shop_id' => $this->_NewShopV
+                'shop_id' => $this->_NewShopV,
+                'primary' => YES
             );
             $this->load->model('dealer/dealer_delivery_shop_model');
             $this->dealer_delivery_shop_model->insert($Set);
@@ -135,14 +164,23 @@ class Dealer extends MY_Controller {
             'email' => $this->input->post('dealer_linker_email'),
             'qq' => $this->input->post('dealer_linker_qq'),
             'fax' => $this->input->post('dealer_linker_fax'),
-            'position' => $this->input->post('dealer_linker_position')
+            'position' => $this->input->post('dealer_linker_position'),
+            'primary' => YES
         );
+        if ($this->_Import) {
+            $Set['creator'] = $_POST['dealer_linker_creator'];
+            $Set['create_datetime'] = $_POST['dealer_linker_create_datetime'];
+        }
+        if (empty($Set['name'])) {
+            $Set['name'] = $Set['mobilephone'];
+        }
         $Set = gh_escape($Set);
         $this->load->model('dealer/dealer_linker_model');
         if (!!($NewId = $this->dealer_linker_model->insert($Set))) {
             $Set = array(
                 'dealer_linker_id' => $NewId,
-                'shop_id' => $this->_NewShopV
+                'shop_id' => $this->_NewShopV,
+                'primary' => YES
             );
             $this->load->model('dealer/dealer_linker_shop_model');
             $this->dealer_linker_shop_model->insert($Set);
@@ -157,8 +195,15 @@ class Dealer extends MY_Controller {
         $Set = array(
             'dealer_id' => $this->_NewDealerV,
             'owner_id' => $this->session->userdata('uid'),
-            'primary' => YES
+            'primary' => YES,
+            'primary_datetime' => date('Y-m-d H:i:s')
         );
+        if ($this->_Import) {
+            if (empty($_POST['owner_id'])) {
+                return true;
+            }
+            $Set['owner_id'] = $_POST['owner_id'];
+        }
         $Set = gh_escape($Set);
         $this->load->model('dealer/dealer_owner_model');
         if (!!($NewId = $this->dealer_owner_model->insert($Set))) {
@@ -248,5 +293,78 @@ class Dealer extends MY_Controller {
             }
         }
         $this->_ajax_return();
+    }
+
+    /**
+     * 导入
+     */
+    public function import () {
+        require_once APPPATH.'third_party/PHPExcels/PHPExcel.php';
+        $PHPExcel = PHPExcel_IOFactory::load('dealer.xls');
+        $this->_CurrentSheet = $PHPExcel->getSheet(0);
+        $AllRow = $this->_CurrentSheet->getHighestRow();
+        if ($AllRow >= 1) {
+            $this->_Import = true;
+            for ($index = 1; $index <= $AllRow; $index++) {
+                $Tmp = array();
+                $Tmp['d_id'] = (int)$this->_CurrentSheet->getCell('A' . $index)->getValue();
+                if ($Tmp['d_id'] > 0) {
+                    $Tmp = array(
+                        'num' => $index,
+                        'company_type' => (string)$this->_CurrentSheet->getCell('B' . $index)->getValue(),
+                        'name' => (string)$this->_CurrentSheet->getCell('C' . $index)->getValue(),
+                        'shop' => (string)$this->_CurrentSheet->getCell('D' . $index)->getValue(),
+                        'area_id' => $this->_CurrentSheet->getCell('E' . $index)->getValue(),
+                        'address' => (string)$this->_CurrentSheet->getCell('F' . $index)->getValue(),
+                        'creator' => $this->_CurrentSheet->getCell('G' . $index)->getValue(),
+                        'create_datetime' => (string)$this->_CurrentSheet->getCell('H' . $index)->getValue(),
+
+                        'owner_id' => $this->_CurrentSheet->getCell('J' . $index)->getValue(),
+
+                        'dealer_linker_truename' => (string)$this->_CurrentSheet->getCell('N' . $index)->getValue(),
+                        'dealer_linker_mobilephone' => (string)$this->_CurrentSheet->getCell('O' . $index)->getValue(),
+                        'dealer_linker_position' => (string)$this->_CurrentSheet->getCell('P' . $index)->getValue(),
+                        'dealer_linker_telephone' => (string)$this->_CurrentSheet->getCell('Q' . $index)->getValue(),
+                        'dealer_linker_email' => (string)$this->_CurrentSheet->getCell('R' . $index)->getValue(),
+                        'dealer_linker_qq' => (string)$this->_CurrentSheet->getCell('S' . $index)->getValue(),
+                        'dealer_linker_fax' => (string)$this->_CurrentSheet->getCell('T' . $index)->getValue(),
+                        'dealer_linker_creator' => $this->_CurrentSheet->getCell('U' . $index)->getValue(),
+                        'dealer_linker_create_datetime' => (string)$this->_CurrentSheet->getCell('V' . $index)->getValue(),
+
+                        'dealer_delivery_area_id' => $this->_CurrentSheet->getCell('Y' . $index)->getValue(),
+                        'dealer_delivery_address' => (string)$this->_CurrentSheet->getCell('Z' . $index)->getValue(),
+                        'dealer_delivery_logistics' => (string)$this->_CurrentSheet->getCell('AA' . $index)->getValue(),
+                        'dealer_delivery_out_method' => (string)$this->_CurrentSheet->getCell('AB' . $index)->getValue(),
+                        'dealer_delivery_linker' => (string)$this->_CurrentSheet->getCell('AC' . $index)->getValue(),
+                        'dealer_delivery_phone' => (string)$this->_CurrentSheet->getCell('AD' . $index)->getValue(),
+                        'dealer_delivery_creator' => $this->_CurrentSheet->getCell('AE' . $index)->getValue(),
+                        'dealer_delivery_create_datetime' => (string)$this->_CurrentSheet->getCell('AF' . $index)->getValue()
+                    );
+                    if (empty($Tmp['shop'])) {
+                        $Tmp['shop'] = $Tmp['name'];
+                    }
+                    $_POST = array_merge($_POST, $Tmp);
+                    if (empty($Tmp['dealer_linker_mobilephone'])) {
+                        continue;
+                    }
+                    if(!!($this->_NewDealerV = $this->dealer_model->insert($Tmp))) {
+                        $this->_add_shop();
+                        $this->_add_dealer_delivery();
+                        $this->_add_dealer_linker();
+                        if (empty($Post['public'])) {
+                            $this->_add_owner();
+                        }
+                        $this->Message = '新建成功, 刷新后生效!';
+                    }else{
+                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                        $this->Code = EXIT_ERROR;
+                    }
+                }else {
+                    $this->Message = 'Excel清单文件上传成功';
+                }
+            }
+        }else {
+            $this->Message = '文件中没有有效的数据!';
+        }
     }
 }

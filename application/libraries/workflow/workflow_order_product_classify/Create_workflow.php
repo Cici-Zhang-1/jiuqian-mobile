@@ -14,16 +14,17 @@ class Create_workflow extends Workflow_order_product_classify_abstract {
     
     public function create() {
         $this->_Workflow->store_message('新建订单产品分类');
+        return true;
     }
 
     public function optimize() {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['optimize']);
-        $this->_Workflow->optimize();
+        return $this->_Workflow->optimize();
     }
 
     public function print_list() {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['print_list']);
-        $this->_Workflow->print_list();
+        return $this->_Workflow->print_list();
     }
 
     public function __call($name, $arguments){

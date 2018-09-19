@@ -14,7 +14,7 @@ class Order_model extends MY_Model{
 
 	public function select ($Search, $Type = '') {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search) . $Type;
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -38,7 +38,11 @@ class Order_model extends MY_Model{
                     $this->HostDb->where('od_creator', $this->session->userdata('uid'));
                 }
                 if (!empty($Search['status'])) {
-                    $this->HostDb->where_in('o_status', explode(',', $Search['status']));
+                    if (is_array($Search['status'])) {
+                        $this->HostDb->where_in('o_status', $Search['status']);
+                    } else {
+                        $this->HostDb->where_in('o_status', explode(',', $Search['status']));
+                    }
                 } else {
                     $this->HostDb->where('o_status != ', O_REMOVE);
                 }
@@ -87,7 +91,11 @@ class Order_model extends MY_Model{
             $this->HostDb->where('od_creator', $this->session->userdata('uid'));
         }
         if (!empty($Search['status'])) {
-            $this->HostDb->where_in('o_status', explode(',', $Search['status']));
+            if (is_array($Search['status'])) {
+                $this->HostDb->where_in('o_status', $Search['status']);
+            } else {
+                $this->HostDb->where_in('o_status', explode(',', $Search['status']));
+            }
         } else {
             $this->HostDb->where('o_status != ', O_REMOVE);
         }
@@ -133,16 +141,14 @@ class Order_model extends MY_Model{
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $Query = $this->HostDb->select($Sql)->from('order')
+            $Query = $this->HostDb->select($Sql, false)->from('order')
                 ->join('task_level', 'tl_id = o_task_level', 'left')
                 ->join('pay_status', 'ps_name = o_pay_status', 'left')
+                ->join('dealer', 'd_id = o_dealer_id', 'left')
+                ->join('shop', 's_id = o_shop_id', 'left')
                 ->join('workflow_order', 'wo_id = o_status', 'left')
-                ->join('j_workflow_order_msg AS C', 'C.wom_order_id = o_id && C.wom_workflow_order_id = ' . O_CREATE, 'left', false) // 创建
-                ->join('user', 'u_id = C.wom_creator', 'left')
-                ->join('j_workflow_order_msg AS A', 'A.wom_order_id = o_id && A.wom_workflow_order_id = ' . O_PRODUCE, 'left', false) // 确认生产
-                ->join('j_workflow_order_msg AS D', 'D.wom_order_id = o_id && D.wom_workflow_order_id = ' . O_DELIVERED, 'left', false) // 发货状态
-                ->join('j_workflow_order_msg AS M', 'M.wom_order_id = o_id && M.wom_workflow_order_id = ' . O_MONEY_LOGISTICS, 'left', false)
-                ->join('j_workflow_order_msg AS B', 'B.wom_order_id = o_id && B.wom_workflow_order_id = ' . O_BLANK_NOTE, 'left', false)
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->join('user AS C', 'C.u_id = od_creator', 'left')
                 ->where('o_id', $Search['order_id'])
                 ->get();
 
@@ -165,7 +171,7 @@ class Order_model extends MY_Model{
      */
     public function select_details ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
@@ -203,7 +209,8 @@ class Order_model extends MY_Model{
                     ->join('dealer', 'd_id = o_dealer_id', 'left')
                     ->join('task_level', 'tl_id = o_task_level', 'left')
                     ->join('pay_status', 'ps_name = o_pay_status', 'left')
-                    ->join('user', 'u_id = od_check', 'left');
+                    ->join('application', 'a_source_id = o_id', 'left')
+                    ->join('application_status', 'as_name = a_status', 'left');
 
                 $this->HostDb->where('o_status', O_WAIT_SURE);
                 if (empty($Search['all'])) {
@@ -260,6 +267,99 @@ class Order_model extends MY_Model{
         }else{
             return false;
         }
+    }
+
+    /**
+     * 获取等待发货订单
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_wait_delivery ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_wait_delivery_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order')
+                    ->join('dealer', 'd_id = o_dealer_id', 'left')
+                    ->join('pay_status', 'ps_name = o_pay_status', 'left')
+                    ->join('j_application', 'a_source_id = o_id && a_des = o_payterms', 'left', false)
+                    ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING))
+                    ->where('o_out_method', $Search['out_method']);
+                if (empty($Search['all'])) {
+                    $this->HostDb->where('od_creator', $this->session->userdata('uid'));
+                }
+
+                if (isset($Search['keyword'])) {
+                    $this->HostDb->group_start()
+                        ->like('o_dealer', $Search['keyword'])
+                        ->or_like('o_num', $Search['keyword'])
+                        ->group_end();
+                }
+
+                $Query = $this->HostDb->order_by('o_id', 'desc')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单';
+            }
+        }
+        return $Return;
+    }
+    private function _page_wait_delivery_num ($Search) {
+        $this->HostDb->select('o_id', FALSE)
+            ->join('order_datetime', 'od_order_id = o_id', 'left')
+            ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING))
+            ->where('o_out_method', $Search['out_method']);
+        if (empty($Search['all'])) {
+            $this->HostDb->where('od_creator', $this->session->userdata('uid'));
+        }
+        if (isset($Search['keyword'])) {
+            $this->HostDb->group_start()
+                ->like('o_dealer', $Search['keyword'])
+                ->or_like('o_num', $Search['keyword'])
+                ->group_end();
+        }
+        $this->HostDb->from('order');
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $this->_Num = $Query->num_rows();
+            $Query->free_result();
+            if(intval($this->_Num%$Search['pagesize']) == 0){
+                $Pn = intval($this->_Num/$Search['pagesize']);
+            }else{
+                $Pn = intval($this->_Num/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 获取已经发货的件数
+     * @param $Vs
+     * @return bool
+     */
+    public function select_delivered ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order')
+            ->where_in('o_id', $Vs)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            return $Query->result_array();
+        }
+        return false;
     }
     /**
      * 获取当前订单的工作流
@@ -401,13 +501,14 @@ class Order_model extends MY_Model{
      * @param $Status
      * @return bool
      */
-    public function are_applicable ($Vs, $Status) {
+    public function are_applicable ($Vs, $Status, $Payterms) {
         $Item = $this->_Item.__FUNCTION__;
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order')
             ->join('dealer', 'd_id = o_dealer_id', 'left')
             ->where_in('o_id', $Vs)
             ->where_in('o_status', is_array($Status) ? $Status : array($Status))
+            ->where('o_payterms != ', $Payterms)
             ->get();
         if($Query->num_rows() > 0){
             return $Query->result_array();
@@ -415,6 +516,178 @@ class Order_model extends MY_Model{
             return false;
         }
     }
+
+    /**
+     * 判断订单是否可以删除
+     * @param $Vs
+     * @return bool
+     */
+    public function are_removable ($Vs) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order')
+            ->join('dealer', 'd_id = o_dealer_id', 'left')
+            ->where_in('o_id', $Vs)
+            ->where('o_status > ', O_REMOVE)
+            ->where('o_status <= ', O_WAIT_DELIVERY)
+            ->get();
+        if($Query->num_rows() > 0){
+            return $Query->result_array();
+        }else{
+            return false;
+        }
+    }
+    /**
+     * 获取时间段内的下单数
+     * @param $Con
+     * @return bool
+     */
+    public function select_order_sorter($Con){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql, FALSE);
+            $this->HostDb->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('o_sum > ', ZERO);
+
+            if (!empty($Con['dealer_id'])) {
+                $this->HostDb->where('o_dealer_id', $Con['dealer_id']);
+            }
+            if(!empty($Con['start_date'])){
+                $this->HostDb->where('od_sure_datetime > ', $Con['start_date']);
+            }
+
+            if(!empty($Con['end_date'])){
+                $this->HostDb->where('od_sure_datetime < ', $Con['end_date']);
+            }
+
+            if(!empty($Con['keyword'])){
+                $this->HostDb->group_start()
+                    ->like('o_dealer', $Con['keyword'])
+                    ->group_end();
+            }
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有对应下单排行榜订单';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 等待确认
+     * @param $Con
+     * @return bool
+     */
+    public function select_after_wait_sure ($Con) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+
+            $Query = $this->HostDb->select($Sql, FALSE)
+                ->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('od_check_datetime > ', $Con['start_date'])
+                ->where('od_check_datetime < ', $Con['end_date'])
+                ->where('o_status > ', O_CHECKED)
+                ->where('o_sum > ', ZERO)
+                ->get();
+
+            if($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '本月还没有开始销售!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 确认生产后的销售额
+     * @param $Con
+     * @return bool
+     */
+    public function select_after_produce($Con){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+
+            $Query = $this->HostDb->select($Sql, FALSE)
+                ->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('od_sure_datetime > ', $Con['start_date'])
+                ->where('od_sure_datetime < ', $Con['end_date'])
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('o_sum > ', ZERO)
+                ->get();
+
+            if($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '本月还没有开始销售!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
+    public function select_everyday_sured ($Con) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Thick = $this->HostDb->select('o_id as order_id, sum(opb_area) as thick', FALSE)
+                ->from('order_product_board')
+                ->join('board', 'b_name = opb_board', 'left')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('od_sure_datetime > ', $Con['start_date'])
+                ->where('od_sure_datetime < ', $Con['end_date'])
+                ->where('op_status > ', OP_DISMANTLING)
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('opb_area > ', ZERO)
+                ->where('b_thick > ', THICK)
+                ->group_by('o_id')
+                ->get_compiled_select();
+
+            $Sql = $this->_unformat_as($Item);
+
+            $Query = $this->HostDb->select($Sql)
+                ->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->join('user', 'u_id = od_sure', 'left')
+                ->join('(' . $Thick . ') as A', 'A.order_id = o_id', 'left')
+                ->where('od_sure_datetime > ', $Con['start_date'])
+                ->where('od_sure_datetime < ', $Con['end_date'])
+                ->where('o_status > ', O_WAIT_SURE)
+                ->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '本日还没有确认订单!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
     public function insert ($Set) {
         $Item = $this->_Item.__FUNCTION__;
         if(!!($Order = $this->_generate_order_num($Set))){

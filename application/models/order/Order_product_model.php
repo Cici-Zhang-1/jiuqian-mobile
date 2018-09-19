@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 订单产品
  */
 class Order_product_model extends MY_Model{
+    private $_Num;
     public function __construct(){
         parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model Order/Order_product_model start!');
@@ -15,7 +16,7 @@ class Order_product_model extends MY_Model{
 
     public function select ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -23,9 +24,11 @@ class Order_product_model extends MY_Model{
                 $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql)->from('order_product')
                     ->join('order', 'o_id = op_order_id', 'left')
+                    ->join('task_level', 'tl_id = o_task_level', 'left')
                     ->join('workflow_order_product', 'wop_id = op_status', 'left')
                     ->join('user as D', 'D.u_id = op_dismantle', 'left')
-                    ->join('user AS C', 'C.u_id = op_creator', 'left');
+                    ->join('user AS C', 'C.u_id = op_creator', 'left')
+                    ->where('o_status > ', O_REMOVE);
                 if (empty($Search['all'])) {
                     $this->HostDb->where('op_creator', $this->session->userdata('uid'));
                 }
@@ -66,7 +69,8 @@ class Order_product_model extends MY_Model{
         $this->HostDb->select('op_id', FALSE)
             ->from('order_product')
             ->join('order', 'o_id = op_order_id', 'left')
-            ->join('workflow_order_product', 'wop_id = op_status', 'left');
+            ->join('workflow_order_product', 'wop_id = op_status', 'left')
+            ->where('o_status > ', O_REMOVE);
         if (empty($Search['all'])) {
             $this->HostDb->where('op_creator', $this->session->userdata('uid'));
         }
@@ -216,6 +220,97 @@ class Order_product_model extends MY_Model{
         }
         return $Return;
     }
+
+    public function select_produce_process_tracking ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num_produce_process_tracking($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order_product')
+                    ->join('order', 'o_id = op_order_id', 'left')
+                    ->join('order_product_classify', 'opc_order_product_id = op_id', 'left')
+                    ->join('mrp', 'm_id = opc_mrp_id', 'left')
+                    ->join('workflow_order_product', 'wop_id = op_status', 'left')
+                    ->join('user', 'u_id = op_producing', 'left');
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->group_start()
+                        ->like('op_num', $Search['keyword'])
+                        ->or_like('o_dealer', $Search['keyword'])
+                        ->or_like('o_owner', $Search['keyword'])
+                        ->or_like('m_batch_num', $Search['keyword'])
+                        ->group_end();
+                }
+                if (isset($Search['order_type']) && $Search['order_type'] != '') {
+                    $this->HostDb->where('o_order_type', $Search['order_type']);
+                }
+                if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
+                    $this->HostDb->where('op_producing_datetime <= ', $Search['warn_date']);
+                }
+                $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKING));
+                $this->HostDb->where('o_status > ', O_PRODUCE);
+                $this->HostDb->order_by('op_producing_datetime', 'desc');
+                $this->HostDb->group_by('op_id');
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的生产中订单';
+            }
+        }
+        return $Return;
+    }
+
+    private function _page_num_produce_process_tracking ($Search) {
+        /*$this->HostDb->select('op_id', FALSE)
+            ->from('mrp')
+            ->join('n9_workflow_mrp_msg', 'wmm_mrp_id = m_id && wmm_workflow_mrp_id = ' . M_ELECTRONIC_SAW, 'left', false)
+            ->join('n9_order_product_classify', 'opc_optimize_datetime = m_batch_num && opc_board = m_board', 'left', false)*/
+        $this->HostDb->select('op_id', FALSE)->from('order_product')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->join('order_product_classify', 'opc_order_product_id = op_id', 'left')
+            ->join('mrp', 'm_id = opc_mrp_id', 'left');
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->group_start()
+                ->like('op_num', $Search['keyword'])
+                ->or_like('o_dealer', $Search['keyword'])
+                ->or_like('o_owner', $Search['keyword'])
+                ->or_like('m_batch_num', $Search['keyword'])
+                ->group_end();
+        }
+        if (isset($Search['order_type']) && $Search['order_type'] != '') {
+            $this->HostDb->where('o_order_type', $Search['order_type']);
+        }
+        if (isset($Search['warn_date']) && $Search['warn_date'] != '') {
+            $this->HostDb->where('op_producing_datetime <= ', $Search['warn_date']);
+        }
+        $this->HostDb->where_in('op_status', array(OP_PRODUCING, OP_PACKING));
+        $this->HostDb->where('o_status > ', O_PRODUCE);
+        $this->HostDb->group_by('op_id');
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->num_rows();
+            $Query->free_result();
+            $this->_Num = $Row;
+            if(intval($Row%$Search['pagesize']) == 0){
+                $Pn = intval($Row/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
     public function select_pack ($Search) {
         $Item = $this->_Item . __FUNCTION__;
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
@@ -318,111 +413,37 @@ class Order_product_model extends MY_Model{
         }
     }
 
-//    /**
-//     * 包装统计
-//     * @param $Search
-//     * @return array|bool
-//     */
-//    public function select_packed ($Search) {
-//        $Item = $this->_Item . __FUNCTION__;
-//        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
-//        $Return = false;
-//        if (!($Return = $this->cache->get($Cache))) {
-//            $Search['pn'] = $this->_page_num_packed($Search);
-//            if(!empty($Search['pn'])){
-//                $Sql = $this->_unformat_as($Item);
-//                $this->HostDb->select($Sql, FALSE)
-//                    ->from('order_product')
-//                    ->join('order', 'o_id = op_order_id', 'left')
-//                    ->where('op_status > ', OP_PRODUCING);  /*已经生产的订单产品才可以扫描*/
-//
-//                if(isset($Search['keyword']) && $Search['keyword'] != '') {
-//                    $this->HostDb->group_start()
-//                        ->like('op_remark', $Search['keyword'])
-//                        ->or_like('op_num', $Search['keyword'])
-//                        ->or_like('o_dealer', $Search['keyword'])
-//                        ->or_like('o_owner', $Search['keyword'])
-//                        ->or_like('o_remark', $Search['keyword'])
-//                        ->group_end();
-//                }
-//
-//                $this->HostDb->order_by('op_id', 'desc');
-//                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
-//
-//                $Return = array(
-//                    'content' => $Query->result_array(),
-//                    'num' => $this->_Num,
-//                    'p' => $Search['p'],
-//                    'pn' => $Search['pn'],
-//                    'pagesize' => $Search['pagesize']
-//                );
-//                $this->cache->save($Cache, $Return, MINUTES);
-//            } else {
-//                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
-//            }
-//        }
-//        return $Return;
-//    }
-//    private function _page_num_packed ($Search) {
-//        $this->HostDb->select('count(op_id) as num', FALSE)
-//            ->from('order_product')
-//            ->join('order', 'o_id = op_order_id', 'left')
-//            ->where('op_status > ', OP_PRODUCING); /*已经生产的订单产品才可以扫描*/
-//        if (!empty($Search['keyword'])) {
-//            $this->HostDb->group_start()
-//                ->like('op_remark', $Search['keyword'])
-//                ->or_like('op_num', $Search['keyword'])
-//                ->or_like('o_dealer', $Search['keyword'])
-//                ->or_like('o_owner', $Search['keyword'])
-//                ->or_like('o_remark', $Search['keyword'])
-//                ->group_end();
-//        }
-//        $Query = $this->HostDb->get();
-//
-//        if($Query->num_rows() > 0){
-//            $Row = $Query->row_array();
-//            $Query->free_result();
-//            $this->_Num = $Row['num'];
-//            if(intval($Row['num']%$Search['pagesize']) == 0){
-//                $Pn = intval($Row['num']/$Search['pagesize']);
-//            }else{
-//                $Pn = intval($Row['num']/$Search['pagesize'])+1;
-//            }
-//            return $Pn;
-//        }else{
-//            return false;
-//        }
-//    }
     /**
-     * 等待入库
+     * 包装统计
      * @param $Search
      * @return array|bool
      */
-    public function select_warehouse_waiting_in ($Search) {
+    public function select_packed ($Search) {
         $Item = $this->_Item . __FUNCTION__;
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
-            $Search['in'] = $this->HostDb->select('wop_order_product_num')->from('warehouse_order_product')->where('wop_picker', 0)->get_compiled_select();
-            $Search['pn'] = $this->_page_warehouse_waiting_in_num($Search);
+            $Search['pn'] = $this->_page_num_packed($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $this->HostDb->select($Sql)->from('order_product')
-                            ->join('order', 'o_id = op_order_id', 'left')
-                            ->where('op_status', OP_INED)
-                            ->where('o_status > ', O_PRODUCE)
-                            ->where('o_status < ', O_DELIVERIED)
-                            ->where_not_in('op_num', '(' . $Search['in'] . ')', false);
-                if (!empty($Search['start_date'])) {
-                    $this->HostDb->where('op_pack_datetime > ', $Search['start_date']);
-                }
-                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                $this->HostDb->select($Sql, FALSE)
+                    ->from('order_product')
+                    ->join('order', 'o_id = op_order_id', 'left')
+                    ->where('op_status > ', OP_PRODUCING);  /*已经生产的订单产品才可以扫描*/
+
+                if(isset($Search['keyword']) && $Search['keyword'] != '') {
                     $this->HostDb->group_start()
-                        ->like('op_num', $Search['keyword'])
+                        ->like('op_remark', $Search['keyword'])
+                        ->or_like('op_num', $Search['keyword'])
+                        ->or_like('o_dealer', $Search['keyword'])
+                        ->or_like('o_owner', $Search['keyword'])
+                        ->or_like('o_remark', $Search['keyword'])
                         ->group_end();
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
-                            ->order_by('op_pack_datetime')->get();
+
+                $this->HostDb->order_by('op_id', 'desc');
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -437,16 +458,88 @@ class Order_product_model extends MY_Model{
         }
         return $Return;
     }
+    private function _page_num_packed ($Search) {
+        $this->HostDb->select('count(op_id) as num', FALSE)
+            ->from('order_product')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->where('op_status > ', OP_PRODUCING); /*已经生产的订单产品才可以扫描*/
+        if (!empty($Search['keyword'])) {
+            $this->HostDb->group_start()
+                ->like('op_remark', $Search['keyword'])
+                ->or_like('op_num', $Search['keyword'])
+                ->or_like('o_dealer', $Search['keyword'])
+                ->or_like('o_owner', $Search['keyword'])
+                ->or_like('o_remark', $Search['keyword'])
+                ->group_end();
+        }
+        $Query = $this->HostDb->get();
 
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+    /**
+     * 等待入库的订单产品
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_warehouse_waiting_in ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_warehouse_waiting_in_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order_product')
+                            ->join('order', 'o_id = op_order_id', 'left')
+                            ->where('op_status', OP_INED)
+                            ->where('o_status > ', O_PRODUCE)
+                            ->where('o_status < ', O_DELIVERING)
+                            ->where('op_warehouse_num is null');
+                if (!empty($Search['start_date'])) {
+                    $this->HostDb->where('op_inned_datetime > ', $Search['start_date']);
+                }
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->group_start()
+                        ->like('op_num', $Search['keyword'])
+                        ->group_end();
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                            ->order_by('op_inned_datetime')->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MINUTES);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
+            }
+        }
+        return $Return;
+    }
     private function _page_warehouse_waiting_in_num($Search){
         $this->HostDb->select('count(op_id) as num', FALSE)->from('order_product')
             ->join('order', 'o_id = op_order_id', 'left')
             ->where('op_status', OP_INED)
             ->where('o_status > ', O_PRODUCE)
-            ->where('o_status < ', O_DELIVERIED)
-            ->where_not_in('op_num', '(' . $Search['in'] . ')', false);
+            ->where('o_status < ', O_DELIVERING)
+            ->where('op_warehouse_num is null');
         if (!empty($Search['start_date'])) {
-            $this->HostDb->where('op_pack_datetime > ', $Search['start_date']);
+            $this->HostDb->where('op_inned_datetime > ', $Search['start_date']);
         }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
             $this->HostDb->group_start()
@@ -471,13 +564,50 @@ class Order_product_model extends MY_Model{
     }
 
     /**
+     * 获取拟定发货计划的订单产品
+     * @param $Vs
+     * @return array|bool
+     */
+    public function select_work_out($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Vs);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->where_in('o_id', $Vs)
+                ->where('op_status >= ', OP_INED)
+                ->where('o_status > ', O_PRODUCING)
+                ->where('op_product_id != ', SERVER)
+                ->having('wait_delivery > ', ZERO)
+                ->order_by('o_dealer_id')
+                ->order_by('o_id')
+                ->order_by('op_id')
+                ->get();
+            if ($Query->num_rows() > ZERO) {
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, MINUTES);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
+            }
+        }
+        return $Return;
+    }
+    /**
      * 拣货单明细
      * @param $Search
      * @return array|bool
      */
     public function select_pick_sheet_detail ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_pick_sheet_detail_num($Search);
@@ -491,10 +621,7 @@ class Order_product_model extends MY_Model{
                 $Query = $this->HostDb->select($Sql)->from('order_product')
                     ->join('order', 'o_id = op_order_id', 'left')
                     ->join('(' . $Scanned . ') as A', 'A.ps_order_product_num = op_num', 'left')
-                    ->where('o_stock_outted_id', $Search['v'])
-                    ->where('op_status >= ', OP_INED)
-                    ->where('o_status > ', O_PRODUCE)
-                    ->where_in('op_product_id', array(CABINET, WARDROBE, DOOR, WOOD, FITTING, OTHER))
+                    ->where_in('op_id', $Search['order_product_id'])
                     ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
                     ->order_by('op_num')
                     ->order_by('no')->get();
@@ -515,11 +642,7 @@ class Order_product_model extends MY_Model{
 
     private function _page_pick_sheet_detail_num($Search){
         $Query = $this->HostDb->select('count(op_id) as num', FALSE)->from('order_product')
-            ->join('order', 'o_id = op_order_id', 'left')
-            ->where('o_stock_outted_id', $Search['v'])
-            ->where('op_status >= ', OP_INED)
-            ->where('o_status > ', O_PRODUCE)
-            ->where_in('op_product_id', array(CABINET, WARDROBE, DOOR, WOOD, FITTING, OTHER))
+            ->where_in('op_id', $Search['order_product_id'])
             ->get();
 
         if($Query->num_rows() > 0){
@@ -544,7 +667,7 @@ class Order_product_model extends MY_Model{
      */
     public function select_pick_sheet_print ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
@@ -555,12 +678,9 @@ class Order_product_model extends MY_Model{
                 ->get_compiled_select();
             $Query = $this->HostDb->select($Sql)->from('order_product')
                 ->join('order', 'o_id = op_order_id', 'left')
-                ->join('stock_outted', 'so_id = o_stock_outted_id', 'left')
+                ->join('pay_status', 'ps_name = o_pay_status', 'left')
                 ->join('(' . $Scanned . ') as A', 'A.ps_order_product_num = op_num', 'left')
-                ->where('o_stock_outted_id', $Search['v'])
-                ->where('op_status >= ', OP_INED)
-                ->where('o_status > ', O_PRODUCE)
-                ->where_in('op_product_id', array(CABINET, WARDROBE, DOOR, WOOD, FITTING, OTHER))
+                ->where_in('op_id', $Search['order_product_id'])
                 ->order_by('op_product_id')
                 ->order_by('no')->get();
             $Return = $Query->result_array();
@@ -577,13 +697,17 @@ class Order_product_model extends MY_Model{
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
         $Sql = $this->_unformat_as($Item);
-        $Query = $this->HostDb->select($Sql)->from('order_product')
+        $this->HostDb->select($Sql)->from('order_product')
             ->join('product', 'p_id = op_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
-            ->where('op_id', $V)
             ->where('o_status > ', O_REMOVE) /*订单没有删除*/
-            ->where('o_status < ', O_DISMANTLED)  /*订单没有确认拆单*/
-            ->limit(1)->get();
+            ->where('o_status < ', O_DISMANTLED);  /*订单没有确认拆单*/
+        if (preg_match(REG_ORDER_PRODUCT_STRICT, $V)) {
+            $this->HostDb->where('op_num', $V);
+        } else {
+            $this->HostDb->where('op_id', $V);
+        }
+        $Query = $this->HostDb->limit(ONE)->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->row_array();
         }
@@ -775,6 +899,49 @@ class Order_product_model extends MY_Model{
     }
 
     /**
+     * 统计已发货数量
+     * @param $OrderId
+     * @return bool
+     */
+    public function select_delivered ($OrderId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product')
+            ->where_in('op_order_id', $OrderId)
+            ->group_by('op_order_id')
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        } else {
+            $GLOBALS['error'] = '没有符合要求的已发货订单';
+        }
+        return $Return;
+    }
+
+    /**
+     * 获取已发货件数
+     * @param $V
+     * @param $OrderId
+     * @return bool
+     */
+    public function select_delivered_by_v ($V, $OrderId = array()) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $this->HostDb->select($Sql)->from('order_product')
+            ->where_in('op_id', $V);
+        if (!empty($OrderId)) {
+            $this->HostDb->where_in('op_order_id', $OrderId);
+        }
+        $Query = $this->HostDb->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    /**
      * 获取当前订单的工作流
      */
     public function select_current_workflow($Opid){
@@ -792,6 +959,92 @@ class Order_product_model extends MY_Model{
         }
     }
 
+    /**
+     * 获取BD文件列表
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_bd ($Search) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Search);
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Search['pn'] = $this->_page_bd($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item, $this->_Module);
+                $this->HostDb->select($Sql, FALSE);
+                $this->HostDb->from('order_product')
+                    ->join('order', 'o_id = op_order_id', 'left')
+                    ->join('user', 'u_id = op_dismantle', 'left')
+                    ->where_in('op_product_id', array(CABINET, WARDROBE))
+                    ->where('op_status > ', OP_DISMANTLING)
+                    ->where('o_status > ', O_PRODUCE);
+                if ($Search['status'] == NO) {
+                    $this->HostDb->where('op_bd', YES);
+                } else {
+                    $this->HostDb->where('op_bd', TWO);
+                }
+
+                if(!empty($Search['keyword'])){
+                    $this->HostDb->group_start()
+                        ->like('o_num', $Search['keyword'])
+                        ->group_end();
+                }
+
+                $this->HostDb->order_by('o_id', 'desc')->order_by('op_product_id')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize']);
+
+                $Query = $this->HostDb->get();
+                if($Query->num_rows() > 0){
+                    $Result = $Query->result_array();
+                    $Return = array(
+                        'content' => $Result,
+                        'num' => $this->_Num,
+                        'p' => $Search['p'],
+                        'pn' => $Search['pn']
+                    );
+                    $this->cache->save($Cache, $Return, HOURS);
+                }
+            }else{
+                $GLOBALS['error'] = '没有符合要求需要导出BD的订单!';
+            }
+        }
+        return $Return;
+    }
+    private function _page_bd ($Search) {
+        $this->HostDb->select('count(op_id) as num', FALSE)
+            ->from('order_product')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->where_in('op_product_id', array(CABINET, WARDROBE))
+            ->where('op_status > ', OP_DISMANTLING)
+            ->where('o_status > ', O_PRODUCE);
+        if ($Search['status'] == NO) {
+            $this->HostDb->where('op_bd', YES);
+        } else {
+            $this->HostDb->where('op_bd', TWO);
+        }
+
+        if(!empty($Search['keyword'])){
+            $this->HostDb->group_start()
+                ->like('o_num', $Search['keyword'])
+                ->group_end();
+        }
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            log_message('debug', 'Num is '.$Row['num'].' and Pagesize is'.$Search['pagesize'].' and Page Nums is'.$Pn);
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
     /**
      * `generate_order_product_num`(IN `id` INT(10), IN `num` INT(5), IN `product_id` SMALLINT(4), `IN `code` VARCHAR(2), IN `product` VARCHAR(64), OUT `opid` VARCHAR(1024), OUT `orderProductNum` VARCHAR(1024))
      * begin
@@ -886,6 +1139,7 @@ class Order_product_model extends MY_Model{
         }
         $this->HostDb->update_batch('order_product', $Data, 'op_id');
         $this->remove_cache($this->_Module);
+        return true;
     }
 
     /**

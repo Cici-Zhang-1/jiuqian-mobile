@@ -39,7 +39,7 @@ class Pack_model extends MY_Model {
                 );
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
+                $GLOBALS['error'] = '没有符合搜索条件的包装订单';
             }
         }
         return $Return;
@@ -84,7 +84,7 @@ class Pack_model extends MY_Model {
                 ->like('op_num', $Search['keyword'])
                 ->group_end();
         }
-        // $this->HostDb->group_by('op_id');
+        $this->HostDb->group_by('op_id, opc_classify_id');
         return $this->HostDb->get_compiled_select();
     }
     private function _select_order_product_board ($Search) {
@@ -93,7 +93,7 @@ class Pack_model extends MY_Model {
         $this->HostDb->select($Sql)->from('order_product_board')
             ->join('workflow_procedure', 'wp_id = opb_status', 'left')
             ->join('order_product', 'op_id = opb_order_product_id', 'left')
-            ->join('product', 'p_id = op_id', 'left')
+            ->join('product', 'p_id = op_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->join('user', 'u_id = opb_pack', 'left');
         if ($Search['status'] == WP_PACK) {
@@ -174,7 +174,7 @@ class Pack_model extends MY_Model {
                 ->like('op_num', $Search['keyword'])
                 ->group_end();
         }
-        // $this->HostDb->group_by('op_id');
+        $this->HostDb->group_by('op_id, opc_classify_id');
         $Query = $this->HostDb->get();
         return $Query->num_rows();
     }
@@ -219,7 +219,7 @@ class Pack_model extends MY_Model {
     public function select_next_pack () {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
-        $OrderProductV = $this->HostDb->select('opb_order_product_id')->from('order_product_board')->join('n9_workflow_order_product_board_msg', 'wopbm_order_product_board_id = opb_id && wopbm_workflow_order_product_board_id = ' . OPB_EDGE, 'left', false)->where('opb_status', OPB_EDGE)->order_by('wopbm_create_datetime')->limit(ONE)->get_compiled_select();
+        $OrderProductV = $this->HostDb->select('opb_order_product_id')->from('order_product_board')->join('n9_workflow_order_product_board_msg', 'wopbm_order_product_board_id = opb_id && wopbm_workflow_order_product_board_id = ' . WP_EDGE, 'left', false)->where('opb_status', WP_EDGE)->order_by('wopbm_create_datetime')->limit(ONE)->get_compiled_select();
         $OrderProductV = $this->HostDb->select('opb_order_product_id')->from('(' . $OrderProductV . ') AS A', false)->get_compiled_select();
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order_product_board')

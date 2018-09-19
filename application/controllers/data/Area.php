@@ -8,6 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category Controller
  */
 class Area extends MY_Controller {
+    private $__Search = array(
+        'paging' => NO
+    );
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller data/Area __construct Start!');
@@ -29,6 +32,7 @@ class Area extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
         if(!($Data = $this->area_model->select($this->_Search))){

@@ -14,9 +14,15 @@ class Sheared_workflow extends Workflow_mrp_abstract {
 
     public function sheared(){
         $this->_Workflow->store_message('已排产 ');
-        $this->_workflow_propagation(__FUNCTION__);
-        $this->_Workflow->edit_current_workflow(Workflow_mrp::$AllWorkflow['electronic_saw']);
-        $this->_Workflow->electronic_saw();
+        if ($this->_workflow_propagation(__FUNCTION__)) {
+            $this->_Workflow->edit_current_workflow(Workflow_mrp::$AllWorkflow['electronic_saw']);
+            return $this->_Workflow->electronic_saw();
+        }
+        return false;
+    }
+    public function re_shear () {
+        $this->_Workflow->edit_current_workflow(Workflow_mrp::$AllWorkflow['shear'], array('distribution' => ZERO, 'shear' => ZERO, 'shear_datetime' => null));
+        return $this->_Workflow->re_shear();
     }
 
     public function __call($name, $arguments){

@@ -55,7 +55,8 @@ $config['permission/func_model/select_allowed'] = array(
     'mt_name' => 'modal_type_name',
     'f_multiple' => 'multiple_v',
     'f_single' => 'single_v',
-    'bt_name' => 'multiple_name'
+    'bt_name' => 'multiple_name',
+    'f_menu_id' => 'menu_id'
 );
 $config['permission/func_model/select_is_allowed_operation'] = array(
 	'f_id' => 'func_v',

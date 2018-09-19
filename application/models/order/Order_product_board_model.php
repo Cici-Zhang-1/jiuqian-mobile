@@ -15,11 +15,11 @@ class Order_product_board_model extends MY_Model{
 
     public function select ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
-            $this->HostDb->select($Sql)->from('order_product_board')
+            $this->HostDb->select($Sql, false)->from('order_product_board')
                 ->join('order_product', 'op_id = opb_order_product_id', 'left')
                 ->join('product', 'p_id = op_product_id', 'left')
                 ->join('workflow_order_product', 'wop_id = op_status', 'left')
@@ -116,21 +116,24 @@ class Order_product_board_model extends MY_Model{
     /**
      * 根据订单ID获取面积
      * @param $OrderV
+     * @param $Thick
      * @return bool
      */
-    public function select_area_by_order_v($OrderV) {
-        $Query = $this->HostDb->select_sum('opb_area')->from('order_product_board')
+    public function select_area_by_order_v($OrderV, $Thick = true) {
+        $this->HostDb->select_sum('opb_area')->from('order_product_board')
             ->join('board', 'b_name = opb_board', 'left')
-            ->join('board_thick', 'bt_id = b_thick', 'left')
             ->join('order_product', 'op_id = opb_order_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->where('o_id', $OrderV)
-            ->where('o_status >= ', O_CREATE)
-            ->where('op_status >= ', OP_CREATE)
-            ->where('bt_name > ', THICK) // 按厚板面积推荐
-            ->get();
+            ->where('o_status != ', O_REMOVE)
+            ->where('op_status != ', OP_REMOVE);
+        if ($Thick) {
+            $this->HostDb->where('b_thick > ', THICK); // 按厚板面积推荐
+        }
+        $Query = $this->HostDb->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->row_array();
+            $Query->free_result();
             return $Return['opb_area'];
         }
         return false;
@@ -165,6 +168,30 @@ class Order_product_board_model extends MY_Model{
             ->group_by('opb_order_product_id')->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    /**
+     * 获取订单产品id
+     * @param $Vs
+     * @return bool
+     */
+    public function select_order_product_id ($Vs) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__ . array_to_string($Vs);
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql, FALSE);
+            $this->HostDb->from('order_product_board')
+                ->where_in('opb_id', $Vs)
+                ->group_by('opb_order_product_id');
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, HOURS);
+            }
         }
         return $Return;
     }
@@ -399,7 +426,7 @@ class Order_product_board_model extends MY_Model{
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)
             ->from('order_product_board')
-            ->join('Workflow_order_product_classify', 'wopb_id = opb_status', 'left')
+            ->join('workflow_procedure', 'wp_id = opb_status', 'left')
             ->where('opb_id', $V)->limit(1)->get();
         if($Query->num_rows() > 0){
             $Return = $Query->row_array();
@@ -459,6 +486,163 @@ class Order_product_board_model extends MY_Model{
         return $Return;
     }
 
+    /**
+     * @param $Con
+     * @return bool
+     */
+    public function select_board_predict($Con){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql, FALSE)
+                ->from('order_product_board')
+                ->join('board', 'b_name = opb_board', 'left')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('o_order_type', REGULAR_ORDER)
+                ->where('od_check_datetime > ', $Con['start_date'])
+                ->where('od_check_datetime < ', $Con['end_date'])
+                ->where('op_status > ', OP_DISMANTLING)
+                ->where('o_status > ', O_CHECKED)
+                ->where('opb_area > ', ZERO);
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '本月还没有开始销售!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 获取核价后的已拆订单，用于拆单统计
+     * @param $Con
+     * @return bool
+     */
+    public function select_dismantled($Con) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql, FALSE)
+                ->from('order_product_board')
+                ->join('board', 'b_name = opb_board', 'left')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('product', 'p_id = op_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('op_dismantle', $Con['dismantle'])
+                ->where('op_status > ', OP_DISMANTLING)
+                ->where('o_status > ', O_CHECKED)
+                ->where('od_check_datetime > ', $Con['start_date']);
+
+            if(!empty($Con['end_date'])){
+                $this->HostDb->where('od_check_datetime < ', $Con['end_date']);
+            }
+
+            $Query = $this->HostDb->order_by('o_id', 'desc')->order_by('op_product_id')->order_by('op_id')->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '在此期间段您没有分解!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 销售数据
+     * @param $Con
+     * @return bool
+     */
+    public function select_sales($Con) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.array_to_string($Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+
+            $this->HostDb->select($Sql, FALSE)
+                ->from('order_product_board')
+                ->join('board', 'b_name = opb_board', 'left')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('product', 'p_id = op_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('op_status > ', OP_DISMANTLING)
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('od_sure_datetime > ', $Con['start_date']);
+            if(!empty($Con['end_date'])) {
+                $this->HostDb->where('od_sure_datetime < ', $Con['end_date']);
+            }
+
+            $Group = false;
+            if (!empty($Con['board_color'])) {
+                if ($Group) {
+                    $this->HostDb->or_where_in('b_color', $Con['board_color']);
+                } else {
+                    $this->HostDb->group_start();
+                    $this->HostDb->where_in('b_color', $Con['board_color']);
+                    $Group = true;
+                }
+            }
+            if (!empty($Con['board_nature'])) {
+                if ($Group) {
+                    $this->HostDb->or_where_in('b_nature', $Con['board_nature']);
+                } else {
+                    $this->HostDb->group_start();
+                    $this->HostDb->where_in('b_nature', $Con['board_nature']);
+                    $Group = true;
+                }
+            }
+            if (!empty($Con['board_thick'])) {
+                if ($Group) {
+                    $this->HostDb->or_where_in('b_thick', $Con['board_thick']);
+                } else {
+                    $this->HostDb->group_start();
+                    $this->HostDb->where_in('b_thick', $Con['board_thick']);
+                    $Group = true;
+                }
+            }
+            if (!empty($Con['product_id'])) {
+                if ($Group) {
+                    $this->HostDb->or_where_in('p_id', $Con['product_id']);
+                } else {
+                    $this->HostDb->group_start();
+                    $this->HostDb->where_in('p_id', $Con['product_id']);
+                    $Group = true;
+                }
+            }
+            if ($Group) {
+                $this->HostDb->group_end();
+            }
+            if(!empty($Con['keyword'])){
+                $this->HostDb->group_start()
+                    ->like('o_dealer', $Con['keyword'])
+                    ->group_end();
+            }
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有对应销售记录';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
     /**
      * 插入数据
      * @param $Data

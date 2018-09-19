@@ -149,15 +149,15 @@ if(! function_exists('gh_to_sec')){
 	 */
 	function gh_to_sec($SParam1){
 		if(!empty($SParam1)){
-			if(preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})\s([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $SParam1)){
+			if(preg_match('/^([0-9]{4})[-\/]([0-9]{1,2})[-\/]([0-9]{1,2})\s([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $SParam1)){
 				$Tmp = explode(' ', $SParam1);
 				$Tmp0 = explode('-',  $Tmp[0]);
 				$Tmp1 = explode(':', $Tmp[1]);
 				$ADate = array_merge($Tmp0, $Tmp1);
-			}elseif(preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $SParam1)){
+			}elseif(preg_match('/^([0-9]{4})[-\/]([0-9]{1,2})[-\/]([0-9]{1,2})$/', $SParam1)){
 				$ADate = explode('-', $SParam1);
 			}else{
-				$reg = "/^([0-9]{4})年([0-9]{2})月([0-9]{2})日$/";
+				$reg = "/^([0-9]{4})年([0-9]{1,2})月([0-9]{1,2})日$/";
 				$ADate = explode('-', preg_replace($reg, '$1-$2-$3', $SParam1));
 			}
 			
@@ -460,4 +460,25 @@ if(! function_exists('gh_infinity_category')){
 		}
 		return $Return;
 	}
+}
+
+if(! function_exists('gh_parse_dealer')) {
+    function gh_parse_dealer ($Dealer, $Key) {
+        if (empty($Dealer)) {
+            return $Dealer;
+        } else {
+            $Dealer = explode('_', $Dealer);
+            $DealerNum = array_shift($Dealer);
+            $DealerName = array_shift($Dealer);
+            $ShopName = array_shift($Dealer);
+            $Address = array_shift($Dealer);
+            if ($Key == 'dealer') {
+                return $DealerName == $ShopName ? $DealerNum . $DealerName : $DealerNum . $DealerName . $ShopName;
+            } elseif ($Key == 'address') {
+                return $Address;
+            } else {
+                return $Dealer;
+            }
+        }
+    }
 }

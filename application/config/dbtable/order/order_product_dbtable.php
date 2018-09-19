@@ -6,12 +6,6 @@ $config['order/order_product_model/insert_order_product'] = array(
 	'remark' => 'op_remark',
 	'parent' => 'op_parent',
 );
-$config['order/order_product_model/update_batch'] = array(
-	'v' => 'op_id',
-	'sum' => 'op_sum',
-	'sum_diff' => 'op_sum_diff',
-	'pack_detail' => 'op_pack_detail',
-);
 $config['order/order_product_model/update'] = array(
 	'product' => 'op_product',
 	'remark' => 'op_remark',
@@ -31,12 +25,17 @@ $config['order/order_product_model/update'] = array(
     'producing' => 'op_producing',
     'producing_datetime' => 'op_producing_datetime',
     'inned' => 'op_inned',
-    'inned_datetime' => 'op_inned_datetime'
+    'inned_datetime' => 'op_inned_datetime',
+    'delivered' => 'op_delivered',
+    'design_atlas' => 'op_design_atlas'
 );
 $config['order/order_product_model/update_batch'] = array(
     'v' => 'op_id',
     'sum' => 'op_sum',
     'sum_diff' => 'op_sum_diff',
+    'virtual_sum' => 'op_virtual_sum',
+    'pack_detail' => 'op_pack_detail',
+    'delivered' => 'op_delivered',
     'warehouse_v' => 'op_warehouse_num'
 );
 $config['order/order_product_model/update_workflow'] = array(

@@ -37,7 +37,7 @@ class Lack extends MY_Controller {
         $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         if (empty($this->_Search['start_date'])) {
-            $this->_Search['start_date'] = date('Y-m-d', strtotime('-1 months'));
+            $this->_Search['start_date'] = date('Y-m-d', strtotime('-6 months'));
         }
         $Data = array();
         if(!($Data = $this->order_product_board_plate_model->select_scan_lack($this->_Search))){
@@ -45,63 +45,5 @@ class Lack extends MY_Controller {
             $this->Code = EXIT_ERROR;
         }
         $this->_ajax_return($Data);
-    }
-
-    /**
-     *
-     * @return void
-     */
-    public function add() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            if(!!($NewId = $this->lack_model->insert($Post))) {
-                $this->Message = '新建成功, 刷新后生效!';
-            }else{
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
-                $this->Code = EXIT_ERROR;
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-    *
-    * @return void
-    */
-    public function edit() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            $Where = $Post['v'];
-            unset($Post['v']);
-            if(!!($this->lack_model->update($Post, $Where))){
-                $this->Message = '内容修改成功, 刷新后生效!';
-            }else{
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-     *
-     * @param  int $id
-     * @return void
-     */
-    public function remove() {
-        $V = $this->input->post('v');
-        if (!is_array($V)) {
-            $_POST['v'] = explode(',', $V);
-        }
-        if ($this->_do_form_validation()) {
-            $Where = $this->input->post('v', true);
-            if ($this->lack_model->delete($Where)) {
-                $this->Message = '删除成功，刷新后生效!';
-            } else {
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
-            }
-        }
-        $this->_ajax_return();
     }
 }

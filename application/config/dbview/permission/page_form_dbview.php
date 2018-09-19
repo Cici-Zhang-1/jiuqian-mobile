@@ -43,7 +43,9 @@ $config['permission/page_form_model/select_allowed'] = array(
     'pf_classes' => 'classes',
     'pf_displayorder' => 'displayorder',
     'pf_form_page_id' => 'form_page_id',
-    'pf_placeholder' => 'placeholder'
+    'pf_placeholder' => 'placeholder',
+    'fp_menu_id' => 'menu_id',
+    'fp_id' => 'form_page_id'
 );
 $config['permission/page_form_model/select_by_mid'] = array(
 	'pf_id' => 'v',

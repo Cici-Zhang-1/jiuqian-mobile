@@ -89,9 +89,10 @@ class Form_model extends MY_Model{
                 ->join('form_type', 'ft_name = A.f_form_type', 'left')
                 ->join('boolean_type AS READONLY', 'READONLY.bt_name = A.f_readonly', 'left')
                 ->join('boolean_type AS REQUIRED', 'REQUIRED.bt_name = A.f_required', 'left')
-                ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_name = A.f_multiple', 'left');
+                ->join('boolean_type AS MULTIPLE', 'MULTIPLE.bt_name = A.f_multiple', 'left')
+                ->join('func as B', 'B.f_id = A.f_func_id', 'left');
             if ($Mid) {
-                $this->HostDb->join('func as B', 'B.f_id = A.f_func_id', 'left')->where('B.f_menu_id', $Mid);
+                $this->HostDb->where('B.f_menu_id', $Mid);
             }
             if ($Fid) {
                 $this->HostDb->where('A.f_func_id', $Fid);

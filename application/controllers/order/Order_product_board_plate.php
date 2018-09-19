@@ -235,4 +235,43 @@ class Order_product_board_plate extends MY_Controller {
         }
         $this->_ajax_return();
     }
+
+    private function _label () {
+        $Item = $this->_Item . __FUNCTION__;
+        $Data['action'] = site_url($Item);
+        $this->load->view('header2');
+        $this->load->view($Item, $Data);
+    }
+
+    public function label () {
+        $OrderProductNum = $this->input->post('order_product_num', true);
+        $OrderProductNum = trim($OrderProductNum);
+        $OrderProductNum = strtoupper($OrderProductNum);
+
+        $Data = array();
+        if(preg_match(REG_ORDER_PRODUCT_STRICT, $OrderProductNum)){
+            $this->load->model('order/order_product_model');
+            if (!!($OrderProduct = $this->order_product_model->is_exist($OrderProductNum))) {
+                $_GET['order_product_id'] = $OrderProduct['v'];
+                $this->_page_search();
+                if(!($Data = $this->order_product_board_plate_model->select($this->_Search))){
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有找到板块信息';
+                    $this->Code = EXIT_ERROR;
+                } else {
+                    foreach ($Data['content'] as $Key => $Value) {
+                        $Data['content'][$Key]['width'] = $Value['width'] - $Value['up_edge'] - $Value['down_edge'];
+                        $Data['content'][$Key]['length'] = $Value['length'] - $Value['left_edge'] - $Value['right_edge'];
+                    }
+                    $Data['order_product'] = $OrderProduct;
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '订单不存在';
+            }
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '订单编号不正确';
+        }
+        $this->_ajax_return($Data);
+    }
 }

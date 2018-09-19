@@ -35,6 +35,7 @@ class Dismantling_workflow extends Workflow_order_abstract {
             'sure' => ZERO,
             'sure_datetime' => null));
         $this->_Workflow->store_message('重新订单');
+        return true;
     }
 
     public function __call($name, $arguments){

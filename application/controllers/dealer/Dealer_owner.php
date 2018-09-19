@@ -117,7 +117,8 @@ class Dealer_owner extends MY_Controller {
                     $Set[] = array(
                         'dealer_id' => $Value['v'],
                         'owner_id' => $this->session->userdata('uid'),
-                        'primary' => YES
+                        'primary' => YES,
+                        'primary_datetime' => date('Y-m-d H:i:s')
                     );
                 }
                 $Set = gh_escape($Set);

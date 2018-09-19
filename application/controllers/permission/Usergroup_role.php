@@ -32,6 +32,9 @@ class Usergroup_role extends MY_Controller {
         $Data = array();
         if ($V > 0) {
             if (!!($Usergroup = $this->usergroup_model->is_exist($V))) {
+                if ($Usergroup['v'] == $this->session->userdata('ugid')) {
+                    $Usergroup['parent'] = $Usergroup['v'];
+                }
                 if (!!($ParentUsergroupRole = $this->usergroup_role_model->select_by_usergroup_v($Usergroup['parent']))) {
                     if (!!($MyselfUsergroupRole = $this->usergroup_role_model->select_by_usergroup_v($Usergroup['v']))) {
                         $Tmp = array();

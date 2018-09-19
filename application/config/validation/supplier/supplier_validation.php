@@ -10,7 +10,7 @@ $config['supplier/supplier/add'] = array(
                                 array (
             'field' => 'code',
             'label' => '编码代号',
-            'rules' => 'trim|required|alpha_numeric|is_unique[supplier.s_code]|max_length[8]'
+            'rules' => 'trim|alpha_numeric|max_length[8]'
         ),
                                 array (
             'field' => 'remark',
@@ -33,7 +33,7 @@ $config['supplier/supplier/edit'] = array(
                                 array (
             'field' => 'code',
             'label' => '编码代号',
-            'rules' => 'trim|required|alpha_numeric|max_length[8]'
+            'rules' => 'trim|alpha_numeric|max_length[8]'
         ),
                                 array (
             'field' => 'remark',

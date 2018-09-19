@@ -30,7 +30,8 @@ $config['order/order_product_classify_model/select_packable_by_order_product_id'
     'opc_status' => 'status',
     'opc_procedure' => 'procedure',
     'opc_pack' => 'pack',
-    'opc_pack_datetime' => 'pack_datetime'
+    'opc_pack_datetime' => 'pack_datetime',
+    'u_truename' => 'packer'
 );
 
 $config['order/order_product_classify_model/has_brothers'] = array(

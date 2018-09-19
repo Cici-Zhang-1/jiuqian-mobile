@@ -62,7 +62,7 @@ class Order_product_board extends MY_Controller{
         $this->read();
     }
     
-
+/*
     public function edit(){
         $Selected = $this->input->post('selected', true);
         $Selected = explode(',', $Selected);
@@ -80,5 +80,5 @@ class Order_product_board extends MY_Controller{
             $this->Failue .= '请选择需要修改的板材!';
         }
         $this->_return();
-    }
+    }*/
 }

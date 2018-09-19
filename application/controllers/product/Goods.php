@@ -68,7 +68,12 @@ class Goods extends MY_Controller {
      */
     public function add() {
         $Speci = $this->input->post('speci', true);
-        $_POST['speci'] = $Speci ? explode(',', $Speci) : [];
+        if (!is_array($Speci)) {
+            $_POST['speci'] = $Speci ? explode(',', $Speci) : [];
+        }
+        if (empty($_POST['purchase'])) {
+            $_POST['purchase'] = 0;
+        }
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
             if (count($Post['speci']) > 0) {
@@ -226,4 +231,78 @@ class Goods extends MY_Controller {
         }
         $this->_ajax_return();
     }
+/*
+    public function import_other () {
+        $this->load->model('product/other_model');
+        if (!!($Others = $this->other_model->select_other())) {
+            foreach ($Others as $Key => $Post) {
+                $Post['speci'] = array();
+                if (count($Post['speci']) > 0) {
+                    $this->_set_goods_speci();
+                }
+                $Post['speci'] = implode(',', $Post['speci']);
+                $Post['status'] = YES;
+                $Post['purchase'] = 0;
+                $_POST = array_merge($_POST, $Post);
+                if(!!($this->_GoodsId = $this->goods_model->insert($Post))) {
+                    $this->_add_goods_speci();
+                    $this->Message .= '新建成功, 刷新后生效!';
+                }else{
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                    $this->Code = EXIT_ERROR;
+                    break;
+                }
+            }
+        }
+        $this->_ajax_return();
+    }
+    public function import_server () {
+        $this->load->model('product/server_model');
+        if (!!($Others = $this->server_model->select_server())) {
+            foreach ($Others as $Key => $Post) {
+                $Post['speci'] = array();
+                if (count($Post['speci']) > 0) {
+                    $this->_set_goods_speci();
+                }
+                $Post['speci'] = implode(',', $Post['speci']);
+                $Post['status'] = YES;
+                $Post['supplier_id'] = 16; // 九千
+                $Post['purchase'] = 0;
+                $_POST = array_merge($_POST, $Post);
+                if(!!($this->_GoodsId = $this->goods_model->insert($Post))) {
+                    $this->_add_goods_speci();
+                    $this->Message .= '新建成功, 刷新后生效!';
+                }else{
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                    $this->Code = EXIT_ERROR;
+                    break;
+                }
+            }
+        }
+        $this->_ajax_return();
+    }
+    public function import_fitting () {
+        $this->load->model('product/fitting_model');
+        if (!!($Others = $this->fitting_model->select_fitting())) {
+            foreach ($Others as $Key => $Post) {
+                $Post['speci'] = array();
+                if (count($Post['speci']) > 0) {
+                    $this->_set_goods_speci();
+                }
+                $Post['speci'] = implode(',', $Post['speci']);
+                $Post['status'] = YES;
+                $Post['purchase'] = 0;
+                $_POST = array_merge($_POST, $Post);
+                if(!!($this->_GoodsId = $this->goods_model->insert($Post))) {
+                    $this->_add_goods_speci();
+                    $this->Message .= '新建成功, 刷新后生效!';
+                }else{
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                    $this->Code = EXIT_ERROR;
+                    break;
+                }
+            }
+        }
+        $this->_ajax_return();
+    }*/
 }

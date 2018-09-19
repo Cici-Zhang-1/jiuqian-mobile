@@ -14,7 +14,7 @@ class Producing_workflow extends Workflow_order_product_abstract {
 
     public function producing () {
         $this->_Workflow->store_message('订单产品正在进行生产');
-        $this->_workflow_propagation(__FUNCTION__);
+        return $this->_workflow_propagation(__FUNCTION__);
     }
 
     public function packing () {
@@ -28,6 +28,9 @@ class Producing_workflow extends Workflow_order_product_abstract {
     }
 
     public function __call($name, $arguments){
-        ;
+        $Methods = array('electronic_sawed', 'edged', 'punched', 'scanned');
+        if (in_array($name, $Methods)) {
+            return true;
+        }
     }
 }

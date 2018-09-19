@@ -14,16 +14,17 @@ class Electronic_sawing_workflow extends Workflow_order_product_classify_abstrac
 
     public function electronic_sawing () {
         $this->_Workflow->store_message('正在下料');
+        return true;
     }
 
     public function re_shear () {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear']);
-        $this->_Workflow->shear();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['shear'], array('saw' => ZERO, 'saw_datetime' => null));
+        return $this->_Workflow->shear();
     }
 
     public function electronic_sawed() {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['electronic_sawed']);
-        $this->_Workflow->electronic_sawed();
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['electronic_sawed'], array('saw' => $this->_CI->session->userdata('uid'), 'saw_datetime' => date('Y-m-d H:i:s')));
+        return $this->_Workflow->electronic_sawed();
     }
 
     public function __call($name, $arguments){

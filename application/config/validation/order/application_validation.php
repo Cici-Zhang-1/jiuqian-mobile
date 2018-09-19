@@ -62,16 +62,29 @@ $config['order/application/edit'] = array(
         )
             );
 
-$config['order/application/pass'] = array(
+$config['order/application/passed'] = array(
             array(
             'field' => 'v[]',
             'label' => '选择项',
             'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
         )
-                                    );
+);
 
 
 $config['order/application/easy_produce'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '选择项',
+        'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
+    ),
+    array (
+        'field' => 'remark',
+        'label' => '备注',
+        'rules' => 'trim|required|max_length[128]'
+    )
+);
+
+$config['order/application/easy_delivery'] = array(
     array(
         'field' => 'v[]',
         'label' => '选择项',

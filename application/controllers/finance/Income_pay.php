@@ -15,6 +15,7 @@ class Income_pay extends MY_Controller {
         parent::__construct();
         log_message('debug', 'Controller finance/Income_pay __construct Start!');
         $this->load->model('finance/income_pay_model');
+        $this->config->load('defaults/finance_activity_type');
     }
 
     /**
@@ -40,6 +41,15 @@ class Income_pay extends MY_Controller {
             $this->Code = EXIT_ERROR;
         }
         $this->_ajax_return($Data);
+    }
+
+    public function in () {
+        $this->__Search['finance_activity_type'] = $this->config->item('finance_activity_type_in');
+        $this->read();
+    }
+    public function out () {
+        $this->__Search['finance_activity_type'] = $this->config->item('finance_activity_type_out');
+        $this->read();
     }
 
     /**

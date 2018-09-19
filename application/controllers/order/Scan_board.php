@@ -25,10 +25,29 @@ class Scan_board extends MY_Controller{
                 if ($OrderProduct['status'] < O_PRE_PRODUCE) {
                     $this->Message .= '该订单还未进入生产...';
                     $this->Code = EXIT_ERROR;
+                } elseif ($OrderProduct['scan_status'] < WP_SCAN) {
+                    $this->Message .= '该订单还未进入扫描环节...正在' . $this->_read_workflow_procedure($OrderProduct['scan_status']);
+                    $this->Code = EXIT_ERROR;
                 } else {
+                    if ($OrderProduct['thick'] > THICK) {
+                        $Thick = true;
+                    } else {
+                        $Thick = false;
+                    }
                     $Data = $this->order_product_board_plate_model->select_scan_list($OrderProduct['order_product_id']);
+                    $ScanDatetime = '0000-00-00 00:00:00';
                     foreach ($Data['content'] as $Key => $Value) {
-                        $Data['content'][$Key]['checked'] = !empty($Value['scanner']);
+                        if (!empty($Value['scanner'])) {
+                            $Data['content'][$Key]['checked'] = !empty($Value['scanner']);
+                            if ((($Thick && $Value['thick'] > THICK) || (!$Thick && $Value['thick'] < THICK)) && $Value['scan_datetime'] > $ScanDatetime) { // 定位最后扫描人
+                                $Data['last_scanner'] = $Value['scanner'];
+                                $ScanDatetime = $Value['scan_datetime'];
+                            } else {
+                                if (empty($Data['last_scanner'])) {
+                                    $Data['last_scanner'] = $Value['scanner'];
+                                }
+                            }
+                        }
                     }
                     $Data['order_product'] = $OrderProduct;
                     $this->Message = '获取待扫描列表成功';
@@ -44,6 +63,14 @@ class Scan_board extends MY_Controller{
         $this->_ajax_return($Data);
     }
 
+    private function _read_workflow_procedure ($WorkflowProcedure) {
+        $this->load->model('workflow/workflow_procedure_model');
+        if (!!($Query = $this->workflow_procedure_model->is_exist($WorkflowProcedure))) {
+            return $Query['label'];
+        }
+        return '';
+    }
+
     public function edit(){
         $V = $this->input->post('v', true);
         if (!is_array($V)) {
@@ -51,9 +78,7 @@ class Scan_board extends MY_Controller{
         }
         if($this->_do_form_validation()){
             $V = $this->input->post('v');
-
             $OrderProductBoardPlateId = $V[array_rand($V, ONE)];
-
             $this->load->model('order/order_product_board_plate_model');
             if(!!($this->order_product_board_plate_model->update_scan($V))){
                 $this->_edit_workflow($OrderProductBoardPlateId);

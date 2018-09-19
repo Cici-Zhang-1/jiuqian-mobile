@@ -17,18 +17,14 @@ class Packed_statistic extends MY_Controller{
     public function read(){
         $this->get_page_search();
         $Data = array();
-        if(!empty($this->Search)){
-            if(!!($Data = $this->order_product_model->select_packed($this->Search))){
-                foreach ($Data['content'] as $Key => $Value) {
-                    $Value['pack_detail'] = discode_pack($Value['pack_detail']);
-                    $Data['content'][$Key] = $Value;
-                }
-            }else{
-                $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有对应的包装统计';
-                $this->Code = EXIT_ERROR;
+        if(!!($Data = $this->order_product_model->select_packed($this->_Search))){
+            $this->load->helper('json_helper');
+            foreach ($Data['content'] as $Key => $Value) {
+                $Value['pack_detail'] = discode_pack($Value['pack_detail']);
+                $Data['content'][$Key] = $Value;
             }
-        }else{
-            $this->Message = '对不起, 没有符合条件的内容!';
+        } else {
+            $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'没有对应的包装统计';
             $this->Code = EXIT_ERROR;
         }
         $this->_ajax_return($Data);

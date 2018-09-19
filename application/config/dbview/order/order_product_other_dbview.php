@@ -16,10 +16,11 @@ $config['order/order_product_other_model/select'] = array(
     'op_remark' => 'order_product_remark',
     'op_pack' => 'pack',
     'wop_label' => 'status_label',
-    'p_code' => 'code'
+    'p_code' => 'code',
+    'wp_label' => 'procedure_status_label'
 );
 
-$config['order/order_product_board_model/select_for_sure'] = array(
+$config['order/order_product_other_model/select_for_sure'] = array(
     'opo_id' => 'v'
 );
 
@@ -31,6 +32,34 @@ $config['order/order_product_other_model/select_by_order_product_id'] = array(
     'opo_unit' => 'unit',
     'opo_amount' => 'amount',
     'opo_unit_price' => 'unit_price',
+    'opo_purchase' => 'purchase',
     'opo_sum' => 'sum',
     'opo_remark' => 'remark'
+);
+
+$config['order/order_product_other_model/select_sales'] = array(
+    'opo_id' => 'v',
+    'opo_sum' => 'sum',
+    'o_dealer_id' => 'dealer_id',
+    'o_dealer' => 'dealer',
+    'p_id' => 'product_id',
+    'p_name' => 'product'
+);
+
+
+$config['order/order_product_other_model/select_current_workflow'] = array(
+    'wp_id' => 'v',
+    'wp_name' => 'name',
+    'wp_label' => 'label',
+    'wp_file' => 'file'
+);
+
+$config['order/order_product_other_model/select_order_product_id'] = array(
+    'opo_order_product_id' => 'order_product_id'
+);
+
+$config['order/order_product_other_model/select_packable_by_order_product_id'] = array(
+    'opo_id' => 'v',
+    'opo_status' => 'status',
+    'opo_procedure' => 'procedure'
 );

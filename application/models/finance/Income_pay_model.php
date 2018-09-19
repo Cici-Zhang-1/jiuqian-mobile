@@ -51,7 +51,7 @@ class Income_pay_model extends MY_Model {
     private function _page_num($Search){
         $this->HostDb->select('count(ip_name) as num', FALSE);
         if ($Search['finance_activity_type'] != '') {
-            $this->HostDb->where('finance_activity_type', $Search['finance_activity_type']);
+            $this->HostDb->where('ip_finance_activity_type', $Search['finance_activity_type']);
         }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
             $this->HostDb->like('ip_name', $Search['keyword']);

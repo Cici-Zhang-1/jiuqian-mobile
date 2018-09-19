@@ -65,6 +65,11 @@ $config['order/order_product/edit'] = array(
             'label' => '金额差额',
             'rules' => 'trim|decimal|min_length[1]'
         ),
+    array (
+        'field' => 'virtual_diff',
+        'label' => '虚拟金额',
+        'rules' => 'trim|decimal|min_length[1]'
+    ),
                                 array (
             'field' => 'pack',
             'label' => '包装',
@@ -84,7 +89,12 @@ $config['order/order_product/edit'] = array(
             'field' => 'remark',
             'label' => '备注',
             'rules' => 'trim|max_length[128]'
-        )
+        ),
+    array (
+        'field' => 'design_atlas',
+        'label' => '设计图集',
+        'rules' => 'trim|max_length[64]'
+    )
             );
 
 $config['order/order_product/remove'] = array(
@@ -105,5 +115,31 @@ $config['order/order_product/repeat'] = array(
         'field' => 'set',
         'label' => '套数',
         'rules' => 'trim|required|numeric|greater_than[0]|less_than_equal_to[5]'
+    )
+);
+
+$config['order/order_product/repeat_to'] = array(
+    array(
+        'field' => 'v',
+        'label' => '待复制项',
+        'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
+    ),
+    array (
+        'field' => 'to',
+        'label' => '复制到',
+        'rules' => 'trim|required|max_length[64]'
+    )
+);
+
+$config['order/order_product/design_atlas'] = array(
+    array(
+        'field' => 'v',
+        'label' => '编号',
+        'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
+    ),
+    array (
+        'field' => 'design_atlas',
+        'label' => '设计图集',
+        'rules' => 'trim|required|max_length[64]'
     )
 );

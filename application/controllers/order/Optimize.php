@@ -129,8 +129,8 @@ class Optimize extends MY_Controller{
                 if (!!($Query = $this->order_product_board_plate_model->select_optimize($V))) {
                     $this->load->library('workflow/workflow');
                     $W = $this->workflow->initialize('order_product_classify');
-                    if ($W->initialize($V)) {
-                        $W->optimize();
+                    $W->initialize($V);
+                    if ($W->optimize()) {
                         $this->_write_to_excel($Query, $FileName);
                     } else {
                         $this->Message .= $W->get_failue();

@@ -16,6 +16,7 @@ $config['order/money_produce/read'] = array(
 	'd_debt1' => 'debt1',
 	'd_debt2' => 'debt2',
 	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance',
 	'tl_icon' => 'icon',
 );
 $config['order/money_delivery/read'] = array(
@@ -39,5 +40,6 @@ $config['order/money_delivery/read'] = array(
 	'd_debt1' => 'debt1',
 	'd_debt2' => 'debt2',
 	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance',
 	'tl_icon' => 'icon',
 );

@@ -55,13 +55,13 @@ class Mrp extends MY_Controller {
                     if(!!($this->mrp_model->update($Post, $Where))) {
                         $this->load->library('workflow/workflow');
                         $W = $this->workflow->initialize('mrp');
-                        if(!!($W->initialize($Where))) {
-                            $GLOBALS['workflow_msg'] = $WorkflowMessage;
-                            $W->sheared();
+                        $W->initialize($Where);
+                        $GLOBALS['workflow_msg'] = $WorkflowMessage;
+                        if(!!($W->sheared())) {
                             $this->Message = '分配成功, 刷新后生效!';
                         } else {
                             $this->Code = EXIT_ERROR;
-                            $this->Message = $this->workflow_mrp->get_failue();
+                            $this->Message = $W->get_failue();
                         }
                     } else {
                         $this->Code = EXIT_ERROR;
@@ -129,7 +129,7 @@ class Mrp extends MY_Controller {
             $Post = gh_escape($_POST);
             $Where = $Post['v'];
             unset($Post['v']);
-            if (!!($Distribution = $this->mrp_model->is_status_and_brothers($Where, array(M_ELECTRONIC_SAW)))) {
+            if (!!($Distribution = $this->mrp_model->is_status_and_brothers($Where, array(M_SHEARED, M_ELECTRONIC_SAW)))) {
                 $Where = array();
                 $WorkflowMessage = '';
                 foreach ($Distribution as $Key => $Value) {

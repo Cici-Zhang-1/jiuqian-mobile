@@ -20,6 +20,7 @@ $config['order/order_product_board_plate_model/select'] = array(
     'opbp_edge' => 'edge',
     'opbp_remark' => 'remark',
     'opbp_decide_size' => 'decide_size',
+    'if(opbp_abnormity = 0, "", "异")' => 'abnormity',
     'opbp_bd_file' => 'bd_file',
     'opb_board' => 'board',
     'ifnull(C.wp_label, ifnull(B.wp_label, ""))' => 'status',
@@ -246,6 +247,7 @@ $config['order/order_product_board_plate_model/select_classify_print_list'] = ar
 	'opbp_edge' => 'edge',
 	'opbp_punch' => 'punch',
 	'opbp_remark' => 'remark',
+    'opbp_abnormity' => 'abnormity',
 	'opbp_decide_size' => 'decide_size',
 	'opc_board' => 'good',
 	'opbp_right_edge' => 'right_edge',
@@ -268,11 +270,12 @@ $config['order/order_product_board_plate_model/select_for_sure'] = array(
 	'opbp_amount' => 'amount',
 	'opbp_area' => 'area',
 	'opbp_bd_file' => 'bd_file',
+    'opbp_qrcode' => 'qrcode',
+	'opbp_abnormity' => 'abnormity',
 	'opb_board' => 'board',
 	'op_id' => 'order_product_id',
 	'op_num' => 'order_product_num',
-	'op_bd' => 'bd',
-	'opbp_qrcode' => 'qrcode'
+	'op_bd' => 'bd'
 );
 $config['order/order_product_board_plate_model/select_qrcode_by_opid'] = array(
 	'opbp_id' => 'opbpid',
@@ -298,6 +301,8 @@ $config['order/order_product_board_plate_model/is_exist'] = array(
     'opbp_id' => 'v',
 	'opbp_order_product_board_id' => 'order_product_board_id',
 	'opbp_order_product_classify_id' => 'opbp_order_product_classify_id',
+    'opbp_thick' => 'thick',
+    'ifnull(opc_status, opb_status)' => 'scan_status',
 	'op_id' => 'order_product_id',
 	'op_num' => 'order_product_num',
 	'o_id' => 'order_id',
@@ -332,18 +337,23 @@ $config['order/order_product_board_plate_model/select_scan_list'] = array(
 	'opb_board' => 'board'
 );
 $config['order/order_product_board_plate_model/select_scan_lack'] = array(
-	'opb_id' => 'v',
+	'op_id' => 'v',
 	'op_num' => 'order_product_num',
     'op_product' => 'product',
-	'op_scan_start' => 'scan_start',
-	'op_scan_end' => 'scan_end',
 	'o_dealer' => 'dealer',
 	'o_owner' => 'owner',
 	'u_truename' => 'creator',
-	'opb_board' => 'board',
-    'opb_amount' => 'amount',
-	'count(opb_id)' => 'lack'
+	'opc_board' => 'board',
+    'sum(opc_amount)' => 'amount',
+	'count(op_id)' => 'lack'
 );
+
+$config['order/order_product_board_plate_model/select_un_scanned_by_order_product_id'] = array(
+    'opbp_thick' => 'thick',
+    'opb_board' => 'board',
+    'count(opb_id)' => 'amount'
+);
+
 $config['order/order_product_board_plate_model/select_scan_lack_detail'] = array(
 	'opbp_id' => 'v',
 	'opbp_qrcode' => 'qrcode',
@@ -358,9 +368,10 @@ $config['order/order_product_board_plate_model/select_scan_lack_detail'] = array
 	'opbp_edge' => 'edge',
 	'opbp_remark' => 'remark',
 	'opbp_decide_size' => 'decide_size',
-	'opb_board' => 'board',
+	'opc_board' => 'board',
     'u_truename' => 'scanner',
-    'opbp_scan_datetime' => 'scan_datetime'
+    'opbp_scan_datetime' => 'scan_datetime',
+    'ifnull(C.wp_label, ifnull(B.wp_label, ""))' => 'status'
 );
 $config['order/order_product_board_plate_model/select_by_order_product_id'] = array(
     'opbp_id' => 'v',
@@ -379,6 +390,9 @@ $config['order/order_product_board_plate_model/select_by_order_product_id'] = ar
     'opbp_bd_file' => 'bd_file',
     'opb_board' => 'board',
     'opb_unit_price' => 'unit_price',
+    'opb_purchase' => 'purchase',
+    'opb_sum' => 'sum',
+    'opb_virtual_sum' => 'virtual_sum',
     'u_truename' => 'scanner',
     'opbp_scan_datetime' => 'scan_datetime'
 );

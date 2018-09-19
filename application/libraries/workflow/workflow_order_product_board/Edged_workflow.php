@@ -13,8 +13,11 @@ class Edged_workflow extends Workflow_order_product_board_abstract {
     }
 
     public function edged() {
-        $this->_Workflow->store_message('已完成封边');
-        $this->_workflow_next();
+        $this->_Workflow->store_message('==已完成封边');
+        if ($this->_workflow_propagation(__FUNCTION__)) {
+            return $this->_workflow_next();
+        }
+        return false;
     }
 
     public function __call($name, $arguments) {

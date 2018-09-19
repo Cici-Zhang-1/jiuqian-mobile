@@ -19,7 +19,7 @@ class Order_product_server_model extends MY_Model{
      */
     public function select ($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
@@ -77,6 +77,46 @@ class Order_product_server_model extends MY_Model{
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
                 $GLOBALS['error'] = '没有符合搜索条件的订单产品服务信息';
+            }
+        }
+        return $Return;
+    }
+
+    public function select_sales($Con) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.array_to_string($Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+
+            $this->HostDb->select($Sql, FALSE)
+                ->from('order_product_server')
+                ->join('order_product', 'op_id = ops_order_product_id', 'left')
+                ->join('product', 'p_id = op_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('op_status > ', OP_DISMANTLING)
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('od_sure_datetime > ', $Con['start_date']);
+            if(!empty($Con['end_date'])) {
+                $this->HostDb->where('od_sure_datetime < ', $Con['end_date']);
+            }
+            if (!empty($Con['product_id'])) {
+                $this->HostDb->where_in('p_id', $Con['product_id']);
+            }
+            if(!empty($Con['keyword'])){
+                $this->HostDb->group_start()
+                    ->like('o_dealer', $Con['keyword'])
+                    ->group_end();
+            }
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有对应销售记录';
+                $Return = false;
             }
         }
         return $Return;

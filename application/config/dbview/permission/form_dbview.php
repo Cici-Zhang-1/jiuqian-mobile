@@ -47,7 +47,8 @@ $config['permission/form_model/select_allowed'] = array(
     'A.f_ide' => 'ide',
     'A.f_displayorder' => 'displayorder',
 	'B.f_name' => 'func',
-    'A.f_func_id' => 'func_id'
+    'A.f_func_id' => 'func_id',
+    'B.f_menu_id' => 'menu_id'
 );
 $config['permission/form_model/select_by_fid'] = array(
 	'f_id' => 'v',

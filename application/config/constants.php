@@ -124,6 +124,8 @@ define('ORDER_SUFFIX', 4);
 define('QRCODE_PREFIX', 4);
 define('QRCODE_SUFFIX', 3);
 defined('ORDER_MODE') OR define('ORDER_MODE', 0); // 模式1统一，模式0分开计数
+defined('REGULAR_ORDER') OR define('REGULAR_ORDER', 'X');
+defined('MEND_ORDER') OR define('MEND_ORDER', 'B');
 
 /**
  * WORKFLOW
@@ -268,7 +270,7 @@ define('MIN_K_AREA', 0.4);
 define('MIN_B_AREA', 0.01);
 
 define('MIN_PAGESIZE', 100);
-define('MOBILE_MIN_PAGESIZE', 15);
+define('MOBILE_MIN_PAGESIZE', 1);
 define('MAX_PAGESIZE', 1000);
 define('ALL_PAGESIZE', 9999999999);
 
@@ -334,6 +336,7 @@ defined('SERVER_NUM') OR define('SERVER_NUM','F');
 
 defined('REG_ORDER') OR define('REG_ORDER', '/[xXbB][\d]{10}/');
 defined('REG_ORDER_PRODUCT') OR define('REG_ORDER_PRODUCT', '/[xXbB][\d]{10}-[wWyYmMpPgGkKaA][\d]{1,}/');
+defined('REG_ORDER_PRODUCT_STRICT') OR define('REG_ORDER_PRODUCT_STRICT', '/^[xXbB][\d]{10}-[wWyYmMpPgGkKaA][\d]{1,}$/');
 defined('REG_ORDER_QRCODE') OR define('REG_ORDER_QRCODE', '/([xXbB][\d]{10})-([wWyYmMpPgGkKaA][\d]{1,})-([\d]{1,})/');
 defined('REG_PACK_LABEL') OR define('REG_PACK_LABEL', '/(([xXbB][\d]{10})-[wWyYmMpPgGkKaA][\d]{1,})-([\d]{1,4})-([\d]{1,4})-(.*)$/');   // 标签
 defined('REG_RECOMMEND') OR define('REG_RECOMMEND', '/(([xXbB][\d]{10})-[wWyYmMpPgGkKaA][\d]{1,})(-([\d]{1,4})-[\d]{1,4}-(.*))?/'); // 推荐货位

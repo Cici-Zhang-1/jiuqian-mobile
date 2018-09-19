@@ -51,10 +51,12 @@ class Dealer_linker_shop extends MY_Controller {
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }
-        $Data['query'] = array(
-            'dealer_id' => $this->_Search['dealer_id'],
-            'shop_id' => $this->_Search['shop_id']
-        );
+        if (!empty($this->_Search['dealer_id'])) {
+            $Data['query']['dealer_id'] = $this->_Search['dealer_id'];
+        }
+        if (!empty($this->_Search['shop_id'])) {
+            $Data['query']['shop_id'] = $this->_Search['shop_id'];
+        }
         $this->_ajax_return($Data);
     }
 

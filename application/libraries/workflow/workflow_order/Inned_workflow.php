@@ -8,7 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 完全入库
  */
 class Inned_workflow extends Workflow_order_abstract {
-    private $_Inned = true;
     public function __construct($Source_id){
         $this->_Source_id = $Source_id;
     }

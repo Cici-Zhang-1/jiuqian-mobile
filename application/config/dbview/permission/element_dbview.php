@@ -26,7 +26,8 @@ $config['permission/element_model/select_allowed'] = array(
     'e_card_id' => 'card_id',
     'c_name' => 'card',
     'e_url' => 'url',
-    'e_query' => 'query'
+    'e_query' => 'query',
+    'c_menu_id' => 'menu_id',
 );
 $config['permission/element_model/select_by_card_url'] = array(
 	'e_id' => 'v',

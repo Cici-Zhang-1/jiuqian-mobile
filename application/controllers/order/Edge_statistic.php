@@ -12,7 +12,8 @@ class Edge_statistic extends MY_Controller{
         'edge' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_EDGED
+        'status' => WP_EDGED,
+        'paging' => NO
     );
     public function __construct(){
         parent::__construct();

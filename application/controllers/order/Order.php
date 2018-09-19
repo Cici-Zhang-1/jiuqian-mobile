@@ -51,6 +51,13 @@ class Order extends MY_Controller {
                 $this->_Search['dealer_id'] = $DealerId;
             }
         }
+        if (is_array($this->_Search['status'])) {
+            foreach ($this->_Search['status'] as $Key => $Value) {
+                if ($Value == '') {
+                    unset($this->_Search['status'][$Key]);
+                }
+            }
+        }
 		$Data = array();
         if(!($Data = $this->order_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
@@ -312,64 +319,59 @@ class Order extends MY_Controller {
         }
 		$this->_return();
 	}
+
+    /**
+     * 代收金额
+     */
+	public function collection () {
+        $V = $this->input->post('v', true);
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $V = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->order_model->update($Post, $V))){
+                $this->load->library('workflow/workflow');
+                $W = $this->workflow->initialize('order');
+                $W->initialize($V);
+                if(!$W->store_message('订单添加了代收金额' . $Post['collection'], O_RECORD)) {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = $W->get_failue();
+                } else {
+                    $this->Message .= '代收金额添加成功, 刷新后生效!';
+                }
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'代收金额添加失败';
+            }
+        }
+        $this->_ajax_return();
+    }
 	
 	
     /**
      * 发货前的订单【1-16】，都可以作废
      */
 	public function remove(){
-	    $Item = $this->_Item.__FUNCTION__;
-	    if($this->form_validation->run($Item)){
-	        $Selected = $this->input->post('selected', true);
-	        if(!!($Selected = $this->order_model->is_removable($Selected))){
-                $Debt1 = array();
-                $Debt2 = array();
-                foreach ($Selected as $key => $value){
-                    $Selected[$key] = $value['oid'];
-                    /*经销商账目*/
-                    if ($value['status'] >= 9 && $value['status'] < 12){
-                        /**
-                         * 等待生产的金额
-                         */
-                        if(empty($Debt1[$value['did']])){
-                            $Debt1[$value['did']] = $value['sum'];
-                        }else{
-                            $Debt1[$value['did']] += $value['sum'];
-                        }
-                    }elseif($value['status'] >= 12 && $value['status'] <= 16){
-                        /**
-                         * 正在生产的金额
-                         */
-                        if(empty($Debt2[$value['did']])){
-                            $Debt2[$value['did']] = $value['sum'];
-                        }else{
-                            $Debt2[$value['did']] += $value['sum'];
-                        }
-                    }
-                }
-                $this->load->model('dealer/dealer_model');
-                if(!empty($Debt1)){
-                    $this->dealer_model->update_dealer_remove($Debt1, 'debt1');
-                }
-                if(!empty($Debt2)){
-                    $this->dealer_model->update_dealer_remove($Debt2, 'debt2');
-                }
-                $this->load->library('workflow/workflow');
-                if($this->workflow->initialize('order', $Selected)){
-                    $this->workflow->remove();
-                    $this->load->model('order/order_product_model');
-                    $this->order_product_model->delete_by_oid($Selected);/*同时清除订单产品*/
-                    $this->Success .= '订单成功作废';
-                }else{
-                    $this->Failue = $this->workflow->get_failue();
-                }
-            }else{
-                $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单作废失败';
+	    $V = $this->input->post('v', true);
+	    if (!is_array($V)) {
+	        $_POST['v'] = explode(',', $V);
+        }
+	    if ($this->_do_form_validation()) {
+            $V = $_POST['v'];
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order');
+            $W->initialize($V);
+            if ($W->remove()) {
+                $this->Message = '订单作废成功!';
+            } else {
+                $this->Message = $W->get_failue();
+                $this->Code = EXIT_ERROR;
             }
-	    }else{
-	        $this->Failue .= validation_errors();
-	    }
-	    $this->_return();
+        }
+        $this->_ajax_return();
 	}
 
     /**

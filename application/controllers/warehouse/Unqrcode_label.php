@@ -39,9 +39,7 @@ class Unqrcode_label extends MY_Controller {
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         } else {
-            $Dealer = explode('_', $Data['dealer']);
-            array_shift($Dealer);
-            $Data['dealer'] = array_shift($Dealer);
+            $Data['dealer'] = gh_parse_dealer($Data['dealer'], 'dealer');
         }
         $this->_ajax_return($Data);
     }

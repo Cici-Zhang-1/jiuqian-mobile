@@ -26,6 +26,16 @@ $config['order/order_product_server_model/select_by_order_product_id'] = array(
     'ops_unit' => 'unit',
     'ops_amount' => 'amount',
     'ops_unit_price' => 'unit_price',
+    'ops_purchase' => 'purchase',
     'ops_sum' => 'sum',
     'ops_remark' => 'remark'
+);
+
+$config['order/order_product_server_model/select_sales'] = array(
+    'ops_id' => 'v',
+    'ops_sum' => 'sum',
+    'o_dealer_id' => 'dealer_id',
+    'o_dealer' => 'dealer',
+    'p_id' => 'product_id',
+    'p_name' => 'product'
 );

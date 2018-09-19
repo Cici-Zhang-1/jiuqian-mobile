@@ -19,7 +19,7 @@ class Remark_list_model extends MY_Model {
      */
     public function select($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -27,16 +27,20 @@ class Remark_list_model extends MY_Model {
                 $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql)->from('order')
                     ->join('remark_list', 'rl_order_id = o_id', 'left')
+                    ->join('user', 'u_id = rl_creator', 'left')
                     ->where('o_status >= ', O_PRODUCE);
-                if (empty($Search['status'])) {
-                    $this->HostDb->where('rl_id is null');
-                }
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
                     $this->HostDb->group_start()
                         ->like('o_num', $Search['keyword'])
                         ->or_like('o_dealer', $Search['keyword'])
                         ->or_like('o_owner', $Search['keyword'])
                         ->group_end();
+                }
+                if (empty($Search['status'])) {
+                    $this->HostDb->where('rl_id is null');
+                    $this->HostDb->order_by('o_id');
+                } else {
+                    $this->HostDb->order_by('rl_id', 'desc');
                 }
                 $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(

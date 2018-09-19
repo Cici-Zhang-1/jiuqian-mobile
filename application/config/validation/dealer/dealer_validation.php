@@ -110,7 +110,7 @@ $config['dealer/dealer/add'] = array(
     array (
         'field' => 'dealer_linker_name',
         'label' => '用户名',
-        'rules' => 'trim|required|max_length[32]'
+        'rules' => 'trim|max_length[32]'
     ),
     array (
         'field' => 'dealer_linker_truename',
@@ -125,7 +125,7 @@ $config['dealer/dealer/add'] = array(
     array (
         'field' => 'dealer_linker_mobilephone',
         'label' => '移动电话',
-        'rules' => 'trim|max_length[16]'
+        'rules' => 'trim|required|min_length[10]|max_length[16]|is_unique[dealer_linker.dl_mobilephone]'
     ),
     array (
         'field' => 'dealer_linker_telephone',

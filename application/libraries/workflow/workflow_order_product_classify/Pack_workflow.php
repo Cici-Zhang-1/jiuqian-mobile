@@ -13,18 +13,19 @@ class Pack_workflow extends Workflow_order_product_classify_abstract {
     }
 
     public function pack(){
-        $this->_Workflow->store_message('==等待包装打包');
+        $this->_Workflow->store_message('==+等待包装打包');
+        return true;
     }
 
     public function re_pack () {
         $this->_Workflow->store_message('岗位工作变动，重新安排打包工人!');
+        return true;
     }
     public function packing ($arguments) {
         $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['packing']);
         return $this->_Workflow->packing($arguments);
     }
     public function packed($arguments) {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['packed'], array('pack' => $this->_CI->session->userdata('uid'), 'pack_datetime' => date('Y-m-d H:i:s')));
         if (count($arguments) == TWO) {
             $Msg = $arguments[0];
             $Data = $arguments[1];
@@ -38,6 +39,11 @@ class Pack_workflow extends Workflow_order_product_classify_abstract {
                 $Data = array();
             }
         }
+
+        if (!isset($GLOBALS['creator'])) {
+            $GLOBALS['creator'] = $this->_CI->session->userdata('uid');
+        }
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_classify::$AllWorkflow['packed'], array('pack' => $GLOBALS['creator'], 'pack_datetime' => date('Y-m-d H:i:s')));
         return $this->_Workflow->packed($Msg, $Data);
     }
 

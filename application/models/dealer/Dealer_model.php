@@ -39,7 +39,7 @@ class Dealer_model extends MY_Model {
                 if (!empty($Search['owner'])) {
                     $this->HostDb->where('do_owner_id', $Search['owner']);
                 } else {
-                    $this->HostDb->where('do_owner_id is NULL');
+                    // $this->HostDb->where('do_owner_id is NULL');
                 }
                 if (isset($Search['status']) && $Search['status'] != '') {
                     $this->HostDb->where('d_status', $Search['status']);
@@ -72,7 +72,7 @@ class Dealer_model extends MY_Model {
         if (!empty($Search['owner'])) {
             $this->HostDb->where('do_owner_id', $Search['owner']);
         } else {
-            $this->HostDb->where('do_owner_id is NULL');
+            // $this->HostDb->where('do_owner_id is NULL');
         }
         if (isset($Search['status']) && $Search['status'] != '') {
             $this->HostDb->where('d_status', $Search['status']);
@@ -95,11 +95,75 @@ class Dealer_model extends MY_Model {
         }
     }
 
+    public function select_remote ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('dealer')
+                ->join('j_dealer_linker', 'dl_dealer_id = d_id && dl_primary = ' . YES, 'left', false)
+                ->join('area', 'a_id = d_area_id', 'left');
+            $this->HostDb->group_start()
+                ->like('d_name', $Search['keyword'])
+                ->or_like('dl_truename', $Search['keyword'])
+                ->or_like('dl_mobilephone', $Search['keyword'])
+                ->group_end();
+            $Query = $this->HostDb->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            }
+        }
+        if ($Return == false) {
+            $Return = array();
+        }
+        return $Return;
+    }
+
+    /**
+     * 获取客户欠款金额
+     * @return array
+     */
+    public function select_dealer_money(){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $this->HostDb->select($Sql, FALSE)
+                ->from('dealer')
+                ->join('area as d', 'd.a_id = d_area_id', 'left')
+                ->join('j_dealer_linker', 'dl_dealer_id = d_id && dl_primary = ' . YES, 'left', false)
+                ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false)
+                ->join('user', 'u_id = do_owner_id', 'left')
+                ->where('d_status', YES)
+                ->where('d_balance < ', ZERO)
+                ->order_by('d_balance');
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的客户欠款信息';
+            }
+        }
+        return $Return;
+    }
+
     public function is_exist ($V) {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('dealer')
+            ->join('j_dealer_linker', 'dl_dealer_id = d_id && dl_primary = ' . YES, 'left', false)
+            ->join('area', 'a_id = d_area_id', 'left')
             ->where('d_id', $V)
             ->limit(ONE)
             ->get();
@@ -131,6 +195,17 @@ class Dealer_model extends MY_Model {
             ->where('d_id != ', $V)
             ->get();
         return $Query->num_rows();
+    }
+
+    private function _is_valid($V){
+        $Query = $this->HostDb->where('d_id', $V)->get('dealer');
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            return $Row;
+        }else{
+            return false;
+        }
     }
     /**
      * Insert data to table dealer
@@ -189,6 +264,7 @@ class Dealer_model extends MY_Model {
         }
         $this->HostDb->update('dealer', $Data);
         $this->remove_cache($this->_Module);
+        $this->remove_cache('order');
         return true;
     }
 
@@ -205,6 +281,34 @@ class Dealer_model extends MY_Model {
         return true;
     }
 
+    /**
+     * 更新客户收支状况
+     * @param $Data
+     * @param $Where
+     * @return bool
+     */
+    public function update_dealer_received ($Data, $Where) {
+        if(!!($Dealer = $this->_is_valid($Where))){
+            $Set = array(
+                'd_balance' => $Dealer['d_balance'] + $Data['corresponding'],
+                'd_received' => $Dealer['d_received'] + $Data['corresponding'],
+                'd_virtual_balance' => $Dealer['d_virtual_balance'] + $Data['corresponding'],
+                'd_virtual_received' => $Dealer['d_virtual_received'] + $Data['corresponding']
+            );
+            $this->HostDb->where('d_id',$Where);
+
+            if($this->HostDb->update('dealer', $Set)) {
+                $this->remove_cache($this->_Cache);
+                return true;
+            } else {
+                $GLOBALS['error'] = '更新客户收支时出错';
+                return false;
+            }
+        } else {
+            $GLOBALS['error'] = '不是有效的客户';
+            return false;
+        }
+    }
     /**
      * Delete data from table dealer
      * @param $Where

@@ -92,9 +92,10 @@ class Element_model extends MY_Model {
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('role_element')
                 ->join('element', 'e_id = re_element_id')
-                ->join('boolean_type', 'bt_name = e_checked', 'left');
+                ->join('boolean_type', 'bt_name = e_checked', 'left')
+                ->join('card', 'c_id = e_card_id', 'left');
             if ($Mid) {
-                $this->HostDb->join('card', 'c_id = e_card_id', 'left')->where('c_menu_id', $Mid);
+                $this->HostDb->where('c_menu_id', $Mid);
             }
             if ($Cid) {
                 $this->HostDb->where('e_card_id', $Cid);

@@ -77,10 +77,10 @@ class Order_product_board_wood extends MY_Controller {
             } else {
                 $Data['content'] = $this->_combine($Data['content']);
                 $Data['statistic'] = $this->_Statistic;
-                $Data['horizontal'] = $this->_Horizontal;
-                $Data['vertical'] = $this->_Vertical;
-                $Data['center'] = $this->_Center;
-                $Data['blinds'] = $this->_Blinds;
+                $Data['horizontal'] = array_values($this->_Horizontal);
+                $Data['vertical'] = array_values($this->_Vertical);
+                $Data['center'] = array_values($this->_Center);
+                $Data['blinds'] = array_values($this->_Blinds);
             }
             $Data['query']['order_product_id'] = $this->_Search['order_product_id'];
         } else {
@@ -93,8 +93,8 @@ class Order_product_board_wood extends MY_Controller {
 
     private function _combine($BoardWood) {
         $List = array();
+        $No = 1;
         foreach ($BoardWood as $key => $value){
-            $value['key'] = $key + 1;
             $Tmp2 = implode('^', array($value['width'], $value['length'],
                 $value['punch'], $value['wood_name'], $value['core'], $value['board'], $value['remark']));
             $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
@@ -107,24 +107,28 @@ class Order_product_board_wood extends MY_Controller {
 
             if(isset($List[$Tmp2])){
                 $List[$Tmp2]['area'] += $value['area'];
-                $List[$Tmp2]['num'] += 1;
+                $List[$Tmp2]['amount'] += 1;
+                $value['key'] = $List[$Tmp2]['key'];
             }else{
+                $value['key'] = $No++;
                 $List[$Tmp2] = $value;
             }
             $this->_parse_wood($value, $value['key']);
             $this->_Statistic['total_area'] += $value['area'];
         }
         $this->_Statistic['total_amount'] = count($BoardWood);
-        ksort($List);
-        $List = array_values($List);
-        return $List;
+        $Tmp = array();
+        foreach ($List as $Key => $Value) {
+            $Tmp[$Value['key'] - 1] = $Value;
+        }
+        return $Tmp;
     }
 
     private function _parse_wood ($Wood, $K) {
         $BoardWidth = 70;
         $ItemWidth = 130;
         if (preg_match('/五五/', $Wood['center'])) {
-            $this->_Center[] = array(
+            $Center = array(
                 'flag' => $K,
                 'name' => '中横',
                 'board' => $Wood['board'],
@@ -132,9 +136,15 @@ class Order_product_board_wood extends MY_Controller {
                 'width' => $BoardWidth,
                 'amount' => $Wood['amount']
             );
+            $Key = implode('_', $Center);
+            if (isset($this->_Center[$Key])) {
+                $this->_Center[$Key]['amount'] += $Center['amount'];
+            } else {
+                $this->_Center[$Key] = $Center;
+            }
             $CenterFlag = 1;
         }elseif (preg_match('/四六/', $Wood['center'])) {
-            $this->_Center[] = array(
+            $Center = array(
                 'flag' => $K,
                 'name' => '中横',
                 'board' => $Wood['board'],
@@ -142,11 +152,17 @@ class Order_product_board_wood extends MY_Controller {
                 'width' => $BoardWidth,
                 'amount' => $Wood['amount']
             );
+            $Key = implode('_', $Center);
+            if (isset($this->_Center[$Key])) {
+                $this->_Center[$Key]['amount'] += $Center['amount'];
+            } else {
+                $this->_Center[$Key] = $Center;
+            }
             $CenterFlag = 2;
         }else {
             $CenterFlag = 0;
         }
-        $this->_Horizontal[] = array(
+        $Horizontal = array(
             'flag' => $K,
             'name' => '木框横框',
             'board' => $Wood['board'],
@@ -154,7 +170,13 @@ class Order_product_board_wood extends MY_Controller {
             'width' => $BoardWidth,
             'amount' => $Wood['amount']*2
         );
-        $this->_Vertical[] = array(
+        $Key = implode('_', $Horizontal);
+        if (isset($this->_Horizontal[$Key])) {
+            $this->_Horizontal[$Key]['amount'] += $Horizontal['amount'];
+        } else {
+            $this->_Horizontal[$Key] = $Horizontal;
+        }
+        $Vertical = array(
             'flag' => $K,
             'name' => '木框竖框',
             'board' => $Wood['board'],
@@ -162,6 +184,12 @@ class Order_product_board_wood extends MY_Controller {
             'width' => $BoardWidth,
             'amount' => $Wood['amount']*2
         );
+        $Key = implode('_', $Vertical);
+        if (isset($this->_Vertical[$Key])) {
+            $this->_Vertical[$Key]['amount'] += $Vertical['amount'];
+        } else {
+            $this->_Vertical[$Key] = $Vertical;
+        }
         if(preg_match('/百叶/', $Wood['wood_name'])) {
             $Blinds = array('flag' => $K, 'name' => '小百叶', 'board' => $Wood['board'], 'length' => $Wood['width'] - $BoardWidth * 2 + 12, 'width' => $ItemWidth);
             if (1 == $CenterFlag) {
@@ -171,7 +199,13 @@ class Order_product_board_wood extends MY_Controller {
             } else {
                 $Blinds['amount'] = $Wood['amount'] * ceil(($Wood['length'] - $BoardWidth * 2 + 12) / $ItemWidth);
             }
-            array_push($this->_Blinds, $Blinds);
+            // array_push($this->_Blinds, $Blinds);
+            $Key = implode('_', $Blinds);
+            if (isset($this->_Blinds[$Key])) {
+                $this->_Blinds[$Key]['amount'] += $Blinds['amount'];
+            } else {
+                $this->_Blinds[$Key] = $Blinds;
+            }
         } else {
             $Blinds = array(
                 'flag' => $K,
@@ -188,18 +222,42 @@ class Order_product_board_wood extends MY_Controller {
             if (1 == $CenterFlag) {
                 $Blinds['length'] = ceil(($Wood['length'] - $BoardWidth*3)/2 + 12);
                 $Blinds['amount'] = $Wood['amount'] * 2;
-                array_push($this->_Blinds, $Blinds);
+                // array_push($this->_Blinds, $Blinds);
+                $Key = implode('_', $Blinds);
+                if (isset($this->_Blinds[$Key])) {
+                    $this->_Blinds[$Key]['amount'] += $Blinds['amount'];
+                } else {
+                    $this->_Blinds[$Key] = $Blinds;
+                }
             }elseif (2 == $CenterFlag) {
                 $Blinds['length'] = ceil(($Wood['length']*3/5 - $BoardWidth*3/2) + 12);
                 $Blinds['amount'] = $Wood['amount'];
-                array_push($this->_Blinds, $Blinds);
+                // array_push($this->_Blinds, $Blinds);
+                $Key = implode('_', $Blinds);
+                if (isset($this->_Blinds[$Key])) {
+                    $this->_Blinds[$Key]['amount'] += $Blinds['amount'];
+                } else {
+                    $this->_Blinds[$Key] = $Blinds;
+                }
                 $Blinds['length'] = ceil(($Wood['length']*2/5 - $BoardWidth*3/2) + 12);
                 $Blinds['amount'] = $Wood['amount'];
-                array_push($this->_Blinds, $Blinds);
+                // array_push($this->_Blinds, $Blinds);
+                $Key = implode('_', $Blinds);
+                if (isset($this->_Blinds[$Key])) {
+                    $this->_Blinds[$Key]['amount'] += $Blinds['amount'];
+                } else {
+                    $this->_Blinds[$Key] = $Blinds;
+                }
             }else {
                 $Blinds['length'] = $Wood['length'] - $BoardWidth*2 + 12;
                 $Blinds['amount'] = $Wood['amount'];
-                array_push($this->_Blinds, $Blinds);
+                // array_push($this->_Blinds, $Blinds);
+                $Key = implode('_', $Blinds);
+                if (isset($this->_Blinds[$Key])) {
+                    $this->_Blinds[$Key]['amount'] += $Blinds['amount'];
+                } else {
+                    $this->_Blinds[$Key] = $Blinds;
+                }
             }
         }
         return true;

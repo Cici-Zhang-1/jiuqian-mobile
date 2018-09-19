@@ -12,18 +12,18 @@ class Scanning_workflow extends Workflow_order_product_board_abstract {
         $this->_Source_id = $Source_id;
     }
 
-    public function sscanning () {
+    public function scanning () {
         $this->_Workflow->store_message('已安排正在扫描');
     }
 
-    public function re_sscan () {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_board::$AllWorkflow['ScanPlate']);
-        $this->_Workflow->re_sscan();
+    public function re_scan () {
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_board::$AllWorkflow['scan'], array('scan' => ZERO, 'scan_datetime' => null));
+        $this->_Workflow->re_scan();
     }
 
-    public function sscanned() {
-        $this->_Workflow->edit_current_workflow(Workflow_order_product_board::$AllWorkflow['scanned']);
-        $this->_Workflow->sscanned();
+    public function scanned() {
+        $this->_Workflow->edit_current_workflow(Workflow_order_product_board::$AllWorkflow['scanned'], array('scan' => $this->_CI->session->userdata('uid'), 'scan_datetime' => date('Y-m-d H:i:s')));
+        $this->_Workflow->scanned();
     }
 
     public function __call($name, $arguments) {

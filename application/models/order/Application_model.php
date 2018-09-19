@@ -19,7 +19,7 @@ class Application_model extends MY_Model {
      */
     public function select($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -31,6 +31,10 @@ class Application_model extends MY_Model {
                     ->join('user AS C', 'C.u_id = a_creator', 'left')
                     ->join('user AS R', 'R.u_id = a_replyer', 'left');
                 $this->HostDb->where_in('a_status', $Search['status']);
+
+                if (!empty($Search['application_id'])) {
+                    $this->HostDb->where('a_id', $Search['application_id']);
+                }
                 if (!empty($Search['order_id'])) {
                     $this->HostDb->where('o_id', $Search['order_id']);
                 }
@@ -60,6 +64,10 @@ class Application_model extends MY_Model {
         $this->HostDb->select('count(a_id) as num', FALSE)
             ->join('order', 'o_id = a_source_id', 'left');
         $this->HostDb->where_in('a_status', $Search['status']);
+
+        if (!empty($Search['application_id'])) {
+            $this->HostDb->where('a_id', $Search['application_id']);
+        }
         if (!empty($Search['order_id'])) {
             $this->HostDb->where('o_id', $Search['order_id']);
         }

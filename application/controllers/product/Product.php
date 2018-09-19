@@ -54,6 +54,7 @@ class Product extends MY_Controller {
                         }
                     }
                 }
+                $Data['content'] = array_values($Data['content']);
             } else {
                 $TmpSource = array();
                 $TmpDes = array();

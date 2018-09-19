@@ -17,7 +17,7 @@ if (!function_exists('discode_pack')) {
                     } elseif ($IKey == 'thin') {
                         $PackDetail .= ' 薄板: ' . $IValue;
                     } else {
-                        $PackDetail .= '  ' . $IValue . '  ';
+                        $PackDetail .= '  所有: ' . $IValue . '  ';
                     }
                 }
             }

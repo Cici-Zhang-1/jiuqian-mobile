@@ -8,13 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 打印清单
  */
 class Print_list extends MY_Controller{
-    private $_Id;
-    private $_Code;
-    
-    private $_Return;
-    
-    private $_FormStyle;
-
     private $_V;
     private $_Type;
     private $_Vs; // 同类板块V
@@ -22,6 +15,10 @@ class Print_list extends MY_Controller{
     private $_Plate;
     private $_Struct = array();
     private $_Abnormity = array();
+
+    private $__Search = array(
+        'status' => NO
+    );
 
     public function __construct(){
         parent::__construct();
@@ -36,6 +33,17 @@ class Print_list extends MY_Controller{
         }else{  // General View
             $this->_index($View);
         }
+    }
+
+    public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Data = array();
+        if(!($Data = $this->print_list_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        }
+        $this->_ajax_return($Data);
     }
 
     public function prints () {
@@ -117,7 +125,7 @@ class Print_list extends MY_Controller{
         $this->load->model('order/order_product_board_model');
         if (!!($Query = $this->order_product_board_model->has_brothers($this->_V))) {
             $this->_OrderProduct = $Query[array_rand($Query, ONE)];
-            $this->_Vs[] = array();
+            $this->_Vs = array();
             foreach ($Query as $Key => $Value) {
                 $this->_Vs[] = $Value['v'];
             }
@@ -423,7 +431,7 @@ class Print_list extends MY_Controller{
                 }
 
                 $Tmp2 = implode('^', array($value['good'], $value['width'], $value['length'],
-                    $value['thick'], $value['punch'], $value['handle'],
+                    $value['punch'], $value['handle'],
                     $value['open_hole'], $value['invisibility'], $value['remark']));
 
                 if(isset($List[$Tmp2])){
@@ -459,8 +467,7 @@ class Print_list extends MY_Controller{
             $List = array();
             foreach ($Plate as $key => $value){
                 $Tmp2 = implode('^', array($value['width'], $value['length'],
-                    $value['thick'], $value['punch'],
-                    $value['wood_name'], $value['core'], $value['good'], $value['remark']));
+                    $value['punch'], $value['wood_name'], $value['core'], $value['good'], $value['remark']));
                 $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
                 if ($value['area'] < MIN_K_AREA) {
                     $value['area'] = MIN_K_AREA;
@@ -471,7 +478,7 @@ class Print_list extends MY_Controller{
 
                 if(isset($List[$Tmp2])){
                     $List[$Tmp2]['area'] += $value['area'];
-                    $List[$Tmp2]['num'] += 1;
+                    $List[$Tmp2]['amount'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }

@@ -24,44 +24,60 @@ if ($Single) {
                     if ($Two) {
                         for ($I = 0; $I < $Nums; $I++) {
                             if (isset($order[$I])) {
-                                $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                // $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                $Item = $order[$I];
                                 $Html .= <<<END
 <div class="page-line row">
-  <div class="j-remark-list col-md-6">
-      <p class="my-enhance-2">$order[$I][num]$order[$I][remark]</p>
-      <table class="my-table-condensed table table-bordered table-condensed">
-          <caption class="j-caption">$Random[num]$Random[order_product_remark]</caption>
-          <tbody>
+    <div class="j-remark-list col-md-6">
+        <p class="my-enhance-2">$Item[num]$Item[remark]</p>
 END;
-                                foreach ($order[$I]['order_product_board'] as $Key => $Value) {
+                                foreach ($Item['order_product_board'] as $Key => $Value) {
+                                    $Random = $Value[array_rand($Value, ONE)];
                                     $Html .= <<<END
-            <tr><td>$Value[board]</td><td>$Value[amount]</td><td>$Value[area]</td></tr>
+        <table class="my-table-condensed table table-bordered table-condensed">
+            <caption class="j-caption">$Random[num]$Random[order_product_remark]</caption>
+            <tbody>
+END;
+                                    foreach ($Value as $IKey => $IValue) {
+                                        $Html .= <<<END
+            <tr><td>$IValue[board]</td><td>$IValue[amount]</td><td>$IValue[area]</td></tr>
+END;
+                                }
+                                    $Html .= <<<END
+            </tbody>
+        </table>
 END;
                                 }
                                 $Html .= <<<END
-          </tbody>
-      </table>
-  </div>
+    </div>
 END;
                             }
                             $I++;
                             if (isset($order[$I])) {
-                                $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                // $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                $Item = $order[$I];
                                 $Html .= <<<END
   <div class="j-remark-list col-md-6">
-      <p class="my-enhance-2">$order[$I][num]$order[$I][remark]</p>
+      <p class="my-enhance-2">$Item[num]$Item[remark]</p>
+END;
+                                foreach ($Item['order_product_board'] as $Key => $Value) {
+                                    $Random = $Value[array_rand($Value, ONE)];
+                                    $Html .= <<<END
       <table class="my-table-condensed table table-bordered table-condensed">
           <caption class="j-caption">$Random[num]$Random[order_product_remark]</caption>
           <tbody>
 END;
-                                foreach ($order[$I]['order_product_board'] as $Key => $Value) {
+                                    foreach ($Value as $IKey => $IValue) {
+                                        $Html .= <<<END
+                <tr><td>$IValue[board]</td><td>$IValue[amount]</td><td>$IValue[area]</td></tr>
+END;
+                                    }
                                     $Html .= <<<END
-            <tr><td>$Value[board]</td><td>$Value[amount]</td><td>$Value[area]</td></tr>
+            </tbody>
+        </table>
 END;
                                 }
                                 $Html .= <<<END
-          </tbody>
-      </table>
   </div>
 END;
                             }
@@ -73,25 +89,33 @@ END;
                     } else {
                         for ($I = 0; $I < $Nums; $I++) {
                             if (isset($order[$I])) {
-                                $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                // $Random = $order[$I]['order_product_board'][array_rand($order[$I]['order_product_board'], ONE)];
+                                $Item = $order[$I];
                                 $num = $order[$I]['num'];
                                 $remark = $order[$I]['remark'];
                                 $Html .= <<<END
 <div class="page-line row">
-  <div class="j-remark-list col-md-6">
-      <p class="my-enhance-2">$num $remark</p>
-      <table class="my-table-condensed table table-bordered table-condensed">
-          <caption class="j-caption my-enhance-2">$Random[num]$Random[order_product_remark]</caption>
-          <tbody>
+    <div class="j-remark-list col-md-6">
+        <p class="my-enhance-2">$num $remark</p>
 END;
-                                foreach ($order[$I]['order_product_board'] as $Key => $Value) {
+                                foreach ($Item['order_product_board'] as $Key => $Value) {
+                                    $Random = $Value[array_rand($Value, ONE)];
                                     $Html .= <<<END
-            <tr><td>$Value[board]</td><td>$Value[amount]</td><td>$Value[area]</td></tr>
+        <table class="my-table-condensed table table-bordered table-condensed">
+            <caption class="j-caption my-enhance-2">$Random[num]$Random[order_product_remark]</caption>
+            <tbody>
+END;
+                                    foreach ($Value as $IKey => $IValue) {
+                                        $Html .= <<<END
+            <tr><td>$IValue[board]</td><td>$IValue[amount]</td><td>$IValue[area]</td></tr>
+END;
+                                    }
+                                    $Html .= <<<END
+            </tbody>
+        </table>
 END;
                                 }
                                 $Html .= <<<END
-          </tbody>
-      </table>
   </div>
 </div>
 END;

@@ -56,8 +56,8 @@ class Print_list_model extends MY_Model {
         $Search['pn'] = $this->_page_yes($Search);
         $Return = false;
         if(!empty($Search['pn'])){
-            $Sql = "SELECT opc_id AS v, op_num as num, c_name as product, u_truename as dismantle, op_remark as remark, o_id as order_id, o_dealer as dealer, o_owner as owner, o_remark as order_remark, o_request_outdate as request_outdate, od_sure_datetime as sure_datetime, 0 as type FROM j_order_product_classify LEFT JOIN j_classify ON c_id = opc_classify_id LEFT JOIN j_order_product ON op_id = opc_order_product_id LEFT JOIN j_order ON o_id = op_order_id LEFT JOIN j_order_datetime ON od_order_id = o_id LEFT JOIN j_user ON u_id = op_dismantle WHERE opc_print > " . ZERO . ' GROUP BY op_id, opc_classify_id';
-            $Sql .= " UNION ALL SELECT opb_id AS v, op_num as num, op_product as product, D.u_truename as dismantle, op_remark as remark, o_id as order_id, o_dealer as dealer, o_owner as owner, o_remark as order_remark, o_request_outdate as request_outdate, od_sure_datetime as sure_datetime, 1 as type FROM j_order_product_board LEFT JOIN j_order_product ON op_id = opb_order_product_id LEFT JOIN j_order ON o_id = op_order_id LEFT JOIN j_order_datetime ON od_order_id = o_id LEFT JOIN j_user ON u_id = op_dismantle WHERE opc_print > " . ZERO . ' GROUP BY op_id';
+            $Sql = "SELECT opc_id AS v, opc_print_datetime as print_datetime, op_num as num, c_name as product, u_truename as dismantle, op_remark as remark, o_id as order_id, o_dealer as dealer, o_owner as owner, o_remark as order_remark, o_request_outdate as request_outdate, od_sure_datetime as sure_datetime, 0 as type FROM j_order_product_classify LEFT JOIN j_classify ON c_id = opc_classify_id LEFT JOIN j_order_product ON op_id = opc_order_product_id LEFT JOIN j_order ON o_id = op_order_id LEFT JOIN j_order_datetime ON od_order_id = o_id LEFT JOIN j_user ON u_id = op_dismantle WHERE opc_print > " . ZERO . ' GROUP BY op_id, opc_classify_id';
+            $Sql .= " UNION ALL SELECT opb_id AS v, opb_print_datetime as print_datetime, op_num as num, op_product as product, u_truename as dismantle, op_remark as remark, o_id as order_id, o_dealer as dealer, o_owner as owner, o_remark as order_remark, o_request_outdate as request_outdate, od_sure_datetime as sure_datetime, 1 as type FROM j_order_product_board LEFT JOIN j_order_product ON op_id = opb_order_product_id LEFT JOIN j_order ON o_id = op_order_id LEFT JOIN j_order_datetime ON od_order_id = o_id LEFT JOIN j_user ON u_id = op_dismantle WHERE opb_print > " . ZERO . ' GROUP BY op_id';
 
             $Sql .= " ORDER BY num desc LIMIT " . ($Search['p']-1)*$Search['pagesize'] . ', ' . $Search['pagesize'];
 
@@ -78,7 +78,7 @@ class Print_list_model extends MY_Model {
 
     private function _page_yes ($Search) {
         $Sql = "SELECT opc_id AS v FROM j_order_product_classify WHERE opc_print > " . ZERO . ' GROUP BY opc_order_product_id, opc_classify_id';
-        $Sql .= " UNION ALL SELECT opb_id AS v FROM j_order_product_board WHERE opc_print > " . ZERO . ' GROUP BY opb_order_product_id';
+        $Sql .= " UNION ALL SELECT opb_id AS v FROM j_order_product_board WHERE opb_print > " . ZERO . ' GROUP BY opb_order_product_id';
 
         $Query = $this->HostDb->query($Sql);
         if($Query->num_rows() > 0){

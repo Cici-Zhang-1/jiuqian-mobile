@@ -10,7 +10,8 @@ $config['permission/form_page_model/select_allowed'] = array(
     'fp_label' => 'label',
     'fp_url' => 'url',
     'fp_source_url' => 'source_url',
-    'fp_source_query' => 'source_query'
+    'fp_source_query' => 'source_query',
+    'fp_menu_id' => 'menu_id'
 );
 $config['permission/form_page_model/select_by_mid'] = array(
     'fp_id' => 'v',

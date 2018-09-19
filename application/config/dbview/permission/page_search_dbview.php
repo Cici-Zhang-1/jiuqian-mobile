@@ -42,7 +42,8 @@ $config['permission/page_search_model/select_allowed'] = array(
     'ps_maxlength' => 'maxlength',
     'ps_pattern' => 'pattern',
     'ps_classes' => 'classes',
-    'ps_ide' => 'ide'
+    'ps_ide' => 'ide',
+    'ps_menu_id' => 'menu_id'
 );
 $config['permission/page_search_model/select_by_mid'] = array(
 	'ps_id' => 'v',

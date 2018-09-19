@@ -56,7 +56,7 @@ END;
     <td>$K</td>
     <td>$value[width]</td>
     <td>$value[length]</td>
-    <td>$value[num]</td>
+    <td>$value[amount]</td>
     <td>$value[area]</td>
     <td>$value[punch]</td>
     <td>$value[handle]</td>

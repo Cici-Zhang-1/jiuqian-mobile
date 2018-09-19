@@ -14,8 +14,10 @@ class Optimize_workflow extends Workflow_order_product_classify_abstract {
     
     public function optimize(){
         $this->_Workflow->store_message('订单产品分类已经优化');
-        $this->_workflow_propagation(__FUNCTION__);
-        $this->_workflow_next();
+        if ($this->_workflow_propagation(__FUNCTION__)) {
+            return $this->_workflow_next();
+        }
+        return false;
     }
 
     public function __call($name, $arguments){

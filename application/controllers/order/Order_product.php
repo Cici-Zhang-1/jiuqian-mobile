@@ -47,13 +47,15 @@ class Order_product extends MY_Controller {
         } else {
             $this->_Search['product_id'] = array();
         }
-        if ($this->_Search['status'] !== '') {
-            $this->_Search['status'] = explode(',', $this->_Search['status']);
-        } else {
-            $this->_Search['status'] = array(
-                OP_CREATE,
-                OP_DISMANTLING
-            );
+        if (!is_array($this->_Search['status'])) {
+            if ($this->_Search['status'] != '') {
+                $this->_Search['status'] = explode(',', $this->_Search['status']);
+            } else {
+                $this->_Search['status'] = array(
+                    OP_CREATE,
+                    OP_DISMANTLING
+                );
+            }
         }
 
         $Data = array();
@@ -162,7 +164,7 @@ class Order_product extends MY_Controller {
     }
 
     /**
-     *
+     * 复制订单
      */
     public function repeat () {
         if ($this->_do_form_validation()) {
@@ -210,4 +212,60 @@ class Order_product extends MY_Controller {
         $this->_return();
     }
 
+    /**
+     * 订单复制到
+     */
+    public function repeat_to () {
+        if ($this->_do_form_validation()) {
+            $V = $this->input->post('v', true);
+            $To = $this->input->post('to', true);
+            if (!!($From = $this->order_product_model->is_exist('', $V))) {
+                $To = gh_escape($To);
+                if (!!($To = $this->order_product_model->is_order_dismantlable($To))) {
+                    if ($To['code'] !== $From['code']) {
+                        $this->Code = EXIT_ERROR;
+                        $this->Message .= '请选择相同类型的订单复制!';
+                    } else {
+                        $this->load->library('d/d');
+                        $D = $this->d->initialize($From['code']);
+                        if (!($D->repeat($To, $From['v']))) {
+                            $this->Code = EXIT_ERROR;
+                            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单板块复制失败!';
+                        } else {
+                            $this->load->library('workflow/workflow');
+                            $W = $this->workflow->initialize('order_product');
+                            $W->initialize($To['v']);
+                            $W->store_message('从' . $From['num'] . '复制订单数据');
+                            $this->Message .= '复制订单成功!';
+                        }
+                    }
+                } else {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message .= '您要复制到的订单不存在!';
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message .= '您要复制的订单不存在!';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
+     * 设计图集
+     */
+    public function design_atlas () {
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $V = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->order_product_model->update($Post, $V))){
+                $this->Message = '设计图集添加成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'设计图集添加失败';
+            }
+        }
+        $this->_ajax_return();
+    }
 }

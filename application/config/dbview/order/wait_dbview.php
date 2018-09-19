@@ -11,6 +11,7 @@ $config['order/wait_check/read'] = array(
 	'o_dismantled_datetime' => 'dismantled_datetime',
 	'o_sum' => 'sum',
 	'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
 	'tl_icon' => 'icon',
 );
 $config['order/wait_quote/read'] = array(
@@ -26,9 +27,11 @@ $config['order/wait_quote/read'] = array(
 	'o_request_outdate' => 'request_outdate',
 	'o_checked_datetime' => 'checked_datetime',
 	'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
 	'd_debt1' => 'debt1',
 	'd_debt2' => 'debt2',
 	'd_balance' => 'balance',
+    'd_virtual_balance' => 'virtual_balance',
 	'tl_icon' => 'icon',
 );
 $config['order/wait_asure/read'] = array(

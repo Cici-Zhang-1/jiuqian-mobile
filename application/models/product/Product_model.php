@@ -32,7 +32,9 @@ class Product_model extends MY_Model {
                 if (!empty($Search['undelete'])) {
                     $this->HostDb->where('p_delete', NO);
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('p_code')
+                    ->order_by('p_name')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,

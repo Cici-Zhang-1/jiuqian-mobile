@@ -30,6 +30,14 @@ class Produce_workflow extends Workflow_order_abstract {
     }
 
     /**
+     * 直接打包入库
+     * @return mixed
+     */
+    public function inned () {
+        $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['inned']);
+        return $this->_Workflow->inned();
+    }
+    /**
      * 重新拆单
      */
     public function re_dismantle(){

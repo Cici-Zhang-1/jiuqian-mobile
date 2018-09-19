@@ -114,11 +114,17 @@ class Board extends MY_Controller {
 
     private function _format () {
         $Thick = $this->input->post('thick', true);
-        $_POST['thick'] = explode(',', $Thick);
+        if (!is_array($Thick)) {
+            $_POST['thick'] = explode(',', $Thick);
+        }
         $Nature = $this->input->post('nature', true);
-        $_POST['nature'] = explode(',', $Nature);
+        if (!is_array($Nature)) {
+            $_POST['nature'] = explode(',', $Nature);
+        }
         $Color = $this->input->post('color', true);
-        $_POST['color'] = explode(',', $Color);
+        if (!is_array($Color)) {
+            $_POST['color'] = explode(',', $Color);
+        }
     }
     /**
      *

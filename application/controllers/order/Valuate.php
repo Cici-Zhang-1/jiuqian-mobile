@@ -8,7 +8,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Valuate extends MY_Controller{
     private $Search = array(
-        'status' => O_VALUATE . ',' . O_VALUATING,
+        'status' => array(
+            O_VALUATE,
+            O_VALUATING
+        ),
         'keyword' => '',
         'all' => NO,
         'order_id' => ZERO
@@ -119,6 +122,7 @@ class Valuate extends MY_Controller{
             'sum_diff' => ceil($this->_SumDiff)
         );
         $Order['sum'] = ceil($Order['sum']);
+        $Order['virtual_sum'] = $Order['sum'] + $Order['sum_diff'];
 
         $this->order_model->update($Order, $this->_OrderId);
     }
@@ -155,6 +159,7 @@ class Valuate extends MY_Controller{
                     $this->_OrderProduct[$value['order_product_id']]['sum'] += $value['sum'];
                     $this->_OrderProduct[$value['order_product_id']]['sum_diff'] += $value['sum_diff'];
                 }
+                $this->_OrderProduct[$value['order_product_id']]['virtual_sum'] = $this->_OrderProduct[$value['order_product_id']]['sum'] + $this->_OrderProduct[$value['order_product_id']]['sum_diff'];
                 $Sum += $value['sum'];
                 $SumDiff += $value['sum_diff'];
             }
@@ -182,6 +187,7 @@ class Valuate extends MY_Controller{
                     $this->_OrderProduct[$value['order_product_id']]['sum'] += $value['sum'];
                     $this->_OrderProduct[$value['order_product_id']]['sum_diff'] += $value['sum_diff'];
                 }
+                $this->_OrderProduct[$value['order_product_id']]['virtual_sum'] = $this->_OrderProduct[$value['order_product_id']]['sum'] + $this->_OrderProduct[$value['order_product_id']]['sum_diff'];
                 $Sum += $value['sum'];
                 $SumDiff += $value['sum_diff'];
             }
@@ -209,6 +215,7 @@ class Valuate extends MY_Controller{
                     $this->_OrderProduct[$value['order_product_id']]['sum'] += $value['sum'];
                     $this->_OrderProduct[$value['order_product_id']]['sum_diff'] += $value['sum_diff'];
                 }
+                $this->_OrderProduct[$value['order_product_id']]['virtual_sum'] = $this->_OrderProduct[$value['order_product_id']]['sum'] + $this->_OrderProduct[$value['order_product_id']]['sum_diff'];
                 $Sum += $value['sum'];
                 $SumDiff += $value['sum_diff'];
             }
@@ -236,6 +243,7 @@ class Valuate extends MY_Controller{
                     $this->_OrderProduct[$value['order_product_id']]['sum'] += $value['sum'];
                     $this->_OrderProduct[$value['order_product_id']]['sum_diff'] += $value['sum_diff'];
                 }
+                $this->_OrderProduct[$value['order_product_id']]['virtual_sum'] = $this->_OrderProduct[$value['order_product_id']]['sum'] + $this->_OrderProduct[$value['order_product_id']]['sum_diff'];
                 $Sum += $value['sum'];
                 $SumDiff += $value['sum_diff'];
             }

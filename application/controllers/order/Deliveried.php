@@ -7,21 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 已发货
  */
-class Deliveried extends MY_Controller{
-    private $_Module = 'order';
-    private $_Item ;
-    private $_Cookie ;
-
-    private $Search = array(
-        'status' => '17',
-        'keyword' => ''
-    );
+class Delivered extends MY_Controller {
     public function __construct(){
         parent::__construct();
-        $this->_Item = $this->_Module.'/'.strtolower(__CLASS__).'/';
-        $this->_Cookie = $this->_Module.'_'.strtolower(__CLASS__).'_';
-        
-        log_message('debug', 'Controller Order/Deliveried Start!');
+        log_message('debug', 'Controller Order/Delivered Start!');
     }
 
     public function index(){
@@ -42,7 +31,7 @@ class Deliveried extends MY_Controller{
         $Data = array();
         if(!empty($this->Search)){
             $this->load->model('order/order_model');
-            if(!!($Data = $this->order_model->select_delivered($this->Search))){
+            if(!!($Data = $this->order_model->select_deliveried($this->Search))){
                 $this->Search['pn'] = $Data['pn'];
                 $this->Search['num'] = $Data['num'];
                 $this->Search['p'] = $Data['p'];

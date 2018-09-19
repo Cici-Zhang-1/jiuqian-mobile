@@ -13,17 +13,19 @@ class Delivered_workflow extends Workflow_order_abstract {
     }
 
     public function delivered () {
+        $this->_Workflow->set_datetime(array('delivery' => $this->_CI->session->userdata('uid'), 'delivery_datetime' => date('Y-m-d H:i:s')));
         $this->_Workflow->store_message('订单已经安排发货!');
+        return true;
     }
 
     public function outed() {
         $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['outed']);
-        $this->_Workflow->outed();
+        return $this->_Workflow->outed();
     }
     
     public function re_delivery() {
-        $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['order']['wait_delivery']);
-        $this->_Workflow->re_delivery();
+        $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['delivering']);
+        return $this->_Workflow->re_delivery();
     }
 
     public function __call($name, $arguments){

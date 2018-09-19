@@ -50,7 +50,7 @@ $config['product/board/add'] = array(
                                 array (
             'field' => 'amount',
             'label' => '数量',
-            'rules' => 'trim|decimal'
+            'rules' => 'trim|numeric'
         ),
                                 array (
             'field' => 'supplier_id',
@@ -123,7 +123,7 @@ $config['product/board/edit'] = array(
                                 array (
             'field' => 'amount',
             'label' => '数量',
-            'rules' => 'trim|decimal'
+            'rules' => 'trim|numeric'
         ),
                                 array (
             'field' => 'supplier_id',

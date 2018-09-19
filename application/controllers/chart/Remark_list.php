@@ -76,6 +76,7 @@ class Remark_list extends MY_Controller {
                 } else {
                     foreach ($Order as $Key => $Value) {
                         if (isset($OrderProductBoard[$Value['v']])) {
+                            ksort($OrderProductBoard[$Value['v']]);
                             $Order[$Key]['order_product_board'] = $OrderProductBoard[$Value['v']];
                         } else {
                             unset($Order[$Key]);
@@ -97,6 +98,11 @@ class Remark_list extends MY_Controller {
         $this->load->model('order/remark_list_model');
         return $this->remark_list_model->insert_batch_update($this->_Search['order_id']);
     }
+
+    /**
+     * 订单详情
+     * @return array
+     */
     private function _read_order () {
         $this->load->model('order/order_model');
         $Data = array();
@@ -114,7 +120,10 @@ class Remark_list extends MY_Controller {
                 if (!isset($Data[$Value['order_id']])) {
                     $Data[$Value['order_id']] = array();
                 }
-                array_push($Data[$Value['order_id']], $Value);
+                if (!isset($Data[$Value['order_id']][$Value['order_product_id']])) {
+                    $Data[$Value['order_id']][$Value['order_product_id']] = array();
+                }
+                array_push($Data[$Value['order_id']][$Value['order_product_id']], $Value);
             }
         }
         return $Data;

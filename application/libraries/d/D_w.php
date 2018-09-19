@@ -159,8 +159,10 @@ class D_w extends D_abstract{
                     'purchase' => $value['purchase'],
                     'unit_price' => $value['unit_price'],
                     'sum' => $value['sum'],
+                    'virtual_sum' => $value['sum'],
                     'amount' => ONE,
-                    'area' => $value['area']
+                    'area' => $value['area'],
+                    'virtual_area' => $value['area']
                 );
                 if(!($Board[$value['board']]['v'] = $this->_CI->order_product_board_model->is_existed($OrderProductId, gh_escape($value['board'])))){
                     /*如果不存在则插入订单产品板材*/
@@ -172,7 +174,9 @@ class D_w extends D_abstract{
             }else{
                 $Board[$value['board']]['amount']++;
                 $Board[$value['board']]['area'] += $value['area'];
+                $Board[$value['board']]['virtual_area'] += $value['area'];
                 $Board[$value['board']]['sum'] += $value['sum'];
+                $Board[$value['board']]['virtual_sum'] += $value['sum'];
             }
             $value['order_product_board_id'] = $Board[$value['board']]['v'];
 
@@ -215,6 +219,9 @@ class D_w extends D_abstract{
 
     /**
      * 复制订单
+     * @param $To
+     * @param $From
+     * @return bool
      */
     public function repeat ($To, $From) {
         $this->_Save = 'dismantling';
@@ -271,6 +278,7 @@ class D_w extends D_abstract{
                         $Value['bd_file'] = preg_replace(REG_ORDER_PRODUCT, $this->_OrderProductNum, $Value['bd_file']);
                         copy($Source, $Value['bd_file']);
                     }
+                    $Value['sum'] = ceil(($Value['area'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR;
                     $BoardPlate[$Key] = $Value;
                 }
                 self::$_BoardPlate = $BoardPlate;

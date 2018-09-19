@@ -31,7 +31,7 @@ class Board_color_model extends MY_Model {
                         ->like('bc_name', $Search['keyword'])
                         ->group_end();
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->order_by('convert(bc_name using gbk)')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
