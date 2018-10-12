@@ -142,7 +142,7 @@ class Board_model extends MY_Model {
         } else {
             if($this->HostDb->insert('board', $Data)){
                 $this->remove_cache($this->_Module);
-                return $this->HostDb->insert_id();
+                return true;
             } else {
                 $GLOBALS['error'] = '插入板材数据失败!';
             }

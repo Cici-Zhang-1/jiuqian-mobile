@@ -52,13 +52,14 @@ class Order_stock_outted_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(oso_id) as num', FALSE);
+        $this->HostDb->select('count(oso_id) as num', FALSE)
+            ->from('order_stock_outted')
+            ->join('order', 'o_id = oso_order_id', 'left');
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
             $this->HostDb->group_start()
                 ->like('o_num', $Search['keyword'])
                 ->group_end();
         }
-        $this->HostDb->from('order_stock_outted');
 
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){

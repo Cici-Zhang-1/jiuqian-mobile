@@ -152,7 +152,7 @@ $config['order/order_model/select_wait_sure'] = array(
     'o_payterms' => 'payterms',
     'o_down_payment' => 'down_payment',
     'ifnull(a_id, "")' => 'application_id',
-    'ifnull(as_label, "")' => 'application_status_label'
+    'ifnull(as_icon, "")' => 'application_status_label'
 );
 
 $config['order/order_model/select_produce'] = array( //财务核价
@@ -169,6 +169,7 @@ $config['order/order_model/select_produce'] = array( //财务核价
 
 $config['order/order_model/select_detail'] = array(
     'o_id' => 'v',
+    'o_task_level' => 'task_level',
     'tl_icon' => 'icon',
     'o_order_type' => 'order_type',
     'o_num' => 'num',

@@ -88,7 +88,7 @@ $config['dealer/dealer_linker/edit'] = array(
                                 array (
             'field' => 'password',
             'label' => '密码',
-            'rules' => 'trim||max_length[128]'
+            'rules' => 'trim|max_length[32]'
         ),
                                 array (
             'field' => 'position',

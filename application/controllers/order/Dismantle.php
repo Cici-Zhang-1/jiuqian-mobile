@@ -170,31 +170,35 @@ class Dismantle extends MY_Controller{
 
     public function dismantled () {
         if (!!($OrderProduct = $this->_is_dismantlable())) {
-            $this->load->library('d/d');
-            if (is_array($this->_Id)) {
-                foreach ($OrderProduct as $Key => $Value) {
-                    if (!!($D = $this->d->initialize($Value['code']))) {
-                        if (!($D->dismantled($Value['order_product_id']))) {
+            if ($this->_check_bd($OrderProduct)) {
+                $this->load->library('d/d');
+                if (is_array($this->_Id)) {
+                    foreach ($OrderProduct as $Key => $Value) {
+                        if (!!($D = $this->d->initialize($Value['code']))) {
+                            if (!($D->dismantled($Value['order_product_id']))) {
+                                $this->Code = EXIT_ERROR;
+                                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error'] : $Value['num'] . '订单产品确认拆单出错!';
+                                break;
+                            }
+                        } else {
                             $this->Code = EXIT_ERROR;
-                            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error'] : $Value['num'] . '订单产品确认拆单出错!';
+                            $this->Message = $Value['num'] . '订单产品确认拆单出错!';
                             break;
+                        }
+                    }
+                } else {
+                    if (!!($D = $this->d->initialize($OrderProduct['code']))) {
+                        if (!($D->dismantled())) {
+                            $this->Code = EXIT_ERROR;
+                            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单产品确认拆单出错!';
                         }
                     } else {
                         $this->Code = EXIT_ERROR;
-                        $this->Message = $Value['num'] . '订单产品确认拆单出错!';
-                        break;
+                        $this->Message = '您拆的订单类型不存在!';
                     }
                 }
             } else {
-                if (!!($D = $this->d->initialize($OrderProduct['code']))) {
-                    if (!($D->dismantled())) {
-                        $this->Code = EXIT_ERROR;
-                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单产品确认拆单出错!';
-                    }
-                } else {
-                    $this->Code = EXIT_ERROR;
-                    $this->Message = '您拆的订单类型不存在!';
-                }
+                $this->Code = EXIT_ERROR;
             }
         } else {
             $this->Code = EXIT_ERROR;
@@ -246,5 +250,29 @@ class Dismantle extends MY_Controller{
             $GLOBALS['error'] = $this->_W->get_failue();
         }
         return false;
+    }
+
+    private function _check_bd ($OrderProduct) {
+        $V = array();
+        if (is_array($this->_Id)) {
+            foreach ($OrderProduct as $Key => $Value) {
+                if ($Value['code'] == CABINET_NUM || $Value['code'] == WARDROBE_NUM) {
+                    array_push($V, $Value['order_product_id']);
+                }
+            }
+        } else {
+            if ($OrderProduct['code'] == CABINET_NUM || $OrderProduct['code'] == WARDROBE_NUM) {
+                array_push($V, $OrderProduct['order_product_id']);
+            }
+        }
+        $this->load->model('order/order_product_board_plate_model');
+        if (!!($Query = $this->order_product_board_plate_model->select_checked_bd($V))) {
+            foreach ($Query as $Key => $Value) {
+                $Query[$Key] = $Value['qrcode'];
+            }
+            $this->Message = implode(',', $Query) . '没有上传BD文件';
+            return false;
+        }
+        return true;
     }
 }

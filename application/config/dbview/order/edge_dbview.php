@@ -39,6 +39,7 @@ $config['order/edge_model/select'] = array(
     'ifnull(opb_saw_datetime, opb_print_datetime)' => 'sort_datetime',
     'opb_edge_datetime' => 'edge_datetime',
     'sum(opb_area)' => 'area',
+    'sum(opb_amount)' => 'amount',
     'wp_label' => 'status',
     'op_id' => 'order_product_id',
     'op_num' => 'num',

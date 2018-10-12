@@ -270,7 +270,7 @@ define('MIN_K_AREA', 0.4);
 define('MIN_B_AREA', 0.01);
 
 define('MIN_PAGESIZE', 100);
-define('MOBILE_MIN_PAGESIZE', 1);
+define('MOBILE_MIN_PAGESIZE', 15);
 define('MAX_PAGESIZE', 1000);
 define('ALL_PAGESIZE', 9999999999);
 

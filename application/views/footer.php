@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script src="<?php echo base_url('source/js/jquery.storage.js');?>"></script>
         <script src="<?php echo base_url('source/node_modules/bootstrap/dist/js/bootstrap.min.js'); ?>"></script>
         <script src="<?php echo base_url('source/js/PCASClass.js');?>" type="text/javascript"></script>
-        <script src="http://cdn.bootcss.com/jquery.tablesorter/2.23.5/js/jquery.tablesorter.min.js"></script>
+        <script src="https://cdn.bootcss.com/jquery.tablesorter/2.23.5/js/jquery.tablesorter.min.js"></script>
         <script src="<?php echo base_url('source/node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js');?>" type="text/javascript"></script>
         <script src="<?php echo base_url('source/node_modules/vue/dist/vue.min.js'); ?>" type="text/javascript"></script>
         <script src="<?php echo base_url('source/node_modules/vuex/dist/vuex.min.js'); ?>" type="text/javascript"></script>

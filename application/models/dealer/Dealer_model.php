@@ -36,11 +36,16 @@ class Dealer_model extends MY_Model {
                             ->or_like('d_num', $Search['keyword'])
                         ->group_end();
                 }
-                if (!empty($Search['owner'])) {
+                if ($Search['public'] == NO) {
                     $this->HostDb->where('do_owner_id', $Search['owner']);
                 } else {
-                    // $this->HostDb->where('do_owner_id is NULL');
+                    if ($Search['all'] == NO) {
+                        $this->HostDb->where('do_owner_id is NULL');
+                    }
                 }
+                /*if (!empty($Search['owner'])) {
+                    $this->HostDb->where('do_owner_id', $Search['owner']);
+                }*/
                 if (isset($Search['status']) && $Search['status'] != '') {
                     $this->HostDb->where('d_status', $Search['status']);
                 }
@@ -69,11 +74,18 @@ class Dealer_model extends MY_Model {
                 ->or_like('d_num', $Search['keyword'])
                 ->group_end();
         }
-        if (!empty($Search['owner'])) {
+        if ($Search['public'] == NO) {
             $this->HostDb->where('do_owner_id', $Search['owner']);
         } else {
-            // $this->HostDb->where('do_owner_id is NULL');
+            if ($Search['all'] == NO) {
+                $this->HostDb->where('do_owner_id is NULL');
+            }
         }
+//        if (!empty($Search['owner'])) {
+//            $this->HostDb->where('do_owner_id', $Search['owner']);
+//        } else {
+            // $this->HostDb->where('do_owner_id is NULL');
+//        }
         if (isset($Search['status']) && $Search['status'] != '') {
             $this->HostDb->where('d_status', $Search['status']);
         }
@@ -108,7 +120,7 @@ class Dealer_model extends MY_Model {
                 ->or_like('dl_truename', $Search['keyword'])
                 ->or_like('dl_mobilephone', $Search['keyword'])
                 ->group_end();
-            $Query = $this->HostDb->get();
+            $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
                 $this->cache->save($Cache, $Return, MONTHS);
@@ -182,6 +194,7 @@ class Dealer_model extends MY_Model {
         $Query = $this->HostDb->select($Sql)->from('dealer')
             ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false)
             ->where('do_owner_id is NULL')
+            ->where_in('d_id', $Vs)
             ->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();

@@ -286,8 +286,10 @@ class Order_model extends MY_Model{
                     ->join('dealer', 'd_id = o_dealer_id', 'left')
                     ->join('pay_status', 'ps_name = o_pay_status', 'left')
                     ->join('j_application', 'a_source_id = o_id && a_des = o_payterms', 'left', false)
-                    ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING))
-                    ->where('o_out_method', $Search['out_method']);
+                    ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING));
+                if (!empty($Search['out_method'])) {
+                    $this->HostDb->where('o_out_method', $Search['out_method']);
+                }
                 if (empty($Search['all'])) {
                     $this->HostDb->where('od_creator', $this->session->userdata('uid'));
                 }
@@ -317,8 +319,10 @@ class Order_model extends MY_Model{
     private function _page_wait_delivery_num ($Search) {
         $this->HostDb->select('o_id', FALSE)
             ->join('order_datetime', 'od_order_id = o_id', 'left')
-            ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING))
-            ->where('o_out_method', $Search['out_method']);
+            ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING));
+        if (!empty($Search['out_method'])) {
+            $this->HostDb->where('o_out_method', $Search['out_method']);
+        }
         if (empty($Search['all'])) {
             $this->HostDb->where('od_creator', $this->session->userdata('uid'));
         }

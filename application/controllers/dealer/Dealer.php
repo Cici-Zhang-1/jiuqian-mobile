@@ -13,7 +13,8 @@ class Dealer extends MY_Controller {
     private $__Search = array(
         'owner' => ZERO,
         'status' => ONE,
-        'public' => YES
+        'public' => YES,
+        'all' => NO
     );
     private $_CurrentSheet;
     private $_Import = false;
@@ -59,10 +60,7 @@ class Dealer extends MY_Controller {
         $this->get_page_search();
         $Data = array();
         if (!empty($this->_Search['keyword'])) {
-            if(!($Data = $this->dealer_model->select_remote($this->_Search))){
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
-                $this->Code = EXIT_ERROR;
-            }
+            $Data = $this->dealer_model->select_remote($this->_Search);
         }
         array_unshift($Data, array('v' => 0, 'name' => '---无---'));
 

@@ -515,6 +515,33 @@ class Order_product_board_plate_model extends MY_Model {
             return false;
         }
     }
+
+    /**
+     * 检测BD文件是否存在
+     * @param $Vs
+     * @return bool
+     */
+    public function select_checked_bd ($Vs) {
+        $Query = $this->HostDb->select('opbp_qrcode as qrcode', false)
+            ->from('order_product_board_plate')
+            ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
+            ->where_in('opb_order_product_id', $Vs)
+            ->group_start()
+                ->where('opbp_qrcode is not null')
+                ->or_where('opbp_qrcode != ""')
+            ->group_end()
+            ->group_start()
+                ->where('opbp_bd_file is null')
+                ->or_where('opbp_bd_file', '')
+            ->group_end()
+            ->get();
+        if($Query->num_rows() > 0){
+            $Return = $Query->result_array();
+            return $Return;
+        }else{
+            return false;
+        }
+    }
     /**
      * Insert data to table order_product_board_plate
      * @param $Data
