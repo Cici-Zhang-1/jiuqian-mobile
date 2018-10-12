@@ -140,15 +140,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div class="col-md-8">
                     <ul class="nav nav-tabs" role="tablist" id="packLabelNavs">
                         <li role="presentation" class="active">
-                            <a href="#cabinetThick" aria-controls="cabinetThick" role="tab" data-toggle="tab">橱柜-厚板</a>
-                        </li>
-                        <li role="presentation" >
-                            <a href="#cabinetThin" aria-controls="cabinetThin" role="tab" data-toggle="tab">橱柜-薄板</a>
-                        </li>
-                        <li role="presentation" >
-                            <a href="#cabinetAll" aria-controls="cabinetAll" role="tab" data-toggle="tab">橱柜-所有</a>
-                        </li>
-                        <li role="presentation" >
                             <a href="#wardrobeThick" aria-controls="wardrobeThick" role="tab" data-toggle="tab">衣柜-厚板</a>
                         </li>
                         <li role="presentation" >
@@ -156,6 +147,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </li>
                         <li role="presentation" >
                             <a href="#wardrobeAll" aria-controls="wardrobeAll" role="tab" data-toggle="tab">衣柜-所有</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#cabinetThick" aria-controls="cabinetThick" role="tab" data-toggle="tab">橱柜-厚板</a>
+                        </li>
+                        <li role="presentation" >
+                            <a href="#cabinetThin" aria-controls="cabinetThin" role="tab" data-toggle="tab">橱柜-薄板</a>
+                        </li>
+                        <li role="presentation" >
+                            <a href="#cabinetAll" aria-controls="cabinetAll" role="tab" data-toggle="tab">橱柜-所有</a>
                         </li>
                         <li role="presentation" >
                             <a href="#door" aria-controls="door" role="tab" data-toggle="tab">门板</a>
@@ -283,8 +283,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="print-area visible-print-block" id="packLabelLabel">
         </div>
     </body>
-    <script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.js"></script>
-    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
     <script src="<?php echo base_url('js/jquery-qrcode/jquery.qrcode.min.js'); ?>"></script>
     <script src="<?php echo base_url('js/jquery.storage.js');?>"></script>
     <script type="text/javascript" src="<?php echo base_url('js/dateselect.js');?>"></script>
@@ -421,8 +421,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             let Classify = '';
             let Brothers;
             let IsPacked = false;
+            let $$Form;
             $('#packLabel').find('form').each(function(i, v){
-                var $Form = $(this);
+                let $Form = $(this);
                 $Form.find('input[name = "prefix"], input[name="middle"]').on('focusout', function(e){
                     let Data = {};
                     Data['prefix'] = $Form.find('input[name = "prefix"]').val();
@@ -430,7 +431,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     Data['year'] = $Form.find('select[name = "year"]').val();
                     Data['month'] = $Form.find('select[name="month"]').val();
                     Data['code'] = $Form.find('input[name="code"]').val();
-                    Data['type'] = $Form.find('input[name="type"]:checked').val();
+                    Data['type'] = $Form.find('input[name="type"]').val();
                     if('' != Data['Prefix'] && '' != Data['middle']){
                         $.ajax({
                             async: false,
@@ -539,6 +540,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         $Form.find('p.error').html('没有找到相应订单, 请重新查找');
                         return false;
                     } else {
+                        $$Form = $Form
                         Pack = $Form.find('input[name="pack"]').val();
                         if('' === Pack || parseInt(Pack) <= 0){
                             $Form.find('input[name="pack"]').focus();
@@ -619,6 +621,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $('#packLabelInfoLinker').text('');
                 $('#packLabelInfoPhone').text('');
                 $('#packLabelLabel').html('');
+                OrderProduct = {};
+                $$Form.find('input[name="num"]').val('');
+                $$Form.find('div.brothers').text('');
+                $$Form.find('input[name="type"]').val('');
+                $$Form.find('input[name="prefix"]').val('');
+                $$Form.find('input[name="middle"]').val('');
+                $$Form.find('input[name="pack"]').val('');
+                $$Form.find('p.error').text('');
+                $$Form.find('p.warning').text('');
                 Pack = 0;
                 IsPacked = false;
             });
