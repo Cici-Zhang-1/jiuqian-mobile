@@ -103,6 +103,7 @@ class Edge extends MY_Controller{
     }
     private function _workflow_order_product_board () {
         $this->load->library('workflow/workflow');
+        $this->load->model('order/order_product_board_model');
         return $this->workflow->initialize('order_product_board');
     }
 

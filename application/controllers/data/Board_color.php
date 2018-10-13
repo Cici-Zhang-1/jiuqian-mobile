@@ -8,6 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category Controller
  */
 class Board_color extends MY_Controller {
+    private $__Search = array(
+        'paging' => NO
+    );
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller data/Board_color __construct Start!');
@@ -29,6 +32,7 @@ class Board_color extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
         if(!($Data = $this->board_color_model->select($this->_Search))){

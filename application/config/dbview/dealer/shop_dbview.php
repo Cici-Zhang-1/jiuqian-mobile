@@ -20,7 +20,7 @@ $config['dealer/shop_model/select'] = array(
 $config['dealer/shop_model/select_my_shop'] = array(
     's_id' => 'shop_id',
     's_dealer_id' => 'dealer_id',
-    'concat(d_num, "-", s_num, "_", d_name, "_", s_name, "_" , a_province, a_city, a_county, ifnull(s_address, ""), "_", dl_truename, "_", dl_mobilephone)' => 'name'
+    'concat(d_num, "-", s_num, "_", d_name, "_", if(d_name = s_name, "", s_name), "_" , a_province, a_city, a_county, ifnull(s_address, ""), "_", dl_truename, "_", dl_mobilephone)' => 'name'
 );
 $config['dealer/shop_model/select_primary_info'] = array(
     'dl_truename' => 'primary_linker',

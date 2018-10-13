@@ -18,19 +18,8 @@
             </div>
         </div>
         <div class="form-group form-group-lg">
-            <div class="col-md-6">
-                <div class="radio">
-                    <label class="my-label-enhance">
-                        <input class="" type="radio" value="x" name="type" checked><span>正常单</span>
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="radio">
-                    <label class="my-label-enhance">
-                        <input class="" type="radio" value="b" name="type"><span>补单</span>
-                    </label>
-                </div>
+            <div class="col-md-12">
+                <input class="form-control" type="text" name="type" autocomplete="off" placeholder="订单类型X/B" />
             </div>
         </div>
         <div class="form-group form-group-lg" id="wAllDate">

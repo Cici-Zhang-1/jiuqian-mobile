@@ -25,10 +25,13 @@ class Unqrcode_model extends MY_Model {
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)
+                $this->HostDb->select($Sql)
                     ->from('unqrcode AS U')
-                    ->join('user AS C', 'C.u_id = U.u_creator', 'left')
-                    ->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->join('user AS C', 'C.u_id = U.u_creator', 'left');
+                if (!empty($Search['order_id'])) {
+                    $this->HostDb->where('u_order_id', $Search['order_id']);
+                }
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
                     ->get();
                 $Return = array(
                     'content' => $Query->result_array(),
@@ -48,6 +51,9 @@ class Unqrcode_model extends MY_Model {
     private function _page_num($Search){
         $this->HostDb->select('count(u_id) as num', FALSE);
         $this->HostDb->from('unqrcode');
+        if (!empty($Search['order_id'])) {
+            $this->HostDb->where('u_order_id', $Search['order_id']);
+        }
 
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){

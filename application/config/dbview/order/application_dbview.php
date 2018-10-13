@@ -9,6 +9,7 @@ $config['order/application_model/select'] = array(
     'a_remark' => 'remark',
     'a_status' => 'status',
     'as_label' => 'status_label',
+    'as_icon' => 'status_icon',
     'a_create_datetime' => 'create_datetime',
     'a_reply_datetime' => 'reply_datetime',
     'o_id' => 'order_id',

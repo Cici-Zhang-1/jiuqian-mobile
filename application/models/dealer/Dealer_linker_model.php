@@ -137,10 +137,11 @@ class Dealer_linker_model extends MY_Model {
     public function update($Data, $Where) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
-        if(!empty($Data['u_password'])){
+        if(!empty($Data['dl_password'])){
             $Data['dl_salt'] = '$2y$11$' . substr(md5(uniqid(rand(), true)), 0, 22);
             $Data['dl_password'] = crypt($Data['dl_password'], $Data['dl_salt']);
         }
+
         if ($Data['dl_primary']) {
             $this->_update_primary($Data['dl_dealer_id']);
         }

@@ -9,7 +9,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Order_product_board_plate extends MY_Controller {
     private $__Search = array(
-        'order_product_id' => ZERO
+        'order_product_id' => ZERO,
+        'paging' => NO
     );
     private $_Statistic = array(
         'thick_amount' => 0,

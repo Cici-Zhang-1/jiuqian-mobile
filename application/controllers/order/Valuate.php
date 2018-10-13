@@ -34,6 +34,9 @@ class Valuate extends MY_Controller{
             $OrderId = $this->input->get('v', true);
             $this->_Search['order_id'] = intval($OrderId);
         }
+        if (!empty($this->_Search['order_id'])) {
+            $this->_Search['all'] = true;
+        }
         $Data = array();
         if(!($Data = $this->order_model->select($this->_Search, '_valuate'))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
@@ -66,7 +69,7 @@ class Valuate extends MY_Controller{
     public function edit () {
         $Save = $this->input->post('save', true);
         if (empty($Save)) {
-            $Save = 'dismantling';
+            $Save = 'valuating';
         }
         $this->_OrderId = $this->input->post('order_id', true);
         if (empty($this->_OrderId)) {

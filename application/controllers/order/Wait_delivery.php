@@ -46,6 +46,9 @@ class Wait_delivery extends MY_Controller{
         $this->_ajax_return($Data);
     }
 
+    public function read () {
+        $this->_read();
+    }
     /**
      * 物流到厂
      */

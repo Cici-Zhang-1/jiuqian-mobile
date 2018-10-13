@@ -2,16 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Slot Controller
+ * Dealer linker signin Controller
  *
  * @package  CodeIgniter
  * @category Controller
  */
-class Slot extends MY_Controller {
+class Dealer_linker_signin extends MY_Controller {
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller data/Slot __construct Start!');
-        $this->load->model('data/slot_model');
+        log_message('debug', 'Controller dealer/Dealer_linker_signin __construct Start!');
+        $this->load->model('dealer/dealer_linker_signin_model');
     }
 
     /**
@@ -31,7 +31,7 @@ class Slot extends MY_Controller {
     public function read () {
         $this->get_page_search();
         $Data = array();
-        if(!($Data = $this->slot_model->select($this->_Search))){
+        if(!($Data = $this->dealer_linker_signin_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }
@@ -45,7 +45,7 @@ class Slot extends MY_Controller {
     public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if($this->slot_model->insert($Post) !== false) {
+            if(!!($NewId = $this->dealer_linker_signin_model->insert($Post))) {
                 $this->Message = '新建成功, 刷新后生效!';
             }else{
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
@@ -64,7 +64,7 @@ class Slot extends MY_Controller {
             $Post = gh_escape($_POST);
             $Where = $Post['v'];
             unset($Post['v']);
-            if(!!($this->slot_model->update($Post, $Where))){
+            if(!!($this->dealer_linker_signin_model->update($Post, $Where))){
                 $this->Message = '内容修改成功, 刷新后生效!';
             }else{
                 $this->Code = EXIT_ERROR;
@@ -86,7 +86,7 @@ class Slot extends MY_Controller {
         }
         if ($this->_do_form_validation()) {
             $Where = $this->input->post('v', true);
-            if ($this->slot_model->delete($Where)) {
+            if ($this->dealer_linker_signin_model->delete($Where)) {
                 $this->Message = '删除成功，刷新后生效!';
             } else {
                 $this->Code = EXIT_ERROR;

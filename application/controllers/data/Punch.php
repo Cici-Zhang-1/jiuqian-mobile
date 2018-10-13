@@ -45,7 +45,7 @@ class Punch extends MY_Controller {
     public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if(!!($NewId = $this->punch_model->insert($Post))) {
+            if($this->punch_model->insert($Post) !== false) {
                 $this->Message = '新建成功, 刷新后生效!';
             }else{
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';

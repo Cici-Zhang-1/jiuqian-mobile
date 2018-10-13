@@ -8,6 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category Controller
  */
 class Unqrcode extends MY_Controller {
+    private $__Search = array(
+        'order_id' => ZERO
+    );
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller warehouse/Unqrcode __construct Start!');
@@ -29,7 +32,16 @@ class Unqrcode extends MY_Controller {
     }
 
     public function read () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
+        if (empty($this->_Search['order_id'])) {
+            $OrderId = $this->input->get('v', true);
+            $this->_Search['order_id'] = intval($OrderId);
+        }
+        if (!empty($this->_Search['order_id'])) {
+            $this->_Search['p'] = ONE;
+            $this->_Search['pagesize'] = ALL_PAGESIZE;
+        }
         $Data = array();
         if(!($Data = $this->unqrcode_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
