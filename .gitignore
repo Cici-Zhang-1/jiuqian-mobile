@@ -17,10 +17,12 @@ application/logs/*
 /vendor/
 
 .DS_Store
+static
 /static/
 /o-static/
 /.idea/
 /upload/
+/download/
 /source/
 TODO.md
 contributing.md
