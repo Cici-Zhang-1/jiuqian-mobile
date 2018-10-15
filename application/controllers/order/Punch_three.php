@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  * 打孔
  */
-class Punch extends MY_Controller{
+class Punch_three extends MY_Controller{
     private $__Search = array(
         'puncher' => 0,
         'start_date' => '',
@@ -18,8 +18,8 @@ class Punch extends MY_Controller{
     private $_Board = array();
     public function __construct(){
         parent::__construct();
-        log_message('debug', 'Controller order/Punch __construct Start!');
-        $this->load->model('order/punch_model');
+        log_message('debug', 'Controller order/Punch_three __construct Start!');
+        $this->load->model('order/punch_three_model');
     }
 
     public function index(){
@@ -41,7 +41,7 @@ class Punch extends MY_Controller{
             }
         }
         $Data = array();
-        if(!($Data = $this->punch_model->select($this->_Search))){
+        if(!($Data = $this->punch_three_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         }
@@ -64,7 +64,7 @@ class Punch extends MY_Controller{
     private function _edit_order_product_classify () {
         if (!empty($this->_Classify)) {
             $this->load->model('order/order_product_classify_model');
-            if (!!($Query = $this->order_product_classify_model->is_status_and_brothers($this->_Classify, WP_PUNCH, P_PUNCH))) {
+            if (!!($Query = $this->order_product_classify_model->is_status_and_brothers($this->_Classify, WP_PUNCH, P_PUNCH_THREE))) {
                 $GLOBALS['workflow_msg'] = '';
                 foreach ($Query as $Key => $Value) {
                     $GLOBALS['workflow_msg'] .= $Value['board'];
@@ -90,7 +90,7 @@ class Punch extends MY_Controller{
     private function _edit_order_product_board () {
         if (!empty($this->_Board)) {
             $this->load->model('order/order_product_board_model');
-            if (!!($Query = $this->order_product_board_model->is_status_and_brothers($this->_Board, WP_PUNCH, P_PUNCH))) {
+            if (!!($Query = $this->order_product_board_model->is_status_and_brothers($this->_Board, WP_PUNCH, P_PUNCH_THREE))) {
                 $GLOBALS['workflow_msg'] = '';
                 foreach ($Query as $Key => $Value) {
                     $GLOBALS['workflow_msg'] .= $Value['board'];
@@ -134,6 +134,7 @@ class Punch extends MY_Controller{
             }
         }
     }
+
     private function _is_punch_group () {
         $this->load->model('permission/usergroup_model');
         if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('打孔'))) {

@@ -5,44 +5,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author Administrator
  * @version
  * @des
- * 打孔
+ * 电子锯
  */
-class Punch_statistic extends MY_Controller{
+class Table_saw_statistic extends MY_Controller{
     private $__Search = array(
-        'puncher' => 0,
+        'saw' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_PUNCH
+        'status' => WP_ELECTRONIC_SAWED,
+        'paging' => NO
     );
-    public function __construct(){
+    public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller order/Punch_statistic __construct Start!');
-        $this->load->model('order/punch_model');
-    }
-
-    public function index(){
-        $View = $this->uri->segment(4, 'read');
-        if(method_exists(__CLASS__, '_' . $View)){
-            $View = '_' . $View;
-            $this->$View();
-        }else{
-            $this->_index($View);
-        }
+        log_message('debug', 'Controller order/Table_saw_statistic __construct Start!');
+        $this->load->model('order/table_saw_model');
     }
 
     public function read(){
         $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
-        if (empty($this->_Search['puncher'])) {
-            if ($this->_is_punch_group()) {
-                $this->_Search['puncher'] = $this->session->userdata('uid');
+        if (empty($this->_Search['saw'])) {
+            if ($this->_is_table_saw_group()) {
+                $this->_Search['saw'] = $this->session->userdata('uid');
             }
         }
         if ($this->_Search['start_date'] == '') {
             $this->_Search['start_date'] = date('Y-m-01');
         }
         $Data = array();
-        if(!($Data = $this->punch_model->select($this->_Search))){
+        if(!($Data = $this->table_saw_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
         } else {
@@ -102,12 +93,12 @@ class Punch_statistic extends MY_Controller{
             $Data['pn'] = ONE;
             $Data['pagesize'] =ALL_PAGESIZE;
         }
-        $this->_ajax_return($Data);
+        $this->_return($Data);
     }
 
-    private function _is_punch_group () {
+    private function _is_table_saw_group () {
         $this->load->model('permission/usergroup_model');
-        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('打孔'))) {
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('推台锯'))) {
             return $this->session->userdata('ugid') == $UsergroupV;
         }
         return false;

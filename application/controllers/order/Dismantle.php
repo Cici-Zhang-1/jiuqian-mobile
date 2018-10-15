@@ -275,4 +275,24 @@ class Dismantle extends MY_Controller{
         }
         return true;
     }
+
+    public function disabled () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order_product');
+            if ($W->initialize($Where)) {
+                $W->remove();
+                $this->Message = '作废成功!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = $this->_W->get_failue();
+            }
+        }
+        $this->_ajax_return();
+    }
 }

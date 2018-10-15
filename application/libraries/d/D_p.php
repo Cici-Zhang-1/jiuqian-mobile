@@ -73,15 +73,16 @@ class D_p extends D_abstract{
             $Value['purchase_unit'] = $FittingInfo['purchase_unit'];
             $Value['purchase'] = $FittingInfo['purchase'];
             $Value['unit_price'] = $FittingInfo['saler_unit_price'];
-            $Value['amount'] = intval($Value['amount']);
+            $Value['amount'] = floatval($Value['amount']);
             $Value['order_product_id'] = $this->_OderProductId;
             $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR;
-            if (isset($MergeFitting[$FittingInfo['v']])) {
+            $MergeFitting[$Key] = $Value;
+            /*if (isset($MergeFitting[$FittingInfo['v']])) {
                 $MergeFitting[$FittingInfo['v']]['amount'] += $Value['amount'];
                 $MergeFitting[$FittingInfo['v']]['sum'] += $Value['sum'];
             } else {
                 $MergeFitting[$FittingInfo['v']] = $Value;
-            }
+            }*/
         }
 
         if (count($MergeFitting) > 0) {
