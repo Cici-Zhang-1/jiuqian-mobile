@@ -9,7 +9,7 @@
 <style>
     .my-label{
         font-size: 36px;
-         font-weight: bold;
+        font-weight: bold;
     }
     .my-label .my-label-title{
         text-align:center;
