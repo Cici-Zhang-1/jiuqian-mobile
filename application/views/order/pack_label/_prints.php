@@ -457,7 +457,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             }
                                         }
                                     } else {
-                                        if (res.contents['packer'][Classify] !== undefined) {
+                                        if (res.contents['packer'] !== undefined && res.contents['packer'][Classify] !== undefined) {
                                             $Form.find('p.warning').html(res.contents['packer'][Classify] + '已经打包该订单');
                                             IsPacked = true
                                         }
@@ -504,7 +504,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     if(undefined !== res.contents.brothers && false !==  res.contents.brothers){
                                         for(var i in res.contents.brothers){
                                             if($.inArray(Classify, res.contents.brothers[i]['pack_type']) >= 0){
-                                                Brothers += '<div class="checkbox"><label class="my-label-enhance"><input type="checkbox" value="'+res.contents.brothers[i]['v']+'" name="brothers" />'+ res.contents.brothers[i]['num']+'[ '+ res.contents.brothers[i][Classify]+' ]件</label></div>';
+                                                Brothers += '<div class="checkbox"><label class="my-label-enhance"><input type="checkbox" value="'+res.contents.brothers[i]['v']+'" name="brothers" />'+ res.contents.brothers[i]['order_product_num']+'[ '+ (res.contents.brothers[i][Classify] || 0) + ' ]件</label></div>';
                                             }
                                         }
                                     }

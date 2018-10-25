@@ -60,8 +60,9 @@ class D_p extends D_abstract{
             } elseif (empty($Value['goods_speci_id'])) {
                 $this->_CI->load->model('product/goods_speci_model');
                 if (!($FittingInfo = $this->_CI->goods_speci_model->is_valid_goods_speci($Value['fitting'], $Value['speci'], $Value['unit']))) {
-                    unset($Fitting[$Key]);
-                    continue;
+                    $Value['goods_speci_id'] = 0;
+                    /* unset($Fitting[$Key]);
+                    continue; */
                 } else {
                     $Value['goods_speci_id'] = $FittingInfo['v'];
                     $Value['speci'] = empty($Value['speci']) ? $FittingInfo['speci'] : $Value['speci'];
@@ -73,15 +74,16 @@ class D_p extends D_abstract{
             $Value['purchase_unit'] = $FittingInfo['purchase_unit'];
             $Value['purchase'] = $FittingInfo['purchase'];
             $Value['unit_price'] = $FittingInfo['saler_unit_price'];
-            $Value['amount'] = intval($Value['amount']);
+            $Value['amount'] = floatval($Value['amount']);
             $Value['order_product_id'] = $this->_OderProductId;
             $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR;
-            if (isset($MergeFitting[$FittingInfo['v']])) {
+            $MergeFitting[$Key] = $Value;
+            /*if (isset($MergeFitting[$FittingInfo['v']])) {
                 $MergeFitting[$FittingInfo['v']]['amount'] += $Value['amount'];
                 $MergeFitting[$FittingInfo['v']]['sum'] += $Value['sum'];
             } else {
                 $MergeFitting[$FittingInfo['v']] = $Value;
-            }
+            }*/
         }
 
         if (count($MergeFitting) > 0) {

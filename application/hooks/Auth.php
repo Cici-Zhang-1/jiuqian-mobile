@@ -43,42 +43,46 @@ class Auth {
 
 	public function is_signed_in(){
 	    if(!$this->_is_sign_page()){ // 如果不是signpage就要判断用户登陆状态
-			$Message = '';
-	        if(is_null(self::$_sign_in)){
-				$Uid = $this->_CI->input->cookie('uid');
-				$Uid = $Uid ? $Uid : $this->_CI->input->post('access2008_cookie_uid'); // Default or Upload
-				if (empty($Uid)) {
-					self::$_sign_in = false;
-					$Message = '请登陆系统!';
-				}else {
-                    log_message('debug', 'Sign In User Id By ' . $this->_CI->input->cookie('uid'));
-					if (!!($User = $this->_CI->user->signed_in($Uid))) {
-						self::$_sign_in = true;
-						$this->_global_session_keys();
-					}else {
-						self::$_sign_in = false;
-						$Message = '您的会话已过期，请重新登陆系统!';
-					}
+	        // if (!($this->_Dd_User = $this->_is_dd_code())) {
+                $Message = '';
+                if(is_null(self::$_sign_in)){
+                    $Uid = $this->_CI->input->cookie('uid');
+                    $Uid = $Uid ? $Uid : $this->_CI->input->post('access2008_cookie_uid'); // Default or Upload
+                    if (empty($Uid)) {
+                        self::$_sign_in = false;
+                        $Message = '请登陆系统!';
+                    }else {
+                        log_message('debug', 'Sign In User Id By ' . $this->_CI->input->cookie('uid'));
+                        if (!!($User = $this->_CI->user->signed_in($Uid))) {
+                            self::$_sign_in = true;
+                            $this->_global_session_keys();
+                        }else {
+                            self::$_sign_in = false;
+                            $Message = '您的会话已过期，请重新登陆系统!';
+                        }
 
-				}
-	        }
-
-	        if(!self::$_sign_in){
-                // gh_location('',site_url('sign/index/in'));
-                $Return = array(
-                    'code' => EXIT_SIGNIN,
-                    'message' => $Message
-                );
-	            /*if ($GLOBALS['MOBILE']) {*/
-                if (isset($_GET['callback'])) {
-                    exit($_GET['callback'] . '(' .json_encode($Return) . ')');
-                } else {
-                    exit(json_encode($Return));
+                    }
                 }
-                /*} else {
-                    gh_location($Return['message'],site_url('sign/index/in'));
-                }*/
-	        }
+
+                if(!self::$_sign_in){
+                    // gh_location('',site_url('sign/index/in'));
+                    $Return = array(
+                        'code' => EXIT_SIGNIN,
+                        'message' => $Message
+                    );
+                    /*if ($GLOBALS['MOBILE']) {*/
+                    if (isset($_GET['callback'])) {
+                        exit($_GET['callback'] . '(' .json_encode($Return) . ')');
+                    } else {
+                        exit(json_encode($Return));
+                    }
+                    /*} else {
+                        gh_location($Return['message'],site_url('sign/index/in'));
+                    }*/
+                }
+//            } else {
+//
+//            }
 	    }
 	}
 	
@@ -101,6 +105,11 @@ class Auth {
 
         }
         return true;
+    }
+
+    private function _is_dd_code () {
+        require_once APPPATH . 'third_party/eapp/login.php';
+        return getUserId();
     }
 }
 

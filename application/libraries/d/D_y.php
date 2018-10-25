@@ -35,6 +35,7 @@ class D_y extends D_abstract{
         $this->_OderProductId = intval(trim($this->_OderProductId));
         $this->_OrderProduct['product'] = $this->_CI->input->post('product', true);
         $this->_OrderProduct['remark'] = $this->_CI->input->post('remark', true);
+        $this->_OrderProduct['bd'] = $this->_CI->input->post('bd', true);
         if (empty($this->_OrderProduct['bd'])) {
             $this->_OrderProduct['bd'] = NO;
         }

@@ -40,7 +40,39 @@ class Mrp extends MY_Controller {
             $Post = gh_escape($_POST);
             $Where = $Post['v'];
             unset($Post['v']);
-            $this->load->model('order/order_product_classify_model');
+            if (!!($Distribution = $this->mrp_model->is_status_and_brothers($Where, array(M_ELECTRONIC_SAW, M_SHEAR, M_SHEARED)))) {
+                $Where = array();
+                $WorkflowMessage = '';
+                foreach ($Distribution as $Key => $Value) {
+                    $Where[] = $Value['v'];
+                    $WorkflowMessage .= $Value['board'];
+                }
+                $this->load->model('order/order_product_classify_model');
+                if (!!($this->order_product_classify_model->are_status_by_mrp_id($Where, array(WP_SHEAR, WP_SHEARED, WP_ELECTRONIC_SAW), TRUE))) {
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = '这个批次中有的订单准备工作还没有做，比如：打印清单...';
+                } else {
+                    if (!!($this->mrp_model->update($Post, $Where))) {
+                        $this->load->library('workflow/workflow');
+                        $W = $this->workflow->initialize('mrp');
+                        $W->initialize($Where);
+                        $GLOBALS['workflow_msg'] = $WorkflowMessage;
+                        if (!!($W->sheared())) {
+                            $this->Message = '分配成功, 刷新后生效!';
+                        } else {
+                            $this->Code = EXIT_ERROR;
+                            $this->Message = $W->get_failue();
+                        }
+                    } else {
+                        $this->Code = EXIT_ERROR;
+                        $this->Message = isset($GLOBALS['error']) ? is_array($GLOBALS['error']) ? implode(',', $GLOBALS['error']) : $GLOBALS['error'] : '分配失败';
+                    }
+                }
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = '该批次已经分配和下料，不可重新分配!';
+            }
+            /*$this->load->model('order/order_product_classify_model');
             if (!!($this->order_product_classify_model->are_status_by_mrp_id($Where, array(WP_SHEAR, WP_SHEARED, WP_ELECTRONIC_SAW), TRUE))) {
                 $this->Code = EXIT_ERROR;
                 $this->Message = '这个批次中有的订单准备工作还没有做，比如：打印清单...';
@@ -71,7 +103,7 @@ class Mrp extends MY_Controller {
                     $this->Code = EXIT_ERROR;
                     $this->Message = '该批次已经分配和下料，不可重新分配!';
                 }
-            }
+            }*/
         }
         $this->_ajax_return();
     }

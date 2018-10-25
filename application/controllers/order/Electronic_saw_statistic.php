@@ -74,7 +74,7 @@ class Electronic_saw_statistic extends MY_Controller {
             $Days = date('Y-m-d');
         } else {
             $Days = '-' . $Days . ' days';
-            $Days = date('Y-m-d', strtotime('-30 days'));
+            $Days = date('Y-m-d', strtotime($Days));
         }
         $Data = array('list' => array());
         if (!!($Query = $this->mrp_model->select_electronic_sawed($Days))) {
@@ -87,9 +87,9 @@ class Electronic_saw_statistic extends MY_Controller {
                     );
                 }
                 if ($Value['thick'] > THICK) {
-                    $Tmp[$Value['saw']]['thick'] += $Value['thick'];
+                    $Tmp[$Value['saw']]['thick'] += $Value['num'];
                 } else {
-                    $Tmp[$Value['saw']]['thin'] += $Value['thin'];
+                    $Tmp[$Value['saw']]['thin'] += $Value['num'];
                 }
             }
             foreach ($Tmp as $Key => $Value) {

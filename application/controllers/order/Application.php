@@ -96,6 +96,7 @@ class Application extends MY_Controller {
                 $MaxEasyProduce = -1 * intval($MaxEasyProduce);
                 $Post['v'] = array();
                 $Data = array();
+                $Ding = array();
                 $Dealer = array();
                 foreach ($Order as $Key => $Value) {
                     if ($this->_is_only_server($Value['v'])) {
@@ -128,6 +129,7 @@ class Application extends MY_Controller {
                         } else {
                             $Tmp['replyer'] = ZERO;
                             $Tmp['reply_datetime'] = null;
+                            array_push($Ding, $Value['num']);
                         }
                         array_push($Data, $Tmp);
                     }
@@ -145,6 +147,8 @@ class Application extends MY_Controller {
                         $W = $this->workflow->initialize('order');
                         if ($W->initialize($Post['v'])) {
                             $W->store_message('订单申请宽松生产');
+                            $dd = $this->_send_dd_msg($Ding, '宽松生产');
+                            log_message('debug', 'dingding send' . $dd);
                         }
                     }
                 } elseif ($this->Code == EXIT_SUCCESS) {
@@ -188,6 +192,7 @@ class Application extends MY_Controller {
                 $MaxEasyDelivery = -1 * intval($MaxEasyDelivery);
                 $Post['v'] = array();
                 $Data = array();
+                $Ding = array();
                 $Dealer = array();
                 foreach ($Order as $Key => $Value) {
                     $NeedPay = floor($Value['sum'] - $Value['payed']);
@@ -214,6 +219,7 @@ class Application extends MY_Controller {
                         } else {
                             $Tmp['replyer'] = ZERO;
                             $Tmp['reply_datetime'] = null;
+                            array_push($Ding, $Value['num']);
                         }
                         array_push($Data, $Tmp);
                     }
@@ -231,6 +237,8 @@ class Application extends MY_Controller {
                         $W = $this->workflow->initialize('order');
                         if ($W->initialize($Post['v'])) {
                             $W->store_message('订单申请宽松发货');
+                            $dd = $this->_send_dd_msg($Ding, '宽松发货');
+                            log_message('debug', 'dingding send' . $dd);
                         }
                     }
                 }
@@ -241,6 +249,49 @@ class Application extends MY_Controller {
             }
         }
         $this->_ajax_return();
+    }
+
+    private function _send_dd_msg ($Ding, $Type) {
+        if (!!($User = $this->_finance())) {
+            require_once APPPATH . 'third_party/eapp/send_application.php';
+            return send(array("msgtype" => 'link', 'link' => array(
+                "messageUrl" => "eapp://pages/application/application",
+                "picUrl" => "@lALOACZwe2Rk",
+                "title" => $this->session->userdata('truename') . $Type,
+                "text" => date('Y-m-d H:i:s') . implode(',', $Ding)
+            )), $User);
+        } else {
+            return '没有财务账户可以发送';
+        }
+    }
+
+    private function _finance() {
+        $this->load->model('permission/usergroup_model');
+        $this->load->model('manage/user_model');
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('财务管理员'))) {
+            $this->get_page_search();
+            $this->_Search['usergroup_v'] = $UsergroupV;
+            $Data = array();
+            if(!($Data = $this->user_model->select($this->_Search))){
+                log_message('debug', 'dddddddd' . '没有user');
+                return false;
+            } else {
+                $User = array();
+                foreach ($Data['content'] as $Key => $Value) {
+                    if (!empty($Value['user_id'])) {
+                        array_push($User, $Value['user_id']);
+                    }
+                }
+                if (!empty($User)) {
+                    return $User;
+                }
+                log_message('debug', 'dddddddd' . '没有user_id');
+                return false;
+            }
+        } else {
+            log_message('debug', 'dddddddd' . '没有usergroup');
+            return false;
+        }
     }
 
     /**

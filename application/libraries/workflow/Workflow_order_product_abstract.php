@@ -89,7 +89,7 @@ abstract class Workflow_order_product_abstract{
         if(!!($Query = $this->_CI->workflow_order_product_model->select_by_name($Name))) {
             $this->_Workflow->store_message('执行了' . $Query['label'] . '操作');
         } else {
-            $this->_Workflow->store_message('执行了无效的操作');
+            $this->_Workflow->store_message('执行了一个操作');
         }
         return true;
     }

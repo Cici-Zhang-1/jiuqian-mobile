@@ -266,7 +266,7 @@ class Dismantle extends MY_Controller{
             }
         }
         $this->load->model('order/order_product_board_plate_model');
-        if (!!($Query = $this->order_product_board_plate_model->select_checked_bd($V))) {
+        if (!empty($V) && !!($Query = $this->order_product_board_plate_model->select_checked_bd($V))) {
             foreach ($Query as $Key => $Value) {
                 $Query[$Key] = $Value['qrcode'];
             }
@@ -274,5 +274,25 @@ class Dismantle extends MY_Controller{
             return false;
         }
         return true;
+    }
+
+    public function disabled () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Where = $this->input->post('v', true);
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order_product');
+            if ($W->initialize($Where)) {
+                $W->remove();
+                $this->Message = '作废成功!';
+            } else {
+                $this->Code = EXIT_ERROR;
+                $this->Message = $this->_W->get_failue();
+            }
+        }
+        $this->_ajax_return();
     }
 }

@@ -185,6 +185,7 @@ class Order extends MY_Controller {
             $this->load->model('dealer/shop_model');
             if ($this->_ShopPrimaryInfo = $this->shop_model->select_primary_info($this->_Order['shop_id'])) {
                 $this->_Order['down_payment'] = $this->_ShopPrimaryInfo['down_payment']; // 可能首付会不同
+                $this->_Order['payterms'] = $this->_ShopPrimaryInfo['payterms'];
                 $this->_set_checker();
                 $this->_set_payer();
                 $this->_set_dealer_delivery();
@@ -378,6 +379,9 @@ class Order extends MY_Controller {
      * 从新拆单
      */
 	public function re_dismantle () {
+	    if (empty($_POST['v'])) {
+	        $_POST['v'] = $_POST['order_id'];
+        }
         if ($this->_do_form_validation()) {
             $V = $this->input->post('v', true);
             if (!!($this->order_model->is_re_dismantlable($V))) {

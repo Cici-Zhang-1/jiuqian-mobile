@@ -470,7 +470,7 @@ class Order_model extends MY_Model{
         $Query = $this->HostDb->select($Sql)->from('order')
             ->where('o_id', $V)
             ->where('o_status > ', O_REMOVE) /*订单没有删除*/
-            ->where('o_status <= ', O_PRODUCE)  /*订单没有确认拆单*/
+            ->where('o_status < ', O_PRODUCE)  /*订单没有确认拆单*/
             ->get();
         if($Query->num_rows() > 0){
             return $Query->row_array();

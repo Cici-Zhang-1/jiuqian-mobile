@@ -44,6 +44,7 @@ class Sign extends MY_Controller {
 	}
 
 	public function in(){
+	    $Data = array();
 	    if ($this->_do_form_validation()) {
             $name = $this->input->post('name',true);
             $password = $this->input->post('password',true);
@@ -57,13 +58,13 @@ class Sign extends MY_Controller {
                 );
                 $this->signin_model->insert($Set);
                 $this->_user_session($user);
-                $this->_user_cookie($user);
+                $Data = $this->_user_cookie($user);
                 $this->Location = base_url('index.php');
             }else{
                 $this->Code = EXIT_ERROR;
             }
         }
-        $this->_return();
+        $this->_return($Data);
 	}
 
 	public function out(){
@@ -87,7 +88,11 @@ class Sign extends MY_Controller {
 	private function _user_session($User){
 	    $SessionKeys = explode(' ', $this->config->item('session_keys'));
 	    foreach ($SessionKeys as $value){
-	        $Session[$value] = $User[$value];
+	        if (is_null($User[$value])) {
+	            continue;
+            } else {
+                $Session[$value] = $User[$value];
+            }
 	    }
 	    $this->session->set_userdata($Session);
 	}
@@ -98,13 +103,20 @@ class Sign extends MY_Controller {
 	 */
 	private function _user_cookie($User){
 	    $CookieKeys = explode(' ', $this->config->item('cookie_keys'));
+	    $Cookies = array();
 	    foreach ($CookieKeys as $value){
-	        $Cookie = array(
-	            'name' => $value,
-	            'value' => $User[$value],
-	            'expire' => 0
-	        );
-	        $this->input->set_cookie($Cookie);
+	        if (is_null($User[$value])) {
+	            continue;
+            } else {
+                $Cookie = array(
+                    'name' => $value,
+                    'value' => $User[$value],
+                    'expire' => 0
+                );
+                array_push($Cookies, $Cookie);
+                $this->input->set_cookie($Cookie);
+            }
 	    }
+	    return $Cookies;
 	}
 }

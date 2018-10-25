@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 class User_model extends MY_Model{
+    private $_Num;
     public function __construct(){
         parent::__construct(__DIR__, __CLASS__);
         log_message('debug', 'Model Manage/User_model Start');
@@ -145,11 +146,15 @@ class User_model extends MY_Model{
     function check_login($name,$password){
         if (!!($query = $this->check_name($name))) {
             if($query['password'] == crypt($password, $query['salt'])){
-                $GLOBALS['uniqid'] = uniqid(mt_rand(),true);
-                $Session_id = session_id();
-                $this->HostDb->where('u_id', $query['uid'])->update('user',array('u_uniqid' =>$GLOBALS['uniqid'], 'u_session' => $Session_id));
-                unset($query['password'], $query['salt']);
-                return $query;
+                if ($query['status'] == STOP_WORK) {
+                    $GLOBALS['message'] = '账户已经停用!';
+                } else {
+                    $GLOBALS['uniqid'] = uniqid(mt_rand(),true);
+                    $Session_id = session_id();
+                    $this->HostDb->where('u_id', $query['uid'])->update('user',array('u_uniqid' =>$GLOBALS['uniqid'], 'u_session' => $Session_id));
+                    unset($query['password'], $query['salt']);
+                    return $query;
+                }
             } else {
                 $GLOBALS['message'] = '密码错误!';
             }
@@ -279,10 +284,12 @@ class User_model extends MY_Model{
         if($Query->num_rows() > 0){
             $Row = $Query->row_array();
             $Query->free_result();
-            if($Row['u_group_no'] < $Data['u_group_no']){
-                $this->_update_group_no_min($Row['u_group_no'], $Data['u_group_no'], $Data['u_usergroup_id']);
-            }elseif ($Row['u_group_no'] > $Data['u_group_no']){
-                $this->_update_group_no_plus($Data['u_group_no'], $Row['u_group_no'], $Data['u_usergroup_id']);
+            if (!empty($Data['u_group_no'])) {
+                if($Row['u_group_no'] < $Data['u_group_no']){
+                    $this->_update_group_no_min($Row['u_group_no'], $Data['u_group_no'], $Data['u_usergroup_id']);
+                }elseif ($Row['u_group_no'] > $Data['u_group_no']){
+                    $this->_update_group_no_plus($Data['u_group_no'], $Row['u_group_no'], $Data['u_usergroup_id']);
+                }
             }
         }else{
             $GLOBALS['error'] = '您要修改的用户不存在';
@@ -341,6 +348,16 @@ class User_model extends MY_Model{
         } else {
             return false;
         }
+    }
+
+    public function update_batch($Data) {
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Data as $key => $value){
+            $Data[$key] = $this->_format_re($value, $Item);
+        }
+        $this->HostDb->update_batch('user', $Data, 'u_id');
+        $this->remove_cache($this->_Module);
+        return true;
     }
     public function delete($Where) {
         if(is_array($Where)){

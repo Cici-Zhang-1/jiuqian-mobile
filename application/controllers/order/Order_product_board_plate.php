@@ -260,6 +260,8 @@ class Order_product_board_plate extends MY_Controller {
                     $this->Code = EXIT_ERROR;
                 } else {
                     foreach ($Data['content'] as $Key => $Value) {
+                        $Data['content'][$Key]['real_width'] = $Data['content'][$Key]['width'];
+                        $Data['content'][$Key]['real_length'] = $Data['content'][$Key]['length'];
                         $Data['content'][$Key]['width'] = $Value['width'] - $Value['up_edge'] - $Value['down_edge'];
                         $Data['content'][$Key]['length'] = $Value['length'] - $Value['left_edge'] - $Value['right_edge'];
                     }

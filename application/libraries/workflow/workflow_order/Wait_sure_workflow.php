@@ -567,6 +567,11 @@ class Wait_sure_workflow extends Workflow_order_abstract {
      * 重新拆单
      */
     public function re_dismantle() {
+        $this->_Order['order_id'] = $this->_Workflow->get_source_ids();
+        $this->_clear_application();
+        $this->_Workflow->set_data(array(
+            'payterms' => NORMAL_PAY
+        ));
         $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['dismantling']);
         $this->_Workflow->re_dismantle();
     }
@@ -575,6 +580,11 @@ class Wait_sure_workflow extends Workflow_order_abstract {
      * 重新核价
      */
     public function re_valuate() {
+        $this->_Order['order_id'] = $this->_Workflow->get_source_ids();
+        $this->_clear_application();
+        $this->_Workflow->set_data(array(
+            'payterms' => NORMAL_PAY
+        ));
         $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['valuating']);
         $this->_Workflow->re_valuate();
     }

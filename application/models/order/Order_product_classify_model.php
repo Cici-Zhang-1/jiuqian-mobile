@@ -186,7 +186,7 @@ class Order_product_classify_model extends MY_Model {
         $Query = $this->HostDb->select($Sql)->from('order_product_classify')
             ->join('user', 'u_id = opc_pack', 'left')
             ->where('opc_order_product_id', $OrderProductId)
-            ->where('opc_status >= ', WP_PACK)
+            ->where('opc_status >= ', WP_ELECTRONIC_SAWED)
             ->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
