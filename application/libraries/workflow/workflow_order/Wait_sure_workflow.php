@@ -70,6 +70,8 @@ class Wait_sure_workflow extends Workflow_order_abstract {
                     $this->_add_order_finance_flow();
                     $this->_edit_dealer_finance();
                     $this->_add_dealer_account_book();
+                } else {
+                    $this->_edit_dealer_status();
                 }
                 if ($this->_OnlyServer) {
                     $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['outed']);
@@ -176,6 +178,16 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             'produce' => $this->_Order['dealer_produce'] + $this->_Order['sum'],
             'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
             'virtual_produce' => $this->_Order['dealer_virtual_produce'] + $this->_Order['virtual_sum'],
+            'last_order' => date('Y-m-d H:i:s')
+        ), $this->_Order['dealer_id']);
+    }
+
+    /**
+     * 更新客户状态
+     */
+    private function _edit_dealer_status () {
+        $this->_CI->load->model('dealer/dealer_model');
+        return $this->_CI->dealer_model->update(array(
             'last_order' => date('Y-m-d H:i:s')
         ), $this->_Order['dealer_id']);
     }
@@ -567,6 +579,11 @@ class Wait_sure_workflow extends Workflow_order_abstract {
      * 重新拆单
      */
     public function re_dismantle() {
+        $this->_Order['order_id'] = $this->_Workflow->get_source_ids();
+        $this->_clear_application();
+        $this->_Workflow->set_data(array(
+            'payterms' => NORMAL_PAY
+        ));
         $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['dismantling']);
         $this->_Workflow->re_dismantle();
     }
@@ -575,6 +592,11 @@ class Wait_sure_workflow extends Workflow_order_abstract {
      * 重新核价
      */
     public function re_valuate() {
+        $this->_Order['order_id'] = $this->_Workflow->get_source_ids();
+        $this->_clear_application();
+        $this->_Workflow->set_data(array(
+            'payterms' => NORMAL_PAY
+        ));
         $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['valuating']);
         $this->_Workflow->re_valuate();
     }

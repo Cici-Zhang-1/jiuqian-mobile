@@ -12,7 +12,8 @@ class Punch extends MY_Controller{
         'puncher' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_PUNCH
+        'status' => WP_PUNCH,
+        'procedure' => P_PUNCH
     );
     private $_Classify = array();
     private $_Board = array();

@@ -31,5 +31,6 @@ $config['dealer/shop_model/select_primary_info'] = array(
     'dd_phone' => 'delivery_phone',
     'concat(a_province, a_city, a_county, dd_address)' => 'delivery_area',
     'dd_address' => 'delivery_address',
-    'd_down_payment' => 'down_payment'
+    'd_down_payment' => 'down_payment',
+    'd_payterms' => 'payterms'
 );

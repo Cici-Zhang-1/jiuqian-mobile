@@ -172,6 +172,7 @@ class Wait_delivery extends MY_Controller{
                 } else {
                     if ($this->Code == EXIT_SUCCESS) {
                         $this->stock_outted_model->trans_commit();
+                        $this->_send_dd_msg($Set['num']);
                         $this->Location = '/warehouse/pick_sheet_print?v=' . $this->_StockOutedId;
                     } else {
                         $this->stock_outted_model->trans_rollback();
@@ -258,5 +259,57 @@ class Wait_delivery extends MY_Controller{
             return false;
         }
         return true;
+    }
+
+    /**
+     * 发送钉钉message
+     * @param $Ding
+     * @return bool|string
+     */
+    private function _send_dd_msg ($Ding) {
+        if (!!($User = $this->_warehouse())) {
+            require_once APPPATH . 'third_party/eapp/send_warehouse.php';
+            return send(array("msgtype" => 'link', 'link' => array(
+                "messageUrl" => "eapp://pages/pick_sheet/pick_sheet",
+                "picUrl" => "@lALOACZwe2Rk",
+                "title" => $this->session->userdata('truename') . '发货单',
+                "text" => $Ding
+            )), $User);
+        } else {
+            return '没有成品库用户可以发送';
+        }
+    }
+
+    /**
+     * 获取成品库成员
+     * @return array|bool
+     */
+    private function _warehouse() {
+        $this->load->model('permission/usergroup_model');
+        $this->load->model('manage/user_model');
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('成品库'))) {
+            $this->get_page_search();
+            $this->_Search['usergroup_v'] = $UsergroupV;
+            $Data = array();
+            if(!($Data = $this->user_model->select($this->_Search))){
+                log_message('debug', 'dddddddd' . '没有user');
+                return false;
+            } else {
+                $User = array();
+                foreach ($Data['content'] as $Key => $Value) {
+                    if (!empty($Value['user_id'])) {
+                        array_push($User, $Value['user_id']);
+                    }
+                }
+                if (!empty($User)) {
+                    return $User;
+                }
+                log_message('debug', 'dddddddd' . '没有user_id');
+                return false;
+            }
+        } else {
+            log_message('debug', 'dddddddd' . '没有usergroup');
+            return false;
+        }
     }
 }

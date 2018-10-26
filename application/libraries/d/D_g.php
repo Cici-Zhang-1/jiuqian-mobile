@@ -54,7 +54,7 @@ class D_g extends D_abstract{
         $Other = self::$_Other;
         // $MergeOther = array();
         foreach ($Other as $Key => $Value) {
-            if (empty($Value['other']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
+            /*if (empty($Value['other']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
                 unset($Other[$Key]);
                 continue;
             } else if (!($OtherInfo = $this->_is_valid_other($Value['goods_speci_id'], $Value['other']))) {
@@ -63,7 +63,24 @@ class D_g extends D_abstract{
                 $Value['purchase_unit'] = $OtherInfo['purchase_unit'];
                 $Value['purchase'] = $OtherInfo['purchase'];
                 $Value['unit_price'] = $OtherInfo['saler_unit_price'];
-                $Value['amount'] = intval($Value['amount']);
+                $Value['amount'] = floatval($Value['amount']);
+                $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
+                $Value['order_product_id'] = $this->_OderProductId;
+            }*/
+            if (empty($Value['other']) || empty($Value['amount'])) {
+                unset($Other[$Key]);
+                continue;
+            } else {
+                if (!($OtherInfo = $this->_is_valid_other($Value['goods_speci_id'], $Value['other']))) {
+                    $Value['purchase_unit'] = 0;
+                    $Value['purchase'] = 0;
+                    $Value['unit_price'] = 0;
+                } else {
+                    $Value['purchase_unit'] = $OtherInfo['purchase_unit'];
+                    $Value['purchase'] = $OtherInfo['purchase'];
+                    $Value['unit_price'] = $OtherInfo['saler_unit_price'];
+                }
+                $Value['amount'] = floatval($Value['amount']);
                 $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
                 $Value['order_product_id'] = $this->_OderProductId;
             }
@@ -159,10 +176,10 @@ class D_g extends D_abstract{
             if (isset(self::$_Others[$GoodsSpeci])) {
                 return self::$_Others[$GoodsSpeci];
             } else {
-                $GLOBALS['error'] = $Other . '不在系统中, 请先登记配件!';
+                // $GLOBALS['error'] = $Other . '不在系统中, 请先登记配件!';
             }
         } else {
-            $GLOBALS['error'] = '系统中没有配件信息';
+            // $GLOBALS['error'] = '系统中没有配件信息';
         }
         return false;
     }

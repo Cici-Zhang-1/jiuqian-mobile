@@ -10,12 +10,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * session中存储的内容
  */
-$config['session_keys'] = 'uid name truename ugid usergroup';
+$config['session_keys'] = 'uid name truename ugid usergroup user_id';
 
 /**
  * cookie中存储的内容
  */
-$config['cookie_keys'] = 'uid truename';
+$config['cookie_keys'] = 'uid truename user_id';
 
 /**
  * action对应的Controller

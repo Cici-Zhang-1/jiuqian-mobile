@@ -163,7 +163,7 @@ class Goods_speci_model extends MY_Model {
                 $Return = $Query->row_array();
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的商品规格';
+                // $GLOBALS['error'] = '没有符合搜索条件的商品规格';
             }
         }
         return $Return;

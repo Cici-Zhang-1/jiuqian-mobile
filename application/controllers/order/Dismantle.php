@@ -266,7 +266,7 @@ class Dismantle extends MY_Controller{
             }
         }
         $this->load->model('order/order_product_board_plate_model');
-        if (!!($Query = $this->order_product_board_plate_model->select_checked_bd($V))) {
+        if (!empty($V) && !!($Query = $this->order_product_board_plate_model->select_checked_bd($V))) {
             foreach ($Query as $Key => $Value) {
                 $Query[$Key] = $Value['qrcode'];
             }

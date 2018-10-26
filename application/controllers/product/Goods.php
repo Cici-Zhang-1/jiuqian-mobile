@@ -155,7 +155,9 @@ class Goods extends MY_Controller {
     */
     public function edit() {
         $Speci = $this->input->post('speci', true);
-        $_POST['speci'] = $Speci ? explode(',', $Speci) : [];
+        if (!empty($Speci) && !is_array($Speci)) {
+            $_POST['speci'] = explode(',', $Speci);
+        }
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
             if (count($Post['speci']) > 0) {

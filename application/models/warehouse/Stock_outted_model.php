@@ -44,7 +44,7 @@ class Stock_outted_model extends MY_Model {
                 );
                 $this->cache->save($Cache, $Return, MONTHS);
             } else {
-                $GLOBALS['error'] = '没有符合搜索条件的出库';
+                $GLOBALS['error'] = '没有符合搜索条件的发货单';
             }
         }
         return $Return;

@@ -139,12 +139,17 @@ class User extends MY_Controller{
         }
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            if (!!($User = $this->user_model->work_status($Post))) {
+            if (!!($User = $this->user_model->work_status($Post['v']))) {
                 $this->load->library('arrange_work');
+                $Post = array();
                 foreach ($User as $Key => $Value) {
                     $this->arrange_work->stop($Value);
+                    $Post[] = array(
+                        'status' => STOP_WORK,
+                        'v' => $Value['v']
+                    );
                 }
-                if(!!($this->user_model->update(array('status' => START_WORK), $Post))){
+                if(!!($this->user_model->update_batch($Post))){
                     $this->Message = '停用成功, 刷新后生效!';
                 }else{
                     $this->Code = EXIT_ERROR;

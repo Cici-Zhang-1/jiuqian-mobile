@@ -12,7 +12,8 @@ class Table_saw extends MY_Controller{
         'saw' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => WP_ELECTRONIC_SAW
+        'status' => WP_ELECTRONIC_SAW,
+        'procedure' => P_TABLE_SAW
     );
     private $_Board;
 
@@ -75,7 +76,7 @@ class Table_saw extends MY_Controller{
     }
     private function _edit_order_product_board () {
         $this->load->model('order/order_product_board_model');
-        if (!!($Query = $this->order_product_board_model->is_status_and_brothers($this->_Board, WP_ELECTRONIC_SAW))) {
+        if (!!($Query = $this->order_product_board_model->is_status_and_brothers($this->_Board, WP_ELECTRONIC_SAW, P_TABLE_SAW))) {
             $GLOBALS['workflow_msg'] = '';
             foreach ($Query as $Key => $Value) {
                 $GLOBALS['workflow_msg'] .= $Value['board'];

@@ -28,6 +28,9 @@ class Scanning_workflow extends Workflow_order_product_classify_abstract {
     }
 
     public function __call($name, $arguments) {
-        ;
+        $Methods = array('optimize');
+        if (in_array($name, $Methods)) {
+            return true;
+        }
     }
 }

@@ -7,10 +7,10 @@ $config['data/edge_model/select'] = array(
         'v'
     ),
     'e_thick' => 'thick',
-    'e_up' => 'up',
-    'e_down' => 'down',
-    'e_left' => 'left',
-    'e_right' => 'right'
+    'e_up' => 'ups',
+    'e_down' => 'downs',
+    'e_left' => 'lefts',
+    'e_right' => 'rights'
 );
 
 $config['data/edge_model/_select'] = array(
@@ -19,8 +19,8 @@ $config['data/edge_model/_select'] = array(
         'v'
     ),
     'e_thick' => 'thick',
-    'e_up' => 'up',
-    'e_down' => 'down',
-    'e_left' => 'left',
-    'e_right' => 'right'
+    'e_up' => 'ups',
+    'e_down' => 'downs',
+    'e_left' => 'lefts',
+    'e_right' => 'rights'
 );

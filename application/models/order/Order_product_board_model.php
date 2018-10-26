@@ -278,20 +278,28 @@ class Order_product_board_model extends MY_Model{
      * 判断是否是某些状态并获取兄弟
      * @param $Vs
      * @param $Status
+     * @param $Procedure
      * @return bool
      */
-    public function is_status_and_brothers ($Vs, $Status) {
+    public function is_status_and_brothers ($Vs, $Status, $Procedure = 0) {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
         $Status = is_array($Status) ? $Status : array($Status);
-        $S = $this->HostDb->select('opb_order_product_id')->from('order_product_board')
+        $this->HostDb->select('opb_order_product_id')->from('order_product_board')
             ->where_in('opb_id', $Vs)
-            ->where_in('opb_status', $Status)
-            ->group_by('opb_order_product_id')->get_compiled_select();
+            ->where_in('opb_status', $Status);
+        if (!empty($Procedure)) {
+            $this->HostDb->where('opc_procedure', $Procedure);
+        }
+        $S = $this->HostDb->group_by('opb_order_product_id')->get_compiled_select();
         $Sql = $this->_unformat_as($Item);
-        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+        $this->HostDb->select($Sql)->from('order_product_board')
             ->where_in('opb_order_product_id', $S, false)
-            ->where_in('opb_status', $Status)->get();
+            ->where_in('opb_status', $Status);
+        if (!empty($Procedure)) {
+            $this->HostDb->where('opc_procedure', $Procedure);
+        }
+        $Query = $this->HostDb->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
         }

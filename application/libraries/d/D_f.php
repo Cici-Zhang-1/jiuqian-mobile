@@ -53,7 +53,7 @@ class D_f extends D_abstract{
         $Server = self::$_Server;
         $MergeServer = array();
         foreach ($Server as $Key => $Value) {
-            if (empty($Value['server']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
+            /*if (empty($Value['server']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
                 unset($Server[$Key]);
                 continue;
             } else if (!($ServerInfo = $this->_is_valid_server($Value['goods_speci_id'], $Value['server']))) {
@@ -62,15 +62,33 @@ class D_f extends D_abstract{
                 $Value['purchase_unit'] = $ServerInfo['purchase_unit'];
                 $Value['purchase'] = $ServerInfo['purchase'];
                 $Value['unit_price'] = $ServerInfo['saler_unit_price'];
-                $Value['amount'] = intval($Value['amount']);
+                $Value['amount'] = floatval($Value['amount']);
+                $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
+                $Value['order_product_id'] = $this->_OderProductId;
+            }*/
+            if (empty($Value['server']) || empty($Value['amount'])) {
+                unset($Server[$Key]);
+                continue;
+            } else {
+                if (!($ServerInfo = $this->_is_valid_server($Value['goods_speci_id'], $Value['server']))) {
+                    $Value['purchase_unit'] = '--';
+                    $Value['purchase'] = 0;
+                    $Value['unit_price'] = 0;
+                } else {
+                    $Value['purchase_unit'] = $ServerInfo['purchase_unit'];
+                    $Value['purchase'] = $ServerInfo['purchase'];
+                    $Value['unit_price'] = $ServerInfo['saler_unit_price'];
+                }
+                $Value['amount'] = floatval($Value['amount']);
                 $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
                 $Value['order_product_id'] = $this->_OderProductId;
             }
-            if (isset($MergeServer[$ServerInfo['v']])) {
+            $MergeServer[$Key] = $Value;
+            /*if (isset($MergeServer[$ServerInfo['v']])) {
                 $MergeServer[$ServerInfo['v']]['amount'] += $Value['amount'];
             } else {
                 $MergeServer[$ServerInfo['v']] = $Value;
-            }
+            }*/
         }
 
         if (count($MergeServer) > 0) {
@@ -162,10 +180,10 @@ class D_f extends D_abstract{
             if (isset(self::$_Servers[$GoodsSpeci])) {
                 return self::$_Servers[$GoodsSpeci];
             } else {
-                $GLOBALS['error'] = $Server . '不在系统中, 请先登记服务!';
+                // $GLOBALS['error'] = $Server . '不在系统中, 请先登记服务!';
             }
         } else {
-            $GLOBALS['error'] = '系统中没有服务信息';
+            // $GLOBALS['error'] = '系统中没有服务信息';
         }
         return false;
     }

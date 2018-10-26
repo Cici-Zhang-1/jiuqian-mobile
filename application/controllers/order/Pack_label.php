@@ -155,6 +155,18 @@ class Pack_label extends MY_Controller {
                             $Data['packer']['thin'] = $Value['packer'];
                         }
                     }
+                } else {
+                    if (!in_array('thick', $Data['pack_type'])) {
+                        array_push($Data['pack_type'], 'thick');
+                        if (!empty($Value['pack'])) {
+                            $Data['packer']['thick'] = $Value['packer'];
+                        }
+                    } elseif (!in_array('thin', $Data['pack_type'])) {
+                        array_push($Data['pack_type'], 'thin');
+                        if (!empty($Value['pack'])) {
+                            $Data['packer']['thin'] = $Value['packer'];
+                        }
+                    }
                 }
             }
             $Data['un_scanned'] = $this->_read_un_scanned($OrderProductId); // 是否缺板材

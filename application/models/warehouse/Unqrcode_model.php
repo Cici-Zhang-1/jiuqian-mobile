@@ -32,6 +32,7 @@ class Unqrcode_model extends MY_Model {
                     $this->HostDb->where('u_order_id', $Search['order_id']);
                 }
                 $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])
+                    ->order_by('U.u_id', 'desc')
                     ->get();
                 $Return = array(
                     'content' => $Query->result_array(),

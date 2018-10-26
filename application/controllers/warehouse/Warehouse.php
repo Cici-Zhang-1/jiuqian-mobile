@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Warehouse extends MY_Controller {
     private $__Search = array(
         'paging' => 0,
-        'status' => 1
+        'status' => ''
     );
     public function __construct() {
         parent::__construct();
@@ -48,6 +48,7 @@ class Warehouse extends MY_Controller {
      */
     public function recommend () {
         $Recommend = $this->input->get('recommend');
+        $Recommend = strtoupper($Recommend);
         $Data = array();
         $this->load->model('order/order_product_model');
         if (preg_match(REG_RECOMMEND, $Recommend, $Matches)

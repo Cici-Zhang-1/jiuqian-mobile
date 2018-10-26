@@ -186,7 +186,7 @@ class Order_product_classify_model extends MY_Model {
         $Query = $this->HostDb->select($Sql)->from('order_product_classify')
             ->join('user', 'u_id = opc_pack', 'left')
             ->where('opc_order_product_id', $OrderProductId)
-            ->where('opc_status >= ', WP_PACK)
+            ->where('opc_status >= ', WP_ELECTRONIC_SAWED)
             ->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
@@ -197,20 +197,28 @@ class Order_product_classify_model extends MY_Model {
      * 判断是否是某种状态以及兄弟项
      * @param $Vs
      * @param $Status
+     * @param $Procedure
      * @return bool
      */
-    public function is_status_and_brothers ($Vs, $Status) {
+    public function is_status_and_brothers ($Vs, $Status, $Procedure = 0) {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
         $Status = is_array($Status) ? $Status : array($Status);
-        $S = $this->HostDb->select('opc_order_product_id')->from('order_product_classify')
+        $this->HostDb->select('opc_order_product_id')->from('order_product_classify')
             ->where_in('opc_id', $Vs)
-            ->where_in('opc_status', $Status)
-            ->group_by('opc_order_product_id')->get_compiled_select();
+            ->where_in('opc_status', $Status);
+        if (!empty($Procedure)) {
+            $this->HostDb->where('opc_procedure', $Procedure);
+        }
+        $S = $this->HostDb->group_by('opc_order_product_id')->get_compiled_select();
         $Sql = $this->_unformat_as($Item);
-        $Query = $this->HostDb->select($Sql)->from('order_product_classify')
+        $this->HostDb->select($Sql)->from('order_product_classify')
             ->where_in('opc_order_product_id', $S, false)
-            ->where_in('opc_status', $Status)->get();
+            ->where_in('opc_status', $Status);
+        if (!empty($Procedure)) {
+            $this->HostDb->where('opc_procedure', $Procedure);
+        }
+        $Query = $this->HostDb->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
         }

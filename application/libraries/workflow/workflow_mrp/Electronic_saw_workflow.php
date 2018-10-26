@@ -17,7 +17,7 @@ class Electronic_saw_workflow extends Workflow_mrp_abstract {
         return true;
     }
 
-    public function electronic_sawed(){
+    public function electronic_sawed() {
         $this->_Workflow->edit_current_workflow(Workflow_mrp::$AllWorkflow['electronic_sawed'], array('saw' => $this->_CI->session->userdata('uid'), 'saw_datetime' => date('Y-m-d H:i:s')));
         return $this->_Workflow->electronic_sawed();
     }

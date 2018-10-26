@@ -22,13 +22,17 @@ class Warehouse_model extends MY_Model {
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
-            $Search['status'] = explode(',', $Search['status']);
+            if ($Search['status'] != '') {
+                $Search['status'] = explode(',', $Search['status']);
+            }
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql)->from('warehouse')
-                    ->join('warehouse_status', 'ws_name = w_status', 'left')
-                    ->where_in('w_status', $Search['status']);
+                    ->join('warehouse_status', 'ws_name = w_status', 'left');
+                if (is_array($Search['status'])) {
+                    $this->HostDb->where_in('w_status', $Search['status']);
+                }
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
                     $this->HostDb->group_start()
                             ->like('w_num', $Search['keyword'])
@@ -52,7 +56,10 @@ class Warehouse_model extends MY_Model {
     }
 
     private function _page_num($Search){
-        $this->HostDb->select('count(w_num) as num', FALSE)->where_in('w_status', $Search['status']);
+        $this->HostDb->select('count(w_num) as num', FALSE);
+        if (is_array($Search['status'])) {
+            $this->HostDb->where_in('w_status', $Search['status']);
+        }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
             $this->HostDb->group_start()
                 ->like('w_num', $Search['keyword'])

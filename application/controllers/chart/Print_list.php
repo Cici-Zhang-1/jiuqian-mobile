@@ -438,7 +438,7 @@ class Print_list extends MY_Controller{
                     $List[$Tmp2]['area'] += $value['area'];
                     $List[$Tmp2]['open_hole'] += $value['open_hole'];
                     $List[$Tmp2]['invisibility'] += $value['invisibility'];
-                    $List[$Tmp2]['num'] += 1;
+                    $List[$Tmp2]['amount'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }

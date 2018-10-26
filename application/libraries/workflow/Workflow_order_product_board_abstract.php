@@ -75,4 +75,9 @@ abstract class Workflow_order_product_board_abstract{
             $this->_Workflow->store_message('执行了无效的操作');
         }
     }
+    public function edged() {
+        $this->_Workflow->set_data(array('edge' => $this->_CI->session->userdata('uid'), 'edge_datetime' => date('Y-m-d H:i:s')));
+        $this->_Workflow->store_message('==已完成封边');
+        return true;
+    }
 }

@@ -357,9 +357,12 @@ class Valuate extends MY_Controller{
      * 重新核价
      */
     public function re_valuate () {
+        if (empty($_POST['v'])) {
+            $_POST['v'] = $_POST['order_id'];
+        }
         if ($this->_do_form_validation()) {
             $V = $this->input->post('v', true);
-            if (!!($this->order_model->is_status($V, array(O_CHECK, O_CHECKED, O_WAIT_SURE, O_PRODUCE)))) {
+            if (!!($this->order_model->is_status($V, array(O_CHECK, O_CHECKED, O_WAIT_SURE)))) {
                 $this->load->library('workflow/workflow');
                 $W = $this->workflow->initialize('order');
                 if ($W->initialize($V)) {

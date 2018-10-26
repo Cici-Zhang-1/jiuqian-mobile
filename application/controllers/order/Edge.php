@@ -123,7 +123,7 @@ class Edge extends MY_Controller{
     private function _edit_order_product_classify () {
         if (!empty($this->_Classify)) {
             $this->load->model('order/order_product_classify_model');
-            if (!!($Edge = $this->order_product_classify_model->is_status_and_brothers($this->_Classify, $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE))) {
+            if (!!($Edge = $this->order_product_classify_model->is_status_and_brothers($this->_Classify, $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE, P_EDGE))) {
                 $GLOBALS['workflow_msg'] = '';
                 foreach ($Edge as $Key => $Value) {
                     $GLOBALS['workflow_msg'] .= $Value['board'];
@@ -149,7 +149,7 @@ class Edge extends MY_Controller{
     private function _edit_order_product_board () {
         if (!empty($this->_Board)) {
             $this->load->model('order/order_product_board_model');
-            if (!!($Edge = $this->order_product_board_model->is_status_and_brothers($this->_Board, $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE))) {
+            if (!!($Edge = $this->order_product_board_model->is_status_and_brothers($this->_Board, $this->_EdgeAutoGet ? WP_EDGING : WP_EDGE, P_EDGE))) {
                 $GLOBALS['workflow_msg'] = '';
                 foreach ($Edge as $Key => $Value) {
                     $GLOBALS['workflow_msg'] .= $Value['board'];

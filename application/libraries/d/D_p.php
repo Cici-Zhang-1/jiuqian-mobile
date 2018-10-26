@@ -60,8 +60,9 @@ class D_p extends D_abstract{
             } elseif (empty($Value['goods_speci_id'])) {
                 $this->_CI->load->model('product/goods_speci_model');
                 if (!($FittingInfo = $this->_CI->goods_speci_model->is_valid_goods_speci($Value['fitting'], $Value['speci'], $Value['unit']))) {
-                    unset($Fitting[$Key]);
-                    continue;
+                    $Value['goods_speci_id'] = 0;
+                    /* unset($Fitting[$Key]);
+                    continue; */
                 } else {
                     $Value['goods_speci_id'] = $FittingInfo['v'];
                     $Value['speci'] = empty($Value['speci']) ? $FittingInfo['speci'] : $Value['speci'];

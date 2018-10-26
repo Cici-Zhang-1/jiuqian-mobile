@@ -11,6 +11,7 @@ class Pick_sheet extends MY_Controller {
     private $_Order = array();
     private $_OrderProduct = array();
     private $__Search = array(
+        'start_date' => '',
         'status' => 1
     );
     public function __construct() {
