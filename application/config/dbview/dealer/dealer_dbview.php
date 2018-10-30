@@ -31,7 +31,9 @@ $config['dealer/dealer_model/select'] = array(
     'ds_label' => 'status_label',
     'd_num' => 'num',
     'd_dealer_rank' => 'dealer_rank',
-    'd_down_payment' => 'down_payment'
+    'd_down_payment' => 'down_payment',
+    'dl_truename' => 'linker_name',
+    'dl_mobilephone' => 'mobilephone'
     );
 
 $config['dealer/dealer_model/is_exist'] = array(

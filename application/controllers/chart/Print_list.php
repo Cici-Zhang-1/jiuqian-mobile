@@ -218,7 +218,7 @@ class Print_list extends MY_Controller{
         return $this->_All;
     }
     private function _read_abnormity () {
-        $this->load->library('d_dismantle');
+        // $this->load->library('d_dismantle');
         $Data = array('Statistic' => array(), 'Amount' => 0, 'Area' => 0);
         $this->load->model('order/order_product_board_plate_model');
         $Plate = $this->order_product_board_plate_model->select_abnormity_by_order_product_id($this->_OrderProduct['order_product_id']);

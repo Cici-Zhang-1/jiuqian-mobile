@@ -19,7 +19,7 @@ class Product_model extends MY_Model {
      */
     public function select($Search) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Search['pn'] = $this->_page_num($Search);
@@ -27,6 +27,9 @@ class Product_model extends MY_Model {
                 $Sql = $this->_unformat_as($Item);
                 $this->HostDb->select($Sql)->from('product')
                     ->join('production_line', 'pl_id = p_production_line', 'left');
+                if (!empty($Search['code'])) {
+                    $this->HostDb->where_in('p_code', $Search['code']);
+                }
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
                 }
                 if (!empty($Search['undelete'])) {
@@ -52,6 +55,9 @@ class Product_model extends MY_Model {
 
     private function _page_num($Search){
         $this->HostDb->select('count(p_id) as num', FALSE);
+        if (!empty($Search['code'])) {
+            $this->HostDb->where_in('p_code', $Search['code']);
+        }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
         }
         if (!empty($Search['undelete'])) {

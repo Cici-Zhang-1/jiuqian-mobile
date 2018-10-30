@@ -65,4 +65,17 @@ class Synchro extends MY_Controller {
         $this->input->set_cookie($Cookie);
         return $Cookies;
     }
+
+    /**
+     * 解除绑定用户
+     */
+    public function remove () {
+        $User = array(
+            'user_id' => ''
+        );
+        $this->user->update($User, $this->session->userdata('uid'));
+        $this->_user_session($User);
+        $this->_user_cookie($User);
+        $this->_ajax_return();
+    }
 }

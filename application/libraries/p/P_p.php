@@ -1,4 +1,4 @@
-<?php namespace Dismantle;
+<?php namespace Post_sale;
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 2016年1月14日
@@ -7,13 +7,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 
-require_once dirname(__FILE__).'/D_abstract.php';
+require_once dirname(__FILE__).'/P_abstract.php';
 
-class D_p extends D_abstract{
+class P_p extends P_abstract{
     private $_Save;
     private $_W;
 
-    private $_OrderProductNum;
     static $_Fitting;
     static $_Fittings;
 
@@ -25,12 +24,12 @@ class D_p extends D_abstract{
         $this->_W = $this->_CI->workflow->initialize('order_product');
     }
 
-    public function edit ($Save) {
+    public function edit ($Save, $OrderProduct) {
         $this->_Save = $Save;
+        $this->_OrderProductInfo = $OrderProduct;
         $this->_OderProductId = $this->_CI->input->post('v', true);
         $this->_OderProductId = intval(trim($this->_OderProductId));
-        $this->_OrderProduct['product'] = $this->_CI->input->post('product', true);
-        $this->_OrderProduct['remark'] = $this->_CI->input->post('remark', true);
+        $this->_OrderProduct['sum'] = 0;
 
         self::$_Fitting = $this->_CI->input->post('order_product_board_plate', true);
 
@@ -52,39 +51,40 @@ class D_p extends D_abstract{
      */
     private function _check_fitting () {
         $Fitting = self::$_Fitting;
+        $Status = $this->_get_source_status();
         $MergeFitting = array();
         foreach ($Fitting as $Key => $Value) {
-            // if ((empty($Value['fitting']) && empty($Value['goods_speci_id'])) || empty($Value['amount'])) {
+            $Value = array_merge($Value, $Status);
             if (empty($Value['fitting']) || empty($Value['amount'])) {
                 unset($Fitting[$Key]);
                 continue;
-            } elseif (empty($Value['goods_speci_id'])) {
-                $this->_CI->load->model('product/goods_speci_model');
-                if (!($FittingInfo = $this->_CI->goods_speci_model->is_valid_goods_speci($Value['fitting'], $Value['speci'], $Value['unit']))) {
-                    $Value['goods_speci_id'] = 0;
-                    /* unset($Fitting[$Key]);
-                    continue; */
-                } else {
-                    $Value['goods_speci_id'] = $FittingInfo['v'];
-                    $Value['speci'] = empty($Value['speci']) ? $FittingInfo['speci'] : $Value['speci'];
-                    $Value['unit'] = empty($Value['unit']) ? $FittingInfo['unit'] : $Value['unit'];
-                }
-            } elseif (!($FittingInfo = $this->_is_valid_fitting($Value['goods_speci_id'], $Value['fitting']))) {
-                return false;
-            }
-            $Value['purchase_unit'] = $FittingInfo['purchase_unit'];
-            $Value['purchase'] = $FittingInfo['purchase'];
-            $Value['unit_price'] = $FittingInfo['saler_unit_price'];
-            $Value['amount'] = floatval($Value['amount']);
-            $Value['order_product_id'] = $this->_OderProductId;
-            $Value['sum'] = ceil($Value['amount'] * $Value['unit_price']);
-            $MergeFitting[$Key] = $Value;
-            /*if (isset($MergeFitting[$FittingInfo['v']])) {
-                $MergeFitting[$FittingInfo['v']]['amount'] += $Value['amount'];
-                $MergeFitting[$FittingInfo['v']]['sum'] += $Value['sum'];
             } else {
-                $MergeFitting[$FittingInfo['v']] = $Value;
-            }*/
+                if (!($FittingInfo = $this->_is_valid_fitting($Value['goods_speci_id'], $Value['fitting']))) {
+                    $FittingInfo = array(
+                        'goods_speci_id' => 0,
+                        'purchase_unit' => '--',
+                        'purchase' => 0,
+                        'unit_price' => 0
+                    );
+                }
+                if (empty($Value['goods_speci_id'])) {
+                    $Value['goods_speci_id'] = $FittingInfo['goods_speci_id'];
+                }
+                if (empty($Value['purchase_unit'])) {
+                    $Value['purchase_unit'] = $FittingInfo['purchase_unit'];
+                }
+                if (empty($Value['purchase'])) {
+                    $Value['purchase'] = $FittingInfo['purchase'];
+                }
+                if (empty($Value['unit_price']) && $Value['unit_price'] != 0) {
+                    $Value['unit_price'] = $FittingInfo['unit_price'];
+                }
+                $Value['amount'] = floatval($Value['amount']);
+                $Value['sum'] = ceil($Value['amount'] * $Value['unit_price']); // 计算价格
+                $this->_OrderProduct['sum'] += $Value['sum'];
+                $Value['order_product_id'] = $this->_OderProductId;
+            }
+            $MergeFitting[$Key] = $Value;
         }
 
         if (count($MergeFitting) > 0) {
@@ -95,6 +95,10 @@ class D_p extends D_abstract{
         }
     }
 
+    private function _get_source_status () {
+        return $this->_CI->order_product_fitting_model->select_for_post_sale($this->_OderProductId);
+    }
+
     /**
      * 新增橱柜板块清单
      * @param unknown $BoardPlate
@@ -102,53 +106,14 @@ class D_p extends D_abstract{
      */
     private function _add_order_product_fitting(){
         $Fitting = self::$_Fitting;
-
         $this->_CI->order_product_fitting_model->delete_by_order_product_id($this->_OderProductId);
         $Fitting = gh_escape($Fitting);
-        if(!!($this->_CI->order_product_fitting_model->insert_batch($Fitting))){
+        if(!!($this->_CI->order_product_fitting_model->insert_batch_post($Fitting))){
             return true;
         }else{
             $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'保存拆单配件失败!';
             return false;
         }
-    }
-
-    /**
-     * 复制订单
-     */
-    public function repeat ($To, $From) {
-        $this->_Save = 'dismantling';
-
-        $this->_OderProductId = $To['v'];
-        $this->_OrderProductNum = $To['order_product_num'];
-
-        $this->_get_fitting($From);
-
-        if (!empty(self::$_Fitting)) {
-            $this->_add_order_product_fitting();
-        }
-        return $this->_workflow();
-    }
-
-
-    /**
-     * 获取板块清单
-     * @param $OrderProductId
-     */
-    private function _get_fitting ($OrderProductId) {
-        if (empty(self::$_Fitting)) {
-            if (!!($Query = $this->_CI->order_product_fitting_model->select_by_order_product_id(array('order_product_id' => $OrderProductId)))) {
-                $Fitting = $Query['content'];
-                unset($Query);
-                foreach ($Fitting as $Key => $Value) {
-                    $Fitting[$Key]['order_product_id'] = $this->_OderProductId;
-                }
-                self::$_Fitting = $Fitting;
-            } else {
-                return false;
-            }
-        }
-        return true;
     }
 
     private function _workflow() {
@@ -161,13 +126,6 @@ class D_p extends D_abstract{
             }
         }
         return false;
-    }
-    public function read(){
-
-    }
-
-    public function remove($Id, $OrderProductNum = ''){
-        return $this->_CI->order_product_fitting_model->delete_by_order_product_id($Id);
     }
 
     private function _is_valid_fitting ($GoodsSpeci, $Fitting) {
@@ -194,15 +152,5 @@ class D_p extends D_abstract{
             return true;
         }
         return false;
-    }
-    /**
-     * 确认拆单
-     * @param $OrderProductId
-     * @return bool
-     */
-    public function dismantled ($OrderProductId) {
-        $this->_Save = 'dismantled';
-        $this->_OderProductId = $OrderProductId;
-        return $this->_workflow();
     }
 }

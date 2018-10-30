@@ -59,6 +59,7 @@ class Order_model extends MY_Model{
                 if (isset($Search['keyword'])) {
                     $this->HostDb->group_start()
                             ->like('o_dealer', $Search['keyword'])
+                            ->or_like('o_owner', $Search['keyword'])
                             ->or_like('o_num', $Search['keyword'])
                         ->group_end();
                 }
@@ -111,6 +112,7 @@ class Order_model extends MY_Model{
         if (isset($Search['keyword'])) {
             $this->HostDb->group_start()
                 ->like('o_dealer', $Search['keyword'])
+                ->or_like('o_owner', $Search['keyword'])
                 ->or_like('o_num', $Search['keyword'])
                 ->group_end();
         }

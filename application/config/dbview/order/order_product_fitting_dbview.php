@@ -23,6 +23,16 @@ $config['order/order_product_fitting_model/select'] = array(
     'p_code' => 'code'
 );
 
+$config['order/order_product_fitting_model/select_for_post_sale'] = array(
+    'opf_status' => 'status',
+    'opf_procedure' => 'procedure',
+    'opf_production_line' => 'production_line',
+    'opf_print' => 'print',
+    'opf_print_datetime' => 'print_datetime',
+    'opf_pack' => 'pack',
+    'opf_pack_datetime' => 'pack_datetime'
+);
+
 $config['order/order_product_fitting_model/select_for_sure'] = array(
     'opf_id' => 'v'
 );

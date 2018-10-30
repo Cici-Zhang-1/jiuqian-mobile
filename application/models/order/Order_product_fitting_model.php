@@ -71,6 +71,31 @@ class Order_product_fitting_model extends MY_Model{
     }
 
     /**
+     * 售后服务
+     * @param $OrderProductId
+     * @return bool
+     */
+    public function select_for_post_sale ($OrderProductId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $OrderProductId;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('order_product_fitting')
+                ->where('opf_order_product_id', $OrderProductId);
+            $Query = $this->HostDb->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->row_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $Return = array();
+            }
+        } else {
+            $Return = array();
+        }
+        return $Return;
+    }
+
+    /**
      * 清配件
      */
     public function select_produce($Search) {
@@ -328,6 +353,20 @@ class Order_product_fitting_model extends MY_Model{
     		log_message('debug', "Model Order_product_fitting_model/insert_batch Error");
     		return false;
     	}
+    }
+    public function insert_batch_post($Set){
+        $Item = $this->_Item.__FUNCTION__;
+        foreach ($Set as $key => $value){
+            $Set[$key] = $this->_format($value, $Item, $this->_Module);
+        }
+        if($this->HostDb->insert_batch('order_product_fitting', $Set)){
+            log_message('debug', "Model Order_product_fitting_model/insert_batch_post Success!");
+            $this->remove_cache($this->_Module);
+            return true;
+        }else{
+            log_message('debug', "Model Order_product_fitting_model/insert_batch_post Error");
+            return false;
+        }
     }
 
     /**

@@ -29,11 +29,14 @@ class Dealer_model extends MY_Model {
                     ->join('area', 'a_id = d_area_id', 'left')
                     ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false)
                     ->join('user', 'u_id = do_owner_id', 'left')
-                    ->join('dealer_status', 'ds_name = d_status', 'left');
+                    ->join('dealer_status', 'ds_name = d_status', 'left')
+                    ->join('j_dealer_linker', 'dl_dealer_id = d_id && dl_primary = ' . YES, 'left', false);
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
                     $this->HostDb->group_start()
                             ->like('d_name', $Search['keyword'])
                             ->or_like('d_num', $Search['keyword'])
+                            ->or_like('dl_truename', $Search['keyword'])
+                            ->or_like('dl_mobilephone', $Search['keyword'])
                         ->group_end();
                 }
                 if ($Search['public'] == NO) {
@@ -67,11 +70,14 @@ class Dealer_model extends MY_Model {
 
     private function _page_num($Search){
         $this->HostDb->select('count(d_id) as num', FALSE)
-            ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false);
+            ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false)
+            ->join('j_dealer_linker', 'dl_dealer_id = d_id && dl_primary = ' . YES, 'left', false);
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
             $this->HostDb->group_start()
                 ->like('d_name', $Search['keyword'])
                 ->or_like('d_num', $Search['keyword'])
+                ->or_like('dl_truename', $Search['keyword'])
+                ->or_like('dl_mobilephone', $Search['keyword'])
                 ->group_end();
         }
         if ($Search['public'] == NO) {

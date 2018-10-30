@@ -16,4 +16,5 @@ $config['dabc_goods'] = '货款';
 $config['dabc_back'] = '返款';
 $config['dabc_remove'] = '取消进账';
 $config['dabc_edit'] = '修改进账';
+$config['dabc_post_sale'] = '售后';
 $config['dabc_other'] = '其它';

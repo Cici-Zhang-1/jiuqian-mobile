@@ -45,6 +45,7 @@ class Optimize extends MY_Controller{
         parent::__construct();
         log_message('debug', 'Controller Produce/Optimize Start!');
         $this->load->model('order/order_product_classify_model');
+        $this->load->model('order/order_product_model');
     }
 
     public function index(){

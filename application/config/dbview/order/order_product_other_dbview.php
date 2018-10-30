@@ -20,6 +20,16 @@ $config['order/order_product_other_model/select'] = array(
     'wp_label' => 'procedure_status_label'
 );
 
+
+$config['order/order_product_other_model/select_for_post_sale'] = array(
+    'opo_status' => 'status',
+    'opo_procedure' => 'procedure',
+    'opo_production_line' => 'production_line',
+    'opo_print' => 'print',
+    'opo_print_datetime' => 'print_datetime',
+    'opo_pack' => 'pack',
+    'opo_pack_datetime' => 'pack_datetime'
+);
 $config['order/order_product_other_model/select_for_sure'] = array(
     'opo_id' => 'v'
 );

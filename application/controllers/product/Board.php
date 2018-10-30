@@ -9,7 +9,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Board extends MY_Controller {
     private $__Search = array(
-        'status' => YES
+        'status' => YES,
+        'paging' => NO
     );
     public function __construct() {
         parent::__construct();

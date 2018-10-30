@@ -90,7 +90,7 @@ class D_y extends D_abstract{
                 if ($Value['area'] < MIN_AREA) {
                     $Value['area'] = MIN_AREA;
                 }
-                $Value['sum'] = ceil(($Value['area'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
+                $Value['sum'] = ceil($Value['area'] * $Value['unit_price']); // 计算价格
 
                 $Value['thick'] = $BoardInfo['thick'];
                 $Value['amount'] = intval($Value['amount']);

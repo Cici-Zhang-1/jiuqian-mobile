@@ -62,6 +62,19 @@ $config['order/order_product_model/select_dismantle'] = array(
     'p_code' => 'code',
     'o_id' => 'order_id'
 );
+$config['order/order_product_model/select_post_sale'] = array(
+    'op_id' => 'v',
+    'op_num' => 'num',
+    'op_product_id' => 'product_id',
+    'op_product' => 'product',
+    'op_remark' => 'remark',
+    'op_status' => 'status',
+    'op_bd' => 'bd',
+    'op_design_atlas' => 'design_atlas',
+    'wop_label'=> 'status_label',
+    'p_code' => 'code',
+    'o_id' => 'order_id'
+);
 
 $config['order/order_product_model/select_detail'] = array(
     'op_id' => array(
@@ -250,6 +263,37 @@ $config['order/order_product_model/is_order_dismantlable'] = array(
     'op_remark' => 'remark',
     'op_design_atlas' => 'design_atlas',
     'p_code' => 'code'
+);
+
+$config['order/order_product_model/is_order_post_salable'] = array(
+    'o_id' => 'order_id',
+    'o_num' => 'num',
+    'o_dealer' => 'dealer',
+    'o_dealer_id' => 'dealer_id',
+    'o_owner' => 'owner',
+    'o_status' => 'status',
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payed' => 'payed',
+    'o_pay_status' => 'pay_status',
+    'op_id' => array(
+        'v',
+        'order_product_id'
+    ),
+    'op_num' => 'order_product_num',
+    'op_product_id' => 'product_id',
+    'op_product' => 'product',
+    'op_remark' => 'remark',
+    'op_design_atlas' => 'design_atlas',
+    'op_sum' => 'order_product_sum',
+    'p_code' => 'code',
+    'd_balance' => 'dealer_balance',
+    'd_produce' => 'dealer_produce',
+    'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_produce' => 'dealer_virtual_produce',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
 );
 
 $config['order/order_product_model/are_dismantlable'] = array(

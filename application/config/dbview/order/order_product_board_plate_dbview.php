@@ -207,7 +207,7 @@ $config['order/order_product_board_plate_model/select_by_order_product_board_id'
     'opbp_up_edge' => 'up_edge',
     'opbp_down_edge' => 'down_edge',
     'opbp_bd_file' => 'bd_file',
-    'opc_board' => 'good'
+    'opb_board' => 'good'
 );
 $config['order/order_product_board_plate_model/select_abnormity_by_order_product_id'] = array(
 	'opbp_qrcode' => 'qrcode',

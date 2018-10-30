@@ -1,4 +1,4 @@
-<?php namespace Dismantle;
+<?php namespace Post_sale;
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 2016年1月14日
@@ -6,13 +6,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @version
  * @des 服务类拆单
  */
-require_once dirname(__FILE__).'/D_abstract.php';
+require_once dirname(__FILE__).'/P_abstract.php';
 
-class D_f extends D_abstract{
+class P_f extends P_abstract{
     private $_Save;
     private $_W;
 
-    private $_OrderProductNum;
     static $_Server;
     static $_Servers;
 
@@ -24,8 +23,9 @@ class D_f extends D_abstract{
         $this->_W = $this->_CI->workflow->initialize('order_product');
     }
 
-    public function edit ($Save) {
+    public function edit ($Save, $OrderProduct) {
         $this->_Save = $Save;
+        $this->_OrderProductInfo = $OrderProduct;
         $this->_OderProductId = $this->_CI->input->post('v', true);
         $this->_OderProductId = intval(trim($this->_OderProductId));
         $this->_OrderProduct['product'] = $this->_CI->input->post('product', true);
@@ -53,37 +53,21 @@ class D_f extends D_abstract{
         $Server = self::$_Server;
         $MergeServer = array();
         foreach ($Server as $Key => $Value) {
-            /*if (empty($Value['server']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
-                unset($Server[$Key]);
-                continue;
-            } else if (!($ServerInfo = $this->_is_valid_server($Value['goods_speci_id'], $Value['server']))) {
-                return false;
-            } else {
-                $Value['purchase_unit'] = $ServerInfo['purchase_unit'];
-                $Value['purchase'] = $ServerInfo['purchase'];
-                $Value['unit_price'] = $ServerInfo['saler_unit_price'];
-                $Value['amount'] = floatval($Value['amount']);
-                $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
-                $Value['order_product_id'] = $this->_OderProductId;
-            }*/
             if (empty($Value['server']) || empty($Value['amount'])) {
                 unset($Server[$Key]);
                 continue;
             } else {
                 if (!($ServerInfo = $this->_is_valid_server($Value['goods_speci_id'], $Value['server']))) {
                     $ServerInfo = array(
+                        'goods_speci_id' => 0,
                         'purchase_unit' => '--',
                         'purchase' => 0,
                         'unit_price' => 0
                     );
-                    /*$Value['purchase_unit'] = '--';
-                    $Value['purchase'] = 0;
-                    $Value['unit_price'] = 0;*/
-                }/* else {
-                    $Value['purchase_unit'] = $ServerInfo['purchase_unit'];
-                    $Value['purchase'] = $ServerInfo['purchase'];
-                    $Value['unit_price'] = $ServerInfo['saler_unit_price'];
-                }*/
+                }
+                if (empty($Value['goods_speci_id'])) {
+                    $Value['goods_speci_id'] = $ServerInfo['goods_speci_id'];
+                }
                 if (empty($Value['purchase_unit'])) {
                     $Value['purchase_unit'] = $ServerInfo['purchase_unit'];
                 }
@@ -95,14 +79,10 @@ class D_f extends D_abstract{
                 }
                 $Value['amount'] = floatval($Value['amount']);
                 $Value['sum'] = ceil($Value['amount'] * $Value['unit_price']); // 计算价格
+                $this->_OrderProduct['sum'] += $Value['sum'];
                 $Value['order_product_id'] = $this->_OderProductId;
             }
             $MergeServer[$Key] = $Value;
-            /*if (isset($MergeServer[$ServerInfo['v']])) {
-                $MergeServer[$ServerInfo['v']]['amount'] += $Value['amount'];
-            } else {
-                $MergeServer[$ServerInfo['v']] = $Value;
-            }*/
         }
 
         if (count($MergeServer) > 0) {
@@ -130,43 +110,6 @@ class D_f extends D_abstract{
         }
     }
 
-    /**
-     * 复制订单
-     */
-    public function repeat ($To, $From) {
-        $this->_Save = 'dismantling';
-        $this->_OderProductId = $To['v'];
-        $this->_OrderProductNum = $To['order_product_num'];
-
-        $this->_get_server($From);
-
-        if (!empty(self::$_Server)) {
-            $this->_add_order_product_server();
-        }
-        return $this->_workflow();
-    }
-
-
-    /**
-     * 获取板块清单
-     * @param $OrderProductId
-     */
-    private function _get_server ($OrderProductId) {
-        if (empty(self::$_Server)) {
-            if (!!($Query = $this->_CI->order_product_server_model->select_by_order_product_id(array('order_product_id' => $OrderProductId)))) {
-                $Server = $Query['content'];
-                unset($Query);
-                foreach ($Server as $Key => $Value) {
-                    $Server[$Key]['order_product_id'] = $this->_OderProductId;
-                }
-                self::$_Server = $Server;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private function _workflow() {
         if(empty($GLOBALS['error'])){
             if(!!($this->_W->initialize($this->_OderProductId))){
@@ -177,13 +120,6 @@ class D_f extends D_abstract{
             }
         }
         return false;
-    }
-    public function read(){
-
-    }
-
-    public function remove($Id, $OrderProductNum = ''){
-        return $this->_CI->order_product_server_model->delete_by_order_product_id($Id);
     }
 
     private function _is_valid_server ($GoodsSpeci, $Server) {
@@ -210,15 +146,5 @@ class D_f extends D_abstract{
             return true;
         }
         return false;
-    }
-    /**
-     * 确认拆单
-     * @param $OrderProductId
-     * @return bool
-     */
-    public function dismantled ($OrderProductId) {
-        $this->_Save = 'dismantled';
-        $this->_OderProductId = $OrderProductId;
-        return $this->_workflow();
     }
 }

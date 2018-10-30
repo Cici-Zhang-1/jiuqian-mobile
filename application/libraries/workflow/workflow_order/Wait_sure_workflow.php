@@ -70,6 +70,8 @@ class Wait_sure_workflow extends Workflow_order_abstract {
                     $this->_add_order_finance_flow();
                     $this->_edit_dealer_finance();
                     $this->_add_dealer_account_book();
+                } else {
+                    $this->_edit_dealer_status();
                 }
                 if ($this->_OnlyServer) {
                     $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['outed']);
@@ -180,6 +182,15 @@ class Wait_sure_workflow extends Workflow_order_abstract {
         ), $this->_Order['dealer_id']);
     }
 
+    /**
+     * 更新客户状态
+     */
+    private function _edit_dealer_status () {
+        $this->_CI->load->model('dealer/dealer_model');
+        return $this->_CI->dealer_model->update(array(
+            'last_order' => date('Y-m-d H:i:s')
+        ), $this->_Order['dealer_id']);
+    }
     /**
      * 新建客户流水账
      */

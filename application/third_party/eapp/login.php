@@ -22,6 +22,8 @@ function getUserId () {
     $app = $_POST['app'];
     if ($app == 'finance') {
         $access_token = getAccessToken(APP_KEY_FINANCE, APP_SECRET_FINANCE);
+    } elseif ($app == 'warehouse') {
+        $access_token = getAccessToken(APP_KEY_STORAGE, APP_SECRET_STORAGE);
     } else {
         $access_token = false;
     }
@@ -46,10 +48,10 @@ function getUserId () {
                     'user_name' => $user->name
                 );
             } else {
-                Log::e('获取用户信息错误，'.$user->errmsg);
+                // Log::e('获取用户信息错误，'.$user->errmsg);
             }
         } else {
-            Log::e('获取用户ID错误，'.$res->errmsg);
+            // Log::e('获取用户ID错误，'.$res->errmsg);
         }
     }
     return false;

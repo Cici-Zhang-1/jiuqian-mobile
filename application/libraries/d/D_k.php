@@ -66,7 +66,7 @@ class D_k extends D_abstract{
                 if ($Value['area'] < MIN_K_AREA) {
                     $Value['area'] = MIN_K_AREA;
                 }
-                $Value['sum'] = ceil(($Value['area'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
+                $Value['sum'] = ceil($Value['area'] * $Value['unit_price']); // 计算价格
 
                 $Amount = intval($Value['amount']);
                 $Value['amount'] = ONE;

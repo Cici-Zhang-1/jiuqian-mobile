@@ -22,7 +22,7 @@ function getAccessToken($appkey, $appsecret) {
         return false;
     }
 
-    Log::e('发送access_tocken返回d信息，' . json_encode($ret));
+    // Log::e('发送access_tocken返回d信息，' . json_encode($ret));
     return $ret->access_token;
 }
 function send ($Msg, $User) {
@@ -34,17 +34,17 @@ function send ($Msg, $User) {
             "userid_list" => implode(',', $User),
             "msg" => $Msg
         ));
-    Log::e('发送消息，' . json_encode($Msg));
-    Log::e('发送消息返回d信息，' . json_encode($res));
+    // Log::e('发送消息，' . json_encode($Msg));
+    // Log::e('发送消息返回d信息，' . json_encode($res));
     if ($res->errcode === 0) {
-        Log::e('task_id，' . $res->task_id);
-        $resd = Http::post("/topapi/message/corpconversation/getsendresult",
-            array("access_token" => $access_token),
-            array(
-                "agent_id" => APP_AGENT_STORAGE,
-                "task_id" => $res->task_id
-            ));
-        Log::e('发送消息返回信息，' . json_encode($resd));
+//        Log::e('task_id，' . $res->task_id);
+//        $resd = Http::post("/topapi/message/corpconversation/getsendresult",
+//            array("access_token" => $access_token),
+//            array(
+//                "agent_id" => APP_AGENT_STORAGE,
+//                "task_id" => $res->task_id
+//            ));
+//        Log::e('发送消息返回信息，' . json_encode($resd));
         return true;
     } else {
         return $res->errmsg;

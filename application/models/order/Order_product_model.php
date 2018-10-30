@@ -221,6 +221,36 @@ class Order_product_model extends MY_Model{
         return $Return;
     }
 
+    /**
+     * 獲取可以售後的訂單
+     * @param $OrderId
+     * @return bool
+     */
+    public function select_post_sale ($OrderId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . $OrderId;
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('order_product')
+                ->join('workflow_order_product', 'wop_id = op_status', 'left')
+                ->join('product', 'p_id = op_product_id', 'left')
+                ->join('order', 'o_id = op_order_id', 'left');
+
+            $this->HostDb->where('op_status >= ', OP_DISMANTLED);
+            $this->HostDb->where('op_order_id', $OrderId);
+
+            $Query = $this->HostDb->order_by('op_status')->order_by('op_id')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的订单产品';
+            }
+        }
+        return $Return;
+    }
+
     public function select_produce_process_tracking ($Search) {
         $Item = $this->_Item . __FUNCTION__;
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
@@ -702,6 +732,34 @@ class Order_product_model extends MY_Model{
             ->join('order', 'o_id = op_order_id', 'left')
             ->where('o_status > ', O_REMOVE) /*订单没有删除*/
             ->where('o_status < ', O_DISMANTLED);  /*订单没有确认拆单*/
+        if (preg_match(REG_ORDER_PRODUCT_STRICT, $V)) {
+            $this->HostDb->where('op_num', $V);
+        } else {
+            $this->HostDb->where('op_id', $V);
+        }
+        $Query = $this->HostDb->limit(ONE)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->row_array();
+        }
+        return $Return;
+    }
+
+    /**
+     * 判斷訂單是否可以添加售後
+     * @param $V
+     * @return bool
+     */
+    public function is_order_post_salable ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $this->HostDb->select($Sql)->from('order_product')
+            ->join('product', 'p_id = op_product_id', 'left')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->join('dealer', 'd_id = o_dealer_id', 'left')
+            ->where_in('p_id', array(FITTING, OTHER, SERVER)) // 只有這三個可以在確認后修改
+            ->where('op_status > ', OP_DISMANTLING)
+            ->where('o_status > ', O_WAIT_SURE);  /*已经确认的订单*/
         if (preg_match(REG_ORDER_PRODUCT_STRICT, $V)) {
             $this->HostDb->where('op_num', $V);
         } else {

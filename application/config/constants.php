@@ -264,9 +264,9 @@ defined('MAX_SET') OR define('MAX_SET', 30); // 拆单时可以提交的最大�
 define('M_REGULAR', 1000);
 define('M_ONE', 10000);
 define('M_TWO', 100);
-define('MIN_AREA', 0.01);
+define('MIN_AREA', 0.1);
 define('MIN_M_AREA', 0.1);
-define('MIN_K_AREA', 0.4);
+define('MIN_K_AREA', 0.3);
 define('MIN_B_AREA', 0.01);
 
 define('MIN_PAGESIZE', 100);

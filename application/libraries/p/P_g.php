@@ -1,4 +1,4 @@
-<?php namespace Dismantle;
+<?php namespace Post_sale;
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 2016年1月14日
@@ -7,13 +7,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @des
  */
 
-require_once dirname(__FILE__).'/D_abstract.php';
+require_once dirname(__FILE__).'/P_abstract.php';
 
-class D_g extends D_abstract{
+class P_g extends P_abstract{
     private $_Save;
     private $_W;
 
-    private $_OrderProductNum;
     static $_Other;
     static $_Others;
 
@@ -25,8 +24,9 @@ class D_g extends D_abstract{
         $this->_W = $this->_CI->workflow->initialize('order_product');
     }
 
-    public function edit ($Save) {
+    public function edit ($Save, $OrderProduct) {
         $this->_Save = $Save;
+        $this->_OrderProductInfo = $OrderProduct;
         $this->_OderProductId = $this->_CI->input->post('v', true);
         $this->_OderProductId = intval(trim($this->_OderProductId));
         $this->_OrderProduct['product'] = $this->_CI->input->post('product', true);
@@ -52,36 +52,37 @@ class D_g extends D_abstract{
      */
     private function _check_other () {
         $Other = self::$_Other;
+        $Status = $this->_get_source_status();
         // $MergeOther = array();
         foreach ($Other as $Key => $Value) {
-            /*if (empty($Value['other']) || empty($Value['goods_speci_id']) || empty($Value['amount'])) {
-                unset($Other[$Key]);
-                continue;
-            } else if (!($OtherInfo = $this->_is_valid_other($Value['goods_speci_id'], $Value['other']))) {
-                return false;
-            } else {
-                $Value['purchase_unit'] = $OtherInfo['purchase_unit'];
-                $Value['purchase'] = $OtherInfo['purchase'];
-                $Value['unit_price'] = $OtherInfo['saler_unit_price'];
-                $Value['amount'] = floatval($Value['amount']);
-                $Value['sum'] = ceil(($Value['amount'] * $Value['unit_price']) * M_REGULAR) / M_REGULAR; // 计算价格
-                $Value['order_product_id'] = $this->_OderProductId;
-            }*/
+            $Value = array_merge($Value, $Status);
             if (empty($Value['other']) || empty($Value['amount'])) {
                 unset($Other[$Key]);
                 continue;
             } else {
                 if (!($OtherInfo = $this->_is_valid_other($Value['goods_speci_id'], $Value['other']))) {
-                    $Value['purchase_unit'] = 0;
-                    $Value['purchase'] = 0;
-                    $Value['unit_price'] = 0;
-                } else {
+                    $OtherInfo = array(
+                        'goods_speci_id' => 0,
+                        'purchase_unit' => '--',
+                        'purchase' => 0,
+                        'unit_price' => 0
+                    );
+                }
+                if (empty($Value['goods_speci_id'])) {
+                    $Value['goods_speci_id'] = $OtherInfo['goods_speci_id'];
+                }
+                if (empty($Value['purchase_unit'])) {
                     $Value['purchase_unit'] = $OtherInfo['purchase_unit'];
+                }
+                if (empty($Value['purchase'])) {
                     $Value['purchase'] = $OtherInfo['purchase'];
-                    $Value['unit_price'] = $OtherInfo['saler_unit_price'];
+                }
+                if (empty($Value['unit_price']) && $Value['unit_price'] != 0) {
+                    $Value['unit_price'] = $OtherInfo['unit_price'];
                 }
                 $Value['amount'] = floatval($Value['amount']);
                 $Value['sum'] = ceil($Value['amount'] * $Value['unit_price']); // 计算价格
+                $this->_OrderProduct['sum'] += $Value['sum'];
                 $Value['order_product_id'] = $this->_OderProductId;
             }
             $Other[$Key] = $Value;
@@ -95,6 +96,9 @@ class D_g extends D_abstract{
         }
     }
 
+    private function _get_source_status () {
+        return $this->_CI->order_product_other_model->select_for_post_sale($this->_OderProductId);
+    }
     /**
      * 新增橱柜板块清单
      * @param unknown $BoardPlate
@@ -104,49 +108,12 @@ class D_g extends D_abstract{
         $Other = self::$_Other;
         $this->_CI->order_product_other_model->delete_by_order_product_id($this->_OderProductId);
         $Other = gh_escape($Other);
-        if(!!($this->_CI->order_product_other_model->insert_batch($Other))){
+        if(!!($this->_CI->order_product_other_model->insert_batch_post($Other))){
             return true;
         }else{
             $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'保存拆单配件失败!';
             return false;
         }
-    }
-
-    /**
-     * 复制订单
-     */
-    public function repeat ($To, $From) {
-        $this->_Save = 'dismantling';
-        $this->_OderProductId = $To['v'];
-        $this->_OrderProductNum = $To['order_product_num'];
-
-        $this->_get_other($From);
-
-        if (!empty(self::$_Other)) {
-            $this->_add_order_product_other();
-        }
-        return $this->_workflow();
-    }
-
-
-    /**
-     * 获取板块清单
-     * @param $OrderProductId
-     */
-    private function _get_other ($OrderProductId) {
-        if (empty(self::$_Other)) {
-            if (!!($Query = $this->_CI->order_product_other_model->select_by_order_product_id(array('order_product_id' => $OrderProductId)))) {
-                $Other = $Query['content'];
-                unset($Query);
-                foreach ($Other as $Key => $Value) {
-                    $Other[$Key]['order_product_id'] = $this->_OderProductId;
-                }
-                self::$_Other = $Other;
-            } else {
-                return false;
-            }
-        }
-        return true;
     }
 
     private function _workflow() {
@@ -159,13 +126,6 @@ class D_g extends D_abstract{
             }
         }
         return false;
-    }
-    public function read(){
-
-    }
-
-    public function remove($Id, $OrderProductNum = ''){
-        return $this->_CI->order_product_other_model->delete_by_order_product_id($Id);
     }
 
     private function _is_valid_other ($GoodsSpeci, $Other) {
@@ -192,15 +152,5 @@ class D_g extends D_abstract{
             return true;
         }
         return false;
-    }
-    /**
-     * 确认拆单
-     * @param $OrderProductId
-     * @return bool
-     */
-    public function dismantled ($OrderProductId) {
-        $this->_Save = 'dismantled';
-        $this->_OderProductId = $OrderProductId;
-        return $this->_workflow();
     }
 }
