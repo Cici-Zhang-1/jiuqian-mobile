@@ -5,7 +5,7 @@ $config['product/board/add'] = array(
                         array (
             'field' => 'name',
             'label' => '名称',
-            'rules' => 'trim|max_length[64]'
+            'rules' => 'trim|max_length[64]|regex_match[/^[^\\s]*$/]'
         ),
                                 array (
             'field' => 'length',
@@ -78,7 +78,7 @@ $config['product/board/edit'] = array(
                                 array (
             'field' => 'name',
             'label' => '名称',
-            'rules' => 'trim|required|max_length[64]'
+            'rules' => 'trim|required|max_length[64]|regex_match[/^[^\\s]*$/]'
         ),
                                 array (
             'field' => 'length',
@@ -175,6 +175,19 @@ $config['product/board/purchase'] = array(
     array (
         'field' => 'purchase',
         'label' => '采购价格',
+        'rules' => 'trim|required|decimal'
+    )
+);
+
+$config['product/board/unit_price'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '选择项',
+        'rules' => 'trim|required|max_length[64]'
+    ),
+    array (
+        'field' => 'unit_price',
+        'label' => '销售价格',
         'rules' => 'trim|required|decimal'
     )
 );
