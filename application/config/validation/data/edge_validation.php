@@ -5,7 +5,7 @@ $config['data/edge/add'] = array(
                         array (
             'field' => 'name',
             'label' => '名称',
-            'rules' => 'trim|required|max_length[64]|is_unique[edge.e_name]'
+            'rules' => 'trim|required|max_length[64]'
         ),
     array(
         'field' => 'thick',
@@ -43,7 +43,7 @@ $config['data/edge/edit'] = array(
                                 array (
             'field' => 'name',
             'label' => '名称',
-            'rules' => 'trim|required|max_length[64]|is_unique[edge.e_name]'
+            'rules' => 'trim|required|max_length[64]'
         ),
     array(
         'field' => 'thick',
