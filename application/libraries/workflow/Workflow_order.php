@@ -195,7 +195,7 @@ class Workflow_order {
     }
 
     public function __call($name, $arguments){
-        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'valuate', 'valuating', 'valuated', 're_valuate', 'check', 'checked', 'wait_sure', 're_sure', 'produce', 'pre_produce', 'producing', 'inning', 'inned', 'wait_delivery', 'delivering', 'delivered', 're_delivery', 'outed', 'remove');
+        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'valuate', 'valuating', 'valuated', 're_valuate', 'check', 'checked', 'wait_sure', 're_sure', 'produce', 'pre_produce', 'producing', 'inning', 'inned', 'wait_delivery', 'delivering', 'delivered', 're_delivery', 'outed', 'remove', 'direct_out');
         if (in_array($name, $Methods)) {
             return $this->_Workflow->{$name}();
         } else {

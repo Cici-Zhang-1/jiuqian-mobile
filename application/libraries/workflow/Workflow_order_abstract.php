@@ -61,17 +61,90 @@ abstract class Workflow_order_abstract{
     }
 
     /**
+     * 订单直接出厂
+     * @return bool
+     */
+    public function direct_out () {
+        if (!!($Order = $this->_are_directable())) {
+            $this->_CI->load->model('dealer/dealer_model');
+            $this->_CI->load->model('dealer/dealer_account_book_model');
+            $this->_CI->order_model->trans_begin();
+            foreach ($Order as $Key => $Value) {
+                if ($Value['sum'] > ZERO && $Value['pay_status'] != PAYED) { // 如果订单是已经确认之后的
+                    if ($this->_add_order_finance_flow($Value) && !($this->_edit_dealer_finance($Value, YES) && $this->_add_dealer_account_book($Value, YES))) {
+                        break;
+                    }
+                }
+                $this->_Workflow->initialize($Value['v']);
+                $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['outed'], array(
+                    'payed' => $Value['sum'],
+                    'virtual_payed' => $Value['virtual_sum'],
+                    'pay_status' => PAYED
+                ));
+                $this->_Workflow->store_message('订单直接出厂');
+            }
+            if ($this->_CI->order_model->trans_status() === FALSE) {
+                $this->_CI->order_model->trans_rollback();
+                $this->_Workflow->set_failue('执行作废操作时, 发生未知错误!');
+                return false;
+            } else {
+                if (empty($this->_Workflow->get_failue())) {
+                    $this->_CI->order_model->trans_commit();
+                    return true;
+                } else {
+                    $this->_CI->order_model->trans_rollback();
+                    return false;
+                }
+            }
+        } else {
+            $this->_Workflow->set_failue('订单还没有确认或者已经出厂，不能直接出厂!');
+            return false;
+        }
+    }
+
+    /**
+     * 添加订单支付流水
+     * @return mixed
+     */
+    private function _add_order_finance_flow ($Order) {
+        $this->_CI->load->model('order/order_finance_flow_model');
+        $Diff = $Order['sum'] - $Order['payed'];
+        $VirtualDiff = $Order['virtual_sum'] - $Order['virtual_payed'];
+        return $this->_CI->order_finance_flow_model->insert(array(
+            'order_id' => $Order['order_id'],
+            'payed_money' => $Diff,
+            'virtual_payed_money' => $VirtualDiff,
+            'status' => YES,
+            'order_status' => $Order['status']
+        ));
+    }
+
+    /**
      * 编辑客户财务状况
      * @param $Order
      * @return mixed
      */
-    private function _edit_dealer_finance ($Order) {
-        if ($this->_CI->dealer_model->update(array(
-            'balance' => $Order['dealer_balance'] + $Order['payed'],
-            'produce' => $Order['dealer_produce'] - $Order['sum'],
-            'virtual_balance' => $Order['dealer_virtual_balance'] + $Order['virtual_payed'],
-            'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum']
-        ), $Order['dealer_id'])) {
+    private function _edit_dealer_finance ($Order, $Direct = false) {
+        if ($Direct) {
+            $Diff = $Order['sum'] - $Order['payed'];
+            $VirtualDiff = $Order['virtual_sum'] - $Order['virtual_payed'];
+            $Set = array(
+                'balance' => $Order['dealer_balance'] - $Diff,
+                'produce' => $Order['dealer_produce'] - $Order['sum'],
+                'delivered' => $Order['dealer_delivered'] + $Order['sum'],
+                'virtual_balance' => $Order['dealer_virtual_balance'] - $VirtualDiff,
+                'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum'],
+                'virtual_delivered' => $Order['dealer_virtual_delivered'] + $Order['virtual_sum']
+            );
+        } else {
+            $Set = array(
+                'balance' => $Order['dealer_balance'] + $Order['payed'],
+                'produce' => $Order['dealer_produce'] - $Order['sum'],
+                'virtual_balance' => $Order['dealer_virtual_balance'] + $Order['virtual_payed'],
+                'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum']
+            );
+        }
+        if ($this->_CI->dealer_model->update($Set, $Order['dealer_id'])) {
             return true;
         } else {
             $this->_Workflow->set_failue('修改客余额时出错!');
@@ -84,20 +157,28 @@ abstract class Workflow_order_abstract{
      * @param $Order
      * @return bool
      */
-    private function _add_dealer_account_book ($Order) {
+    private function _add_dealer_account_book ($Order, $Direct) {
         $Data = array(
             'flow_num' => date('YmdHis' . join('', explode('.', microtime(true)))),
             'dealer_id' => $Order['dealer_id'],
-            'in' => YES,
-            'amount' => $Order['payed'],
             'title' => $Order['order_num'],
-            'category' => $this->_get_category(),
+            'category' => $this->_get_category($Direct),
             'source_id' => $Order['order_id'],
-            'balance' => $Order['dealer_balance'] + $Order['payed'],
-            'remark' => '',
-            'virtual_amount' => $Order['virtual_payed'],
-            'virtual_balance' => $Order['dealer_virtual_balance'] + $Order['virtual_payed']
+            'remark' => ''
         );
+        if ($Direct) {
+            $Data['in'] = NO;
+            $Data['amount'] = $Order['payed'] - $Order['sum'];
+            $Data['virtual_amount'] = $Order['virtual_payed'] - $Order['virtual_sum'];
+            $Data['balance'] = $Order['dealer_balance'] + $Data['amount'];
+            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Data['virtual_amount'];
+        } else {
+            $Data['in'] = YES;
+            $Data['amount'] = $Order['payed'];
+            $Data['virtual_amount'] = $Order['virtual_payed'];
+            $Data['balance'] = $Order['dealer_balance'] + $Order['payed'];
+            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Order['virtual_payed'];
+        }
         if ($this->_CI->dealer_account_book_model->insert($Data)) {
             return true;
         } else {
@@ -105,9 +186,13 @@ abstract class Workflow_order_abstract{
             return false;
         }
     }
-    private function _get_category () {
+    private function _get_category ($Direct) {
         $this->_CI->config->load('defaults/dealer_account_book_category');
-        return $this->_CI->config->item('dabc_order_remove');
+        if ($Direct) {
+            return $this->_CI->config->item('dabc_order_direct');
+        } else {
+            return $this->_CI->config->item('dabc_order_remove');
+        }
     }
     /**
      * 判断订单产品是否可以删除
@@ -116,6 +201,18 @@ abstract class Workflow_order_abstract{
     private function _are_removable () {
         $this->_Source_ids = $this->_Workflow->get_source_ids();
         if(!!($Ids = $this->_CI->order_model->are_removable($this->_Source_ids))){
+            return $Ids;
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否可以直接出厂
+     * @return bool || array
+     */
+    private function _are_directable () {
+        $this->_Source_ids = $this->_Workflow->get_source_ids();
+        if(!!($Ids = $this->_CI->order_model->are_directable($this->_Source_ids))){
             return $Ids;
         }
         return false;

@@ -376,6 +376,29 @@ class Order extends MY_Controller {
 	}
 
     /**
+     * 直接出厂
+     */
+    public function direct_out(){
+        $V = $this->input->post('v', true);
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $V = $_POST['v'];
+            $this->load->library('workflow/workflow');
+            $W = $this->workflow->initialize('order');
+            $W->initialize($V);
+            if ($W->direct_out()) {
+                $this->Message = '订单直接出厂成功!';
+            } else {
+                $this->Message = $W->get_failue();
+                $this->Code = EXIT_ERROR;
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    /**
      * 从新拆单
      */
 	public function re_dismantle () {

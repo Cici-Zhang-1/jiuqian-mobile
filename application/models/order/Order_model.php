@@ -543,6 +543,27 @@ class Order_model extends MY_Model{
             return false;
         }
     }
+
+    /**
+     * 订单是否可以直接出厂, 只有已经确认生产的订单可以确认出厂
+     * @param $Vs
+     * @return bool
+     */
+    public function are_directable ($Vs) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order')
+            ->join('dealer', 'd_id = o_dealer_id', 'left')
+            ->where_in('o_id', $Vs)
+            ->where('o_status > ', O_WAIT_SURE)
+            ->where('o_status <= ', O_WAIT_DELIVERY)
+            ->get();
+        if($Query->num_rows() > 0){
+            return $Query->result_array();
+        }else{
+            return false;
+        }
+    }
     /**
      * 获取时间段内的下单数
      * @param $Con

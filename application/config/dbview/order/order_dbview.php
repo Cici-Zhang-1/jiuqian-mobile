@@ -492,3 +492,26 @@ $config['order/order_model/are_removable'] = array(
     'd_virtual_delivered' => 'dealer_virtual_delivered',
     'o_status' => 'status'
 );
+
+$config['order/order_model/are_directable'] = array(
+    'o_id' => array(
+        'v',
+        'order_id'
+    ),
+    'o_num' => 'order_num',
+    'o_payterms' => 'payterms',
+    'o_down_payment' => 'down_payment',
+    'o_sum' => 'sum',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payed' => 'payed',
+    'o_virtual_payed' => 'virtual_payed',
+    'o_pay_status' => 'pay_status',
+    'd_id' => 'dealer_id',
+    'd_balance' => 'dealer_balance',
+    'd_produce' => 'dealer_produce',
+    'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_produce' => 'dealer_virtual_produce',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
+    'o_status' => 'status'
+);

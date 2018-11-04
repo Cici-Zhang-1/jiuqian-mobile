@@ -12,6 +12,7 @@ $config['dabc_easy_produce'] = '生产扣款';
 $config['dabc_easy_delivery'] = '发货扣款';
 $config['dabc_withdraw'] = '订单修改';
 $config['dabc_order_remove'] = '订单作废';
+$config['dabc_order_direct'] = '订单出厂';
 $config['dabc_goods'] = '货款';
 $config['dabc_back'] = '返款';
 $config['dabc_remove'] = '取消进账';
