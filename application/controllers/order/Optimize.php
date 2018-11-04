@@ -130,13 +130,18 @@ class Optimize extends MY_Controller{
                 if (!!($Query = $this->order_product_board_plate_model->select_optimize($V))) {
                     $this->load->library('workflow/workflow');
                     $W = $this->workflow->initialize('order_product_classify');
-                    $W->initialize($V);
+                    foreach ($V as $Value) {
+                        $W->initialize($Value);
+                        $W->optimize();
+                    }
+                    $this->_write_to_excel($Query, $FileName);
+                    /*$W->initialize($V);
                     if ($W->optimize()) {
                         $this->_write_to_excel($Query, $FileName);
                     } else {
                         $this->Message .= $W->get_failue();
                         $this->Code = EXIT_ERROR;
-                    }
+                    }*/
                 } else {
                     $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'优化导出失败';
                     $this->Code = EXIT_ERROR;
