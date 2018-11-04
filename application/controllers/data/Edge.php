@@ -38,6 +38,25 @@ class Edge extends MY_Controller {
         $this->_ajax_return($Data);
     }
 
+    public function unique () {
+        $this->_Search['paging'] = NO;
+        $this->get_page_search();
+        $Data = array();
+        if(!($Data = $this->edge_model->select($this->_Search))){
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+            $this->Code = EXIT_ERROR;
+        } else {
+            $Tmp = array();
+            foreach ($Data['content'] as $Key => $Value) {
+                if (in_array($Value['v'], $Tmp)) {
+                    unset($Data['content'][$Key]);
+                } else {
+                    array_push($Tmp, $Value['v']);
+                }
+            }
+        }
+        $this->_ajax_return($Data);
+    }
     /**
      *
      * @return void
