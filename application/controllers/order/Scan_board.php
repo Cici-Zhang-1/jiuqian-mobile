@@ -159,7 +159,7 @@ class Scan_board extends MY_Controller{
     private function _edit_order_product_board ($OrderProductBoard) {
         $W = $this->_workflow_order_product_board();
         foreach ($OrderProductBoard as $Key => $Value) {
-            if (empty($Value['scanner'])) {
+            if (empty($Value['scan'])) {
                 continue;
             } else {
                 if ($W->initialize($Key, $Value)) {
