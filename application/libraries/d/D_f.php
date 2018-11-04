@@ -74,7 +74,7 @@ class D_f extends D_abstract{
                     $ServerInfo = array(
                         'purchase_unit' => '--',
                         'purchase' => 0,
-                        'unit_price' => 0
+                        'saler_unit_price' => 0
                     );
                     /*$Value['purchase_unit'] = '--';
                     $Value['purchase'] = 0;
@@ -90,8 +90,8 @@ class D_f extends D_abstract{
                 if (empty($Value['purchase'])) {
                     $Value['purchase'] = $ServerInfo['purchase'];
                 }
-                if (empty($Value['unit_price']) && $Value['unit_price'] != 0) {
-                    $Value['unit_price'] = $ServerInfo['unit_price'];
+                if (!isset($Value['unit_price']) || (empty($Value['unit_price']) && $Value['unit_price'] != 0)) {
+                    $Value['unit_price'] = $ServerInfo['saler_unit_price'];
                 }
                 $Value['amount'] = floatval($Value['amount']);
                 $Value['sum'] = ceil($Value['amount'] * $Value['unit_price']); // 计算价格

@@ -80,14 +80,16 @@ class D_m extends D_abstract{
             if ($Value['board'] == '' || empty($Value['length']) || empty($Value['width'])) {
                 unset($BoardPlate[$Key]);
                 continue;
-            } else if (!($BoardInfo = $this->_is_valid_board($Value['board']))) {
-                return false;
+            /*} else if (!($BoardInfo = $this->_is_valid_board($Value['board']))) {
+                return false;*/
             } elseif (($Value['length'] > MAX_LENGTH || $Value['width'] > MAX_LENGTH) || ($Value['length'] > MAX_WIDTH && $Value['width'] > MAX_WIDTH)) {
                 $GLOBALS['error'] = $Value['board'] .  '的板块尺寸太长';
                 return false;
             } else {
-                $Value['purchase'] = $BoardInfo['purchase'];
-                $Value['unit_price'] = $BoardInfo['saler_unit_price'];
+                /*$Value['purchase'] = $BoardInfo['purchase'];
+                $Value['unit_price'] = $BoardInfo['saler_unit_price'];*/
+                $Value['purchase'] = 0;
+                $Value['unit_price'] = 0;
                 if ($Value['area'] < MIN_M_AREA) {
                     $Value['area'] = MIN_M_AREA;
                 }
