@@ -908,6 +908,19 @@ class Order_product_model extends MY_Model{
         return $Return;
     }
 
+    public function select_brothers_by_order_id ($OrderV) {
+        $Query = $this->X->select('op_num as num')->from('order_product')
+            ->where('op_order_id', $OrderV)
+            ->where('op_status >= ', OP_CREATE)
+            ->where_in('op_product_id', array(CABINET, WARDROBE, DOOR, WOOD))
+            ->order_by('op_product_id')
+            ->order_by('op_id')
+            ->get();
+        if ($Query->num_rows() > 0) {
+            return $Query->result_array();
+        }
+        return false;
+    }
     /**
      * 判断是不是所有订单产品都已经入库
      * @param $OrderId

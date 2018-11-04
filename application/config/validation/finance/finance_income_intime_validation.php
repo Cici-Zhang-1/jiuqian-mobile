@@ -76,6 +76,11 @@ $config['finance/finance_income_intime/claim'] = array(
         'label' => '进账编号',
         'rules' => 'trim|required|numeric|max_length[10]'
     ),
+    array(
+        'field' => 'amount',
+        'label' => '进账金额',
+        'rules' => 'trim|required|decimal|greater_than_equal_to[0]|max_length[10]'
+    ),
     array (
         'field' => 'income_pay',
         'label' => '收入类型',

@@ -23,6 +23,9 @@ class Finance_income_intime extends MY_Controller {
     private $_Dealer = array();
     private $_FinanceIncomeId;
     private $_Category;
+
+    private $_Announce = NO;
+    private $_AnnounceMsg = '';
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller finance/Finance_income __construct Start!');
@@ -71,6 +74,11 @@ class Finance_income_intime extends MY_Controller {
                 $this->_read_dealer($Post['dealer_id']);
                 $Post['dealer'] = $this->_Dealer['unique_name'];
                 $Post['inned'] = YES;
+
+                if (($Post['amount'] == ZERO && $Post['corresponding'] > ZERO) || ($Post['amount'] < $Post['corresponding'])) {
+                    $this->_Announce = true;
+                    $this->_AnnounceMsg = $this->session->userdata('truename') . '登记了一笔财务账户进账为￥' . $Post['amount'] . '，客户' . $Post['dealer'] . '进账为￥' . $Post['corresponding'] . '的及时进账';
+                }
             }
         } elseif ($Post['income_pay'] == '银行结息') {
             $Post['inned'] = YES;
@@ -84,6 +92,8 @@ class Finance_income_intime extends MY_Controller {
             $this->Code = EXIT_ERROR;
             return false;
         }
+        list($U, $S) = explode(' ', microtime());
+        $Post['flow_num'] = number_format($S + $U, TEN, '.', '');
         return $Post;
     }
     /**
@@ -312,6 +322,10 @@ class Finance_income_intime extends MY_Controller {
                 if ($this->Code == EXIT_SUCCESS) {
                     $Post['remark'] .= $this->_Remark;
                     $Post['inned'] = YES;
+                    if (($Post['amount'] == ZERO && $Post['corresponding'] > ZERO) || ($Post['amount'] < $Post['corresponding'])) {
+                        $this->_Announce = true;
+                        $this->_AnnounceMsg = $this->session->userdata('truename') . '认领了一笔财务账户进账为￥' . $Post['amount'] . '，客户' . $Post['dealer'] . '进账为￥' . $Post['corresponding'] . '的及时进账';
+                    }
                     if ($this->finance_income_model->update($Post, $V)) {
                         $this->Message = '认领成功!';
                     } else {
@@ -379,9 +393,57 @@ class Finance_income_intime extends MY_Controller {
         } else {
             if ($this->Code == EXIT_SUCCESS) {
                 $this->finance_income_model->trans_commit();
+                if ($this->_Announce) {
+                    $this->_announce_to_finance();
+                }
             } else {
                 $this->finance_income_model->trans_rollback();
             }
+        }
+    }
+
+    /**
+     * 向财务发送钉钉消息
+     * @return bool|string
+     */
+    private function _announce_to_finance () {
+        if (!!($User = $this->_finance())) {
+            require_once APPPATH . 'third_party/eapp/send_finance.php';
+            return send(array("msgtype" => 'text', 'text' => $this->_AnnounceMsg), $User);
+        } else {
+            return '没有财务账户可以发送';
+        }
+    }
+    /**
+     * 获取财务人员信息
+     * @return array|bool
+     */
+    private function _finance() {
+        $this->load->model('permission/usergroup_model');
+        $this->load->model('manage/user_model');
+        if (!!($UsergroupV = $this->usergroup_model->select_usergroup_id('财务管理员'))) {
+            $this->get_page_search();
+            $this->_Search['usergroup_v'] = $UsergroupV;
+            $Data = array();
+            if(!($Data = $this->user_model->select($this->_Search))){
+                log_message('debug', 'dddddddd' . '没有user');
+                return false;
+            } else {
+                $User = array();
+                foreach ($Data['content'] as $Key => $Value) {
+                    if (!empty($Value['user_id'])) {
+                        array_push($User, $Value['user_id']);
+                    }
+                }
+                if (!empty($User)) {
+                    return $User;
+                }
+                log_message('debug', 'dddddddd' . '没有user_id');
+                return false;
+            }
+        } else {
+            log_message('debug', 'dddddddd' . '没有usergroup');
+            return false;
         }
     }
 }

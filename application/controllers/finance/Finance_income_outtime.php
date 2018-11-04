@@ -80,6 +80,8 @@ class Finance_income_outtime extends MY_Controller {
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'非及时进账账户不存在!';
             $this->Code = EXIT_ERROR;
         }
+        list($U, $S) = explode(' ', microtime());
+        $Post['flow_num'] = number_format($S + $U, TEN, '.', '');
         return $Post;
     }
     /**

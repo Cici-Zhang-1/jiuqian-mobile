@@ -71,6 +71,8 @@ class Finance_pay extends MY_Controller {
                 $Post['in_finance_account'] = $this->_InFinanceAccount['name'];
             }
         }
+        list($U, $S) = explode(' ', microtime());
+        $Post['flow_num'] = number_format($S + $U, TEN, '.', '');
         return $Post;
     }
     private function _read_finance_account($V) {
@@ -129,6 +131,8 @@ class Finance_pay extends MY_Controller {
             'balance' => $Post['amount'] + $this->_InFinanceAccount['balance'] - $Post['fee'],
             'in' => $Post['amount'] + $this->_InFinanceAccount['in'] - $Post['fee']
         );
+        list($U, $S) = explode(' ', microtime());
+        $Data['flow_num'] = number_format($S + $U, TEN, '.', '');
         $this->load->model('finance/finance_account_model');
         if (!!($this->finance_account_model->update($Data, $Post['in_finance_account_id']))) {
             return true;

@@ -199,6 +199,14 @@ $config['order/order/remove'] = array(
     )
 );
 
+$config['order/order/direct_out'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '订单编号',
+        'rules' => 'required|numeric|min_length[1]|max_length[10]'
+    )
+);
+
 $config['order/order/re_dismantle'] = array(
     array(
         'field' => 'v',

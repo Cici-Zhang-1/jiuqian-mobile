@@ -27,7 +27,10 @@ $config['order/order_product_model/update'] = array(
     'inned' => 'op_inned',
     'inned_datetime' => 'op_inned_datetime',
     'delivered' => 'op_delivered',
-    'design_atlas' => 'op_design_atlas'
+    'design_atlas' => 'op_design_atlas',
+    'sum' => 'op_sum',
+    'sum_diff' => 'op_sum_diff',
+    'virtual_sum' => 'op_virtual_sum'
 );
 $config['order/order_product_model/update_batch'] = array(
     'v' => 'op_id',

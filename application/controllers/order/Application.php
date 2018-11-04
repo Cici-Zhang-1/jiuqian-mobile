@@ -265,6 +265,10 @@ class Application extends MY_Controller {
         }
     }
 
+    /**
+     * 获取财务人员信息
+     * @return array|bool
+     */
     private function _finance() {
         $this->load->model('permission/usergroup_model');
         $this->load->model('manage/user_model');
