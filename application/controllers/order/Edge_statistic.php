@@ -58,7 +58,7 @@ class Edge_statistic extends MY_Controller{
                             array_push($X[$Value['product']]['num'], '<br />');
                         }
                     }
-                } elseif ($Value['order_type'] == 'X') {
+                } elseif ($Value['order_type'] == 'B') {
                     $BArea += $Value['area'];
                     if (!in_array($Value['num'], $BOrderProductNum)) {
                         array_push($BOrderProductNum, $Value['num']);

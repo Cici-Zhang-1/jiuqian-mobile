@@ -12,7 +12,7 @@ class Punch_statistic extends MY_Controller{
         'puncher' => 0,
         'start_date' => '',
         'end_date' => '',
-        'status' => OPB_PUNCHED
+        'status' => WP_PUNCHED
     );
     public function __construct(){
         parent::__construct();
@@ -65,7 +65,7 @@ class Punch_statistic extends MY_Controller{
                             array_push($X[$Value['product']]['order_product_num'], '<br />');
                         }
                     }
-                } elseif ($Value['order_type'] == 'X') {
+                } elseif ($Value['order_type'] == 'B') {
                     $BArea += $Value['area'];
                     if (!in_array($Value['order_product_num'], $BOrderProductNum)) {
                         array_push($BOrderProductNum, $Value['order_product_num']);
