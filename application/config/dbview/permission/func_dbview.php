@@ -17,7 +17,8 @@ $config['permission/func_model/select'] = array(
     'f_modal_type' => 'modal_type_v',
     'f_tag' => 'tag_v',
     'f_menu_id' => 'menu_v',
-	'm_name' => 'menu',
+	'f_hide' => 'hide',
+	'm_name' => 'menu'
 );
 $config['permission/func_model/select_by_mid'] = array(
 	'f_id' => 'v',
@@ -36,6 +37,7 @@ $config['permission/func_model/select_by_mid'] = array(
     'f_modal_type' => 'modal_type_v',
 	'f_tag' => 'tag',
 	'f_menu_id' => 'menu_v',
+    'f_hide' => 'hide'
 );
 $config['permission/func_model/select_allowed'] = array(
 	'f_id' => 'v',
@@ -56,7 +58,8 @@ $config['permission/func_model/select_allowed'] = array(
     'f_multiple' => 'multiple_v',
     'f_single' => 'single_v',
     'bt_name' => 'multiple_name',
-    'f_menu_id' => 'menu_id'
+    'f_menu_id' => 'menu_id',
+    'f_hide' => 'hide'
 );
 $config['permission/func_model/select_is_allowed_operation'] = array(
 	'f_id' => 'func_v',

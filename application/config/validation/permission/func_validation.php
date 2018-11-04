@@ -70,6 +70,11 @@ $config['permission/func/add'] = array(
         'field' => 'modal_type_v',
         'label' => 'Modal',
         'rules' => 'trim|max_length[16]'
+    ),
+    array(
+        'field' => 'hide',
+        'label' => '隐藏',
+        'rules' => 'trim|numeric|max_length[1]'
     )
 );
 
@@ -148,6 +153,11 @@ $config['permission/func/edit'] = array(
         'field' => 'modal_type_v',
         'label' => 'Modal',
         'rules' => 'trim|max_length[16]'
+    ),
+    array(
+        'field' => 'hide',
+        'label' => '隐藏',
+        'rules' => 'trim|numeric|max_length[1]'
     )
 );
 

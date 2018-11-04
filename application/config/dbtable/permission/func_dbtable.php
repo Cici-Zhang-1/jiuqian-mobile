@@ -15,7 +15,8 @@ $config['permission/func_model/insert'] = array(
 	'multiple_v' => 'f_multiple',
 	'single_v' => 'f_single',
     'source' => 'f_source',
-    'modal_type_v' => 'f_modal_type'
+    'modal_type_v' => 'f_modal_type',
+    'hide' => 'f_hide'
 );
 $config['permission/func_model/update'] = array(
 	'name' => 'f_name',
@@ -32,5 +33,6 @@ $config['permission/func_model/update'] = array(
 	'multiple_v' => 'f_multiple',
 	'single_v' => 'f_single',
     'source' => 'f_source',
-    'modal_type_v' => 'f_modal_type'
+    'modal_type_v' => 'f_modal_type',
+    'hide' => 'f_hide'
 );
