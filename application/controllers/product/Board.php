@@ -204,4 +204,23 @@ class Board extends MY_Controller {
         }
         $this->_ajax_return();
     }
+
+    public function unit_price () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->board_model->update($Post, $Where))){
+                $this->Message = '销售价修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'销售价修改失败';
+            }
+        }
+        $this->_ajax_return();
+    }
 }

@@ -135,3 +135,29 @@ $config['product/goods/start'] = array(
         'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
     )
 );
+
+$config['product/goods/purchase'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '选择项',
+        'rules' => 'trim|required|max_length[64]'
+    ),
+    array (
+        'field' => 'purchase',
+        'label' => '采购价格',
+        'rules' => 'trim|required|decimal'
+    )
+);
+
+$config['product/goods/unit_price'] = array(
+    array(
+        'field' => 'v[]',
+        'label' => '选择项',
+        'rules' => 'trim|required|max_length[64]'
+    ),
+    array (
+        'field' => 'unit_price',
+        'label' => '销售价格',
+        'rules' => 'trim|required|decimal'
+    )
+);

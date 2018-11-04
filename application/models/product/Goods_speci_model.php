@@ -257,6 +257,25 @@ class Goods_speci_model extends MY_Model {
     }
 
     /**
+     * 通过goods_id修改信息
+     * @param $Data
+     * @param $Where
+     * @return bool
+     */
+    public function update_by_goods_id($Data, $Where) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Data = $this->_format_re($Data, $Item);
+        if (is_array($Where)) {
+            $this->HostDb->where_in('gs_goods_id', $Where);
+        } else {
+            $this->HostDb->where('gs_goods_id', $Where);
+        }
+        $this->HostDb->update('goods_speci', $Data);
+        $this->remove_cache($this->_Module);
+        return true;
+    }
+
+    /**
      * Delete data from table goods_speci
      * @param $Where
      * @return boolean

@@ -307,4 +307,54 @@ class Goods extends MY_Controller {
         }
         $this->_ajax_return();
     }*/
+    public function purchase () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->goods_model->update($Post, $Where))){
+                $this->_edit_goods_speci($Post, $Where);
+                $this->Message = '内容修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
+            }
+        }
+        $this->_ajax_return();
+    }
+
+    public function unit_price () {
+        $V = $this->input->post('v');
+        if (!is_array($V)) {
+            $_POST['v'] = explode(',', $V);
+        }
+        if ($this->_do_form_validation()) {
+            $Post = gh_escape($_POST);
+            $Where = $Post['v'];
+            unset($Post['v']);
+            if(!!($this->goods_model->update($Post, $Where))){
+                $this->_edit_goods_speci($Post, $Where);
+                $this->Message = '销售价修改成功, 刷新后生效!';
+            }else{
+                $this->Code = EXIT_ERROR;
+                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'销售价修改失败';
+            }
+        }
+        $this->_ajax_return();
+    }
+    private function _edit_goods_speci ($Data, $Where) {
+        $this->load->model('product/goods_speci_model');
+        if (!!($this->goods_speci_model->update_by_goods_id($Data, $Where))) {
+            $this->Message .= '商品规格编辑成功, 刷新后生效!';
+            return true;
+        } else {
+            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'商品规格编辑失败!';
+            $this->Code = EXIT_ERROR;
+        }
+        return false;
+    }
 }

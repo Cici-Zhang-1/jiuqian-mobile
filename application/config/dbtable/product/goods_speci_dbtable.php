@@ -43,6 +43,14 @@ $config['product/goods_speci_model/update'] = array(
                                 'remark' => 'gs_remark',
                         'status' => 'gs_status'
                     );
+$config['product/goods_speci_model/update_by_goods_id'] = array(
+    'speci' => 'gs_speci',
+    'code' => 'gs_code',
+    'purchase' => 'gs_purchase',
+    'unit_price' => 'gs_unit_price',
+    'remark' => 'gs_remark',
+    'status' => 'gs_status'
+);
 $config['product/goods_speci_model/update_batch'] = array(
                                 'goods_id' => 'gs_goods_id',
                                 'speci' => 'gs_speci',
