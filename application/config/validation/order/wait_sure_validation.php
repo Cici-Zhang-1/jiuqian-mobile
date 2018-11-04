@@ -23,6 +23,16 @@ $config['order/wait_sure/edit'] = array(
         'field' => 'down_payment',
         'label' => '首付比例',
         'rules' => 'trim|required|decimal|max_length[5]'
+    ),
+    array(
+        'field' => 'down_payment_sum',
+        'label' => '首付金额',
+        'rules' => 'trim|numeric|max_length[10]'
+    ),
+    array(
+        'field' => 'sum',
+        'label' => '金额',
+        'rules' => 'trim|required|numeric|max_length[10]'
     )
 );
 

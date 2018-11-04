@@ -28,7 +28,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     }
     /**
      * 确认生产
-     * @param unknown $Type
+     * @return bool
      */
     public function produce() {
         $this->_CI->load->model('order/order_product_model');

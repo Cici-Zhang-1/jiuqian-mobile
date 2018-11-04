@@ -75,6 +75,15 @@ class Warehouse extends MY_Controller {
                     $Data['content'] = $OrderProduct['warehouse_v'];
                     $Data['num'] = count($Data['content']);
                 }
+                if (!!($Brothers = $this->order_product_model->select_brothers_by_order_id($OrderProduct['order_v']))) {
+                    foreach ($Brothers as $Key => $Value) {
+                        $Tmp = explode('-', $Value['num']);
+                        $Brothers[$Key] = array_pop($Tmp);
+                    }
+                    $Data['brothers'] = implode(',', $Brothers);
+                } else {
+                    $Data['brothers'] = '';
+                }
                 $Data['p'] = $Data['pn'] = ONE;
             } else {
                 $this->Code = EXIT_ERROR;

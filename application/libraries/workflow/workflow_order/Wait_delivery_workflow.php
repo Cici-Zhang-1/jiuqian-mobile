@@ -179,6 +179,6 @@ class Wait_delivery_workflow extends Workflow_order_abstract {
     }
 
     public function __call($name, $arguments){
-        ;
+        return true;
     }
 }

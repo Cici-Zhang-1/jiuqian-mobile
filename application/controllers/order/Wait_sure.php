@@ -25,6 +25,10 @@ class Wait_sure extends MY_Controller{
         if(!($Data = $this->order_model->select_wait_sure($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
             $this->Code = EXIT_ERROR;
+        } else {
+            foreach ($Data['content'] as $Key => $Value) {
+                $Data['content'][$Key]['need_pay'] = floor($Value['sum'] * $Value['down_payment']);
+            }
         }
         if (!empty($this->_Search['order_id'])) {
             $Data['query']['order_id'] = $this->_Search['order_id'];
@@ -71,6 +75,12 @@ class Wait_sure extends MY_Controller{
             $Post = gh_escape($_POST);
             $Where = $Post['v'];
             unset($Post['v']);
+            if (!empty($Post['down_payment_sum']) && !empty($Post['sum'])) {
+                $Post['down_payment'] = floor(($Post['down_payment_sum'] / $Post['sum']) * M_TWO) / M_TWO;
+            }
+            if ($Post['down_payment'] < MIN_DOWN_PAYMENT) {
+                $Post['down_payment'] = MIN_DOWN_PAYMENT;
+            }
             if(!!($this->order_model->update($Post, $Where))){
                 $this->Message = '订单修改成功, 刷新后生效!';
             }else{
