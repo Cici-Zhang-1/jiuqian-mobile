@@ -98,8 +98,8 @@ class Order_product_board_wood extends MY_Controller {
             $Tmp2 = implode('^', array($value['width'], $value['length'],
                 $value['punch'], $value['wood_name'], $value['core'], $value['board'], $value['remark']));
             $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
-            if ($value['area'] < MIN_AREA) {
-                $value['area'] = MIN_AREA;
+            if ($value['area'] < MIN_K_AREA) {
+                $value['area'] = MIN_K_AREA;
             }
 
             $value['m_width'] = $value['width'] - 3;

@@ -93,8 +93,8 @@ class Order_product_board_door extends MY_Controller {
             $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
             $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
             $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
-            if ($value['area'] < MIN_AREA) {
-                $value['area'] = MIN_AREA;
+            if ($value['area'] < MIN_M_AREA) {
+                $value['area'] = MIN_M_AREA;
             }
 
             $Tmp2 = implode('^', array($value['board'], $value['width'], $value['length'],
