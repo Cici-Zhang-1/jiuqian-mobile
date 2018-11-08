@@ -386,6 +386,79 @@ class Order_model extends MY_Model{
     }
 
     /**
+     * 获取同一经销商的某个时间段的订单编号
+     * @param $Did
+     * @param $Startdate
+     * @return bool\
+     */
+    public function select_order_num($Did, $Startdate){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.'_'.$Startdate;
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql,  FALSE);
+            $this->HostDb->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('o_sum > ', ZERO)
+                ->where('o_dealer_id', $Did)
+                ->where('o_status > ', O_CHECKED)
+                ->where('od_check_datetime > ', $Startdate)
+                ->order_by('o_num', 'desc');
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有符合条件的订单编号';
+            }
+        }
+        return $Return;
+    }
+    /**
+     * 获取对账的订单
+     * @param $Did
+     * @param $StartDatetime
+     * @param $EndDatetime
+     * @return bool
+     */
+    public function select_for_debt($Did, $StartDatetime, $EndDatetime){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.$StartDatetime.$EndDatetime;
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql,  FALSE);
+            $this->HostDb->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('o_sum > ', ZERO);
+
+            $this->HostDb->where('od_check_datetime >', $StartDatetime);
+            $this->HostDb->where('od_check_datetime <', $EndDatetime);
+            $this->HostDb->where('o_dealer_id', $Did);
+
+            $this->HostDb->where('o_status > ', O_REMOVE);
+
+            $this->HostDb->order_by('o_num', 'desc');
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有符合条件的对账订单';
+            }
+        }
+        return $Return;
+    }
+    /**
      * 判断是否是存在的订单编号
      * @param $OrderNum
      * @return bool

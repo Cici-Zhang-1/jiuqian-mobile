@@ -21,6 +21,7 @@ $config['order/order_product_board_model/select'] = array(
     'op_product' => 'product',
     'op_remark' => 'order_product_remark',
     'op_pack' => 'pack',
+    'op_warehouse_num' => 'warehouse_num',
     'wop_label' => 'status_label',
     'p_code' => 'code',
     'op_order_id' => 'order_id'

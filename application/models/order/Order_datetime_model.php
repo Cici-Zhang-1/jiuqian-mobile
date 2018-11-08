@@ -66,6 +66,18 @@ class Order_datetime_model extends MY_Model {
         }
     }
 
+    private function _select_by_order_num($OrderNum){
+        $Query = $this->HostDb->select('o_id')->from('order')
+            ->where_in('o_num', $OrderNum)
+            ->get();
+        if($Query->num_rows() > 0){
+            $Return = $Query->result_array();
+            $Query->free_result();
+            return $Return;
+        }
+        return false;
+    }
+
     /**
      * Insert data to table order_datetime
      * @param $Data
@@ -132,6 +144,19 @@ class Order_datetime_model extends MY_Model {
         return true;
     }
 
+    public function update_order_payed ($Nums) {
+        if(!!($Oids = $this->_select_by_order_num($Nums))){
+            foreach ($Oids as $key => $value){
+                $Oids[$key] = $value['o_id'];
+            }
+            $this->HostDb->set(array('od_payed_datetime' => date('Y-m-d H:i:s')));
+            $this->HostDb->where_in('od_order_id', $Oids);
+            $this->HostDb->update('order_datetime');
+            $this->remove_cache($this->_Module);
+            return $Oids;
+        }
+        return true;
+    }
     /**
      * Delete data from table order_datetime
      * @param $Where

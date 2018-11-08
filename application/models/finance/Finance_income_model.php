@@ -39,7 +39,7 @@ class Finance_income_model extends MY_Model {
                     $this->HostDb->where('fi_bank_date <= ', $Search['end_date']);
                 }
                 if (!empty($Search['income_pay'])) {
-                    $this->HostDb->where('fi_income_pay', $Search['income_pay']);
+                    $this->HostDb->where_in('fi_income_pay', $Search['income_pay']);
                 }
                 if (isset($Search['inned'])) {
                     $this->HostDb->where_in('fi_inned', $Search['inned']);
@@ -81,7 +81,7 @@ class Finance_income_model extends MY_Model {
             $this->HostDb->where('fi_bank_date <= ', $Search['end_date']);
         }
         if (!empty($Search['income_pay'])) {
-            $this->HostDb->where('fi_income_pay', $Search['income_pay']);
+            $this->HostDb->where_in('fi_income_pay', $Search['income_pay']);
         }
         if (isset($Search['inned'])) {
             $this->HostDb->where_in('fi_inned', $Search['inned']);
@@ -109,6 +109,39 @@ class Finance_income_model extends MY_Model {
         }
     }
 
+    /**
+     * 获取对账的进账
+     * @param $Did
+     * @param $StartDatetime
+     * @param $EndDatetime
+     * @return bool
+     */
+    public function select_for_debt($Did, $StartDatetime, $EndDatetime){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.'_'.$Did.$StartDatetime.$EndDatetime;
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql,  FALSE);
+            $this->HostDb->from('finance_income');
+
+            $this->HostDb->where('fi_create_datetime >', $StartDatetime);
+            $this->HostDb->where('fi_create_datetime <', $EndDatetime);
+            $this->HostDb->where('fi_dealer_id', $Did);
+            $this->HostDb->where('fi_status > 0');
+
+            $this->HostDb->order_by('fi_create_datetime', 'desc');
+
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有符合条件的进账';
+            }
+        }
+        return $Return;
+    }
     /**
      * 判断收入是否有效
      * @param $V

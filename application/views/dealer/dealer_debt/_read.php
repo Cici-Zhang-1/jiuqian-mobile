@@ -13,19 +13,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <div class="col-md-12">
                 <div class="col-md-offset-1 col-md-10" id="dealerDebt">
                     <form class="form-inline" action="<?php echo site_url('dealer/dealer_debt/index/read');?>" method="get">
-                        <input type="hidden" name="id" value="<?php echo $Id;?>" />
-                        <strong><?php echo $Info['des'].'-'.$Info['area'].'-'.$Info['linker'].'-'.$Info['way'];?></strong>
+                        <input type="hidden" name="dealer_id" value="<?php echo $Id;?>" />
+                        <strong><?php echo $Info['unique_name'];?></strong>
                         <div class="form-group">
-                            <label class="sr-only" for="dealerDebtYear">dealerDebtYear</label>
-                            <select class="form-control" name="year" id="dealerDebtYear"></select>
+                            <label class="sr-only" for="startDate">startDate</label>
+                            <input class="form-control" type="date" name="start_date" id="startDate" value="<?php echo $StartDate; ?>" />
                         </div>
                         <div class="form-group">
-                            <label class="sr-only" for="dealerDebtMonth">dealerDebtMonth</label>
-                            <select class="form-control" name="month" id="dealerDebtMonth"><option value="0">0</option></select>
+                            <label class="sr-only" for="endDate">endDate</label>
+                            <input class="form-control" type="date" name="end_date" id="endDate" value="<?php echo $EndDate; ?>"/>
                         </div>
                         <button class="btn btn-primary" data-action="" type="submit" id="dealerDebtBtn" value="查询">查询</button>
-                        <strong>生产欠款:<?php echo $Info['balance']-$Info['debt2'];?></strong>
-                        <strong>报价欠款:<?php echo $Info['balance']-$Info['debt2']-$Info['debt1'];?></strong>
+                        <strong>余额:<?php echo $Info['balance'];?></strong>
                     </form>
                 </div>
             </div>
@@ -56,12 +55,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 $Tr .= <<<END
 <tr>
     <td>$Count</td>
-    <td>$value[asure_datetime]</td>
+    <td>$value[sure_datetime]</td>
     <td name="order_num">$value[order_num]</td>
     <td>$value[sum]</td>
     <td>$value[owner]</td>
     <td>$value[remark]</td>
-    <td>$value[end_datetime]</td>
+    <td>$value[delivery_datetime]</td>
     <td>$value[payed_datetime]</td>
 </tr>                                
 END;
@@ -138,19 +137,11 @@ END;
             </div>
   	    </div>
     </div>
-        <script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.js"></script>
-  	    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+        <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.js"></script>
+  	    <script src="https://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
   	    <script type="text/javascript" src="<?php echo base_url('js/dateselect.js');?>"></script>
   	    <script>
   	    (function($){
-  	    	$("#dealerDebt").DateSelector({
-  	            ctlYearId: 'dealerDebtYear',
-  	            ctlMonthId: 'dealerDebtMonth',
-	            defYear: <?php echo $Year;?>,
-                defMonth: <?php echo $Month;?>,
-  	            minYear: 2014,
-  	            clear: false
-  	    	});
   	    	var $Table1 = $('#dealerDebtOrderTable tbody tr'),
   	    	$Table2 = $('#dealerDebtFinanceTable tbody tr');
   	    	$Table1.on('click', function(e){

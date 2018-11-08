@@ -48,7 +48,9 @@ class Warehouse extends MY_Controller {
      */
     public function recommend () {
         $Recommend = $this->input->get('recommend');
-        $Recommend = strtoupper($Recommend);
+        if (empty($Recommend)) {
+            $Recommend = $this->input->get('order_product_num');
+        }
         $Data = array();
         $this->load->model('order/order_product_model');
         if (preg_match(REG_RECOMMEND, $Recommend, $Matches)

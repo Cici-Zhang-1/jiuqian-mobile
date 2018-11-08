@@ -199,6 +199,7 @@ $config['order/order_model/select_detail'] = array(
     'o_remark' => 'remark',
     'o_dealer_remark' => 'dealer_remark',
     'o_status' => 'status',
+    'o_warehouse_num' => 'warehouse_num',
     'C.u_truename' => 'creator',
     'od_create_datetime' => 'create_datetime',
     'od_sure_datetime' => 'produce_datetime',
@@ -353,10 +354,11 @@ $config['order/order_model/select_order_dealer_by_id'] = array(
 	'o_dealer_id' => 'did',
 );
 $config['order/order_model/select_order_num'] = array(
-	'o_num' => 'order_num',
-	'o_sum' => 'sum',
-    'o_virtual_sum' => 'virtual_sum',
-	'ifnull(o_payed_datetime, "")' => 'payed_datetime',
+	'o_num' => array(
+	    'v',
+        'order_num'
+    ),
+    'concat(o_num, "-", o_sum, "-", ifnull(od_payed_datetime, ""))' => 'label'
 );
 $config['order/order_model/select_order_num_by_cargo_no'] = array(
 	'o_id' => 'v',
@@ -514,4 +516,16 @@ $config['order/order_model/are_directable'] = array(
     'd_virtual_produce' => 'dealer_virtual_produce',
     'd_virtual_delivered' => 'dealer_virtual_delivered',
     'o_status' => 'status'
+);
+
+$config['order/order_model/select_for_debt'] = array(
+    'o_id' => 'oid',
+    'o_num' => 'order_num',
+    'o_remark' => 'remark',
+    'o_dealer' => 'dealer',
+    'o_owner' => 'owner',
+    'od_delivery_datetime' => 'delivery_datetime',
+    'od_sure_datetime' => 'sure_datetime',
+    'od_payed_datetime' => 'payed_datetime',
+    'o_sum' => 'sum'
 );

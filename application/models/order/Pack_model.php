@@ -58,7 +58,7 @@ class Pack_model extends MY_Model {
         if ($Search['status'] == WP_PACK) {
             $this->HostDb->where('opc_status', $Search['status']);
         } elseif ($Search['status'] == WP_PACKING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opc_pack', $Search['pack']);
             }
@@ -99,7 +99,7 @@ class Pack_model extends MY_Model {
         if ($Search['status'] == WP_PACK) {
             $this->HostDb->where('opb_status', $Search['status']);
         } elseif ($Search['status'] == WP_PACKING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opb_pack', $Search['pack']);
             }
@@ -148,7 +148,7 @@ class Pack_model extends MY_Model {
         if ($Search['status'] == WP_PACK) {
             $this->HostDb->where('opc_status', $Search['status']);
         } elseif ($Search['status'] == WP_PACKING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opc_pack', $Search['pack']);
             }
@@ -156,7 +156,7 @@ class Pack_model extends MY_Model {
             $this->HostDb->where('opc_pack > ', ZERO);
             $this->HostDb->where('opc_pack_datetime is null');
         } else {
-            $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opc_pack', $Search['pack']);
             }
@@ -185,7 +185,7 @@ class Pack_model extends MY_Model {
         if ($Search['status'] == WP_PACK) {
             $this->HostDb->where('opb_status', $Search['status']);
         } elseif ($Search['status'] == WP_PACKING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opb_pack', $Search['pack']);
             }
@@ -193,7 +193,7 @@ class Pack_model extends MY_Model {
             $this->HostDb->where('opb_pack > ', ZERO);
             $this->HostDb->where('opb_pack_datetime is null');
         } else {
-            $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_pack', 'left');
             if (!empty($Search['pack'])) {
                 $this->HostDb->where('opb_pack', $Search['pack']);
             }

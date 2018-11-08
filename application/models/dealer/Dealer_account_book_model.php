@@ -39,7 +39,12 @@ class Dealer_account_book_model extends MY_Model {
                     $this->HostDb->where('dab_create_datetime <= ', $Search['end_date']);
                 }
                 if (isset($Search['keyword']) && $Search['keyword'] != '') {
-                    $this->HostDb->like('dab_flow_num', $Search['keyword']);
+                    $this->HostDb->group_start()
+                        ->like('dab_flow_num', $Search['keyword'])
+                        ->or_like('dab_title', $Search['keyword'])
+                        ->or_like('dab_remark', $Search['keyword'])
+                        ->or_like('dab_category', $Search['keyword'])
+                        ->group_end();
                 }
                 $Query = $this->HostDb->order_by('dab_id', 'desc')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
@@ -67,7 +72,12 @@ class Dealer_account_book_model extends MY_Model {
             $this->HostDb->where('dab_create_datetime <= ', $Search['end_date']);
         }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
-            $this->HostDb->like('dab_flow_num', $Search['keyword']);
+            $this->HostDb->group_start()
+                ->like('dab_flow_num', $Search['keyword'])
+                    ->or_like('dab_title', $Search['keyword'])
+                    ->or_like('dab_remark', $Search['keyword'])
+                    ->or_like('dab_category', $Search['keyword'])
+                ->group_end();
         }
         $this->HostDb->from('dealer_account_book');
 

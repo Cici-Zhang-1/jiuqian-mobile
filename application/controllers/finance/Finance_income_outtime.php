@@ -21,8 +21,10 @@ class Finance_income_outtime extends MY_Controller {
     private $_FinanceAccount = array();
     private $_Remark = '';
     private $_Dealer = array();
-    private $_FinanceIncomeId;
+    private $_FinanceIncomeId = ZERO;
+    private $_DealerAccountBookId;
     private $_Category;
+    private $_OrderNums;
     public function __construct() {
         parent::__construct();
         log_message('debug', 'Controller finance/Finance_income __construct Start!');
@@ -70,6 +72,11 @@ class Finance_income_outtime extends MY_Controller {
             } else {
                 $this->_read_dealer($Post['dealer_id']);
                 $Post['dealer'] = $this->_Dealer['unique_name'];
+                if (isset($Post['order_num'])) {
+                    $this->_OrderNums =  $Post['order_num'];
+                    unset($Post['order_num']);
+                    $Post['remark'] .= ',' . implode(',', $this->_OrderNums);
+                }
             }
         } elseif ($Post['income_pay'] == '银行结息') {
             $Post['inned'] = YES;
@@ -82,6 +89,7 @@ class Finance_income_outtime extends MY_Controller {
         }
         list($U, $S) = explode(' ', microtime());
         $Post['flow_num'] = number_format($S + $U, TEN, '.', '');
+        $this->_Remark = $Post['remark'];
         return $Post;
     }
     /**
@@ -92,10 +100,16 @@ class Finance_income_outtime extends MY_Controller {
         if ($this->_do_form_validation()) {
             if (!!($Post = $this->_parse_input())) {
                 $this->_trans_start();
+                if (!empty($Post['dealer_id'])) {
+                    $this->_set_category('', $Post['income_pay']);
+                    $this->_edit_dealer($Post, $Post['dealer_id']);
+                }
                 if (!!($this->_FinanceIncomeId = $this->finance_income_model->insert($Post))) {
-                    if (!empty($Post['dealer_id'])) {
-                        $this->_set_category('', $Post['income_pay']);
-                        $this->_edit_dealer($Post, $Post['dealer_id']);
+                    if (!empty($this->_DealerAccountBookId)) {
+                        $this->_edit_dealer_account_book();
+                    }
+                    if (!empty($this->_OrderNums)) {
+                        $this->_edit_order();
                     }
                     if ($Post['inned']) { // 如果是已经到账则更改财务账户信息
                         $this->_edit_finance_account($Post);
@@ -273,7 +287,7 @@ class Finance_income_outtime extends MY_Controller {
         $this->load->model('dealer/dealer_model');
         if (!!($this->dealer_model->update($Data, $Where))) {
             if ($Remark) {
-                $this->_Remark = '[截止本次付款，账户余额为 ' . $Data['balance'] . ' 元]';
+                $this->_Remark .= '[截止本次付款，账户余额为 ' . $Data['balance'] . ' 元]';
             }
             return $this->_add_dealer_account_book($Post['corresponding'], $Data['balance']);
         } else {
@@ -329,12 +343,31 @@ class Finance_income_outtime extends MY_Controller {
             'source_id' => $this->_FinanceIncomeId,
             'balance' => $Balance,
             'remark' => $Remark,
+            'inside' => NO,
+            'source_status' => O_MINUS
         );
-        if ($this->dealer_account_book_model->insert($Data)) {
+        if (!!($this->_DealerAccountBookId = $this->dealer_account_book_model->insert($Data))) {
             return true;
         } else {
             $this->Code = EXIT_ERROR;
             $this->Message = '新增客户流水失败!';
+            return false;
+        }
+    }
+
+    /**
+     * 编辑客户账户流水
+     * @return bool
+     */
+    private function _edit_dealer_account_book () {
+        $Data = array(
+            'source_id' => $this->_FinanceIncomeId,
+        );
+        if (!!($this->dealer_account_book_model->update($Data, $this->_DealerAccountBookId))) {
+            return true;
+        } else {
+            $this->Code = EXIT_ERROR;
+            $this->Message = '编辑客户流水失败!';
             return false;
         }
     }
@@ -347,6 +380,8 @@ class Finance_income_outtime extends MY_Controller {
                 $this->_Category = $this->config->item('dabc_goods');
             } elseif ($IncomePay == '客户返款') {
                 $this->_Category = $this->config->item('dabc_back');
+            } elseif ($IncomePay == '平账') {
+                $this->_Category = $this->config->item('dabc_discount');
             } else {
                 $this->_Category = $this->config->item('dabc_other');
             }
@@ -370,5 +405,15 @@ class Finance_income_outtime extends MY_Controller {
                 $this->finance_income_model->trans_rollback();
             }
         }
+    }
+
+    /**
+     * 编辑订单支付状态
+     * @return bool
+     */
+    private function _edit_order () {
+        $this->load->model('order/order_datetime_model');
+        $this->_OrderNums = gh_escape($this->_OrderNums);
+        return  $this->order_datetime_model->update_order_payed($this->_OrderNums);
     }
 }

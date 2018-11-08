@@ -7,16 +7,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @package  CodeIgniter
  * @category Controller
  */
-class Dealer_account_book extends MY_Controller {
+class Dealer_account_book_statistic extends MY_Controller {
     private $__Search = array(
         'dealer_id' => ZERO,
         'start_date' => '',
         'end_date' => '',
-        'unique' => NO
+        'unique' => NO,
+        'paging' => NO
     );
     public function __construct() {
         parent::__construct();
-        log_message('debug', 'Controller dealer/Dealer_account_book __construct Start!');
+        log_message('debug', 'Controller dealer/Dealer_account_book_statistic __construct Start!');
         $this->load->model('dealer/dealer_account_book_model');
     }
 
@@ -47,97 +48,65 @@ class Dealer_account_book extends MY_Controller {
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
                 $this->Code = EXIT_ERROR;
             } else {
+                $In = 0;
+                $Out = 0;
+                $OutOrder = array();
                 if ($this->_Search['unique']) {
                     $UniqueWaitSure = array();
                     $UniqueWaitDelivery = array();
                     foreach ($Data['content'] as $Key => $Value) {
                         if ($Value['inside'] == YES) { // 去掉内部加款的项目
-                            unset($Data['content'][$Key]);
+                            // unset($Data['content'][$Key]);
                             continue;
                         }
                         if ($Value['in'] == NO) { // 扣款项
                             if ($Value['source_status'] == O_WAIT_SURE) {
                                 if (in_array($Value['source_id'], $UniqueWaitSure)) {
-                                    unset($Data['content'][$Key]);
+                                    // unset($Data['content'][$Key]);
+                                    continue;
                                 } else {
                                     array_push($UniqueWaitSure, $Value['source_id']);
                                 }
                             } elseif ($Value['source_status'] == O_WAIT_DELIVERY) {
                                 if (in_array($Value['source_id'], $UniqueWaitDelivery)) {
-                                    unset($Data['content'][$Key]);
+                                    // unset($Data['content'][$Key]);
+                                    continue;
                                 } else {
                                     array_push($UniqueWaitDelivery, $Value['source_id']);
                                 }
                             }
+                            if (!in_array($Value['title'], $OutOrder)) {
+                                array_push($OutOrder, $Value['title']);
+                            }
+                            $Out += $Value['amount'];
+                        } else {
+                            $In += $Value['amount'];
                         }
                     }
-                    $Data['content'] = array_values($Data['content']);
-                    $Data['num'] = count($Data['content']);
+                } else {
+                    foreach ($Data['content'] as $Key => $Value) {
+                        if ($Value['in'] == NO) { // 扣款项
+                            if (!in_array($Value['title'], $OutOrder)) {
+                                array_push($OutOrder, $Value['title']);
+                            }
+                            $Out += $Value['amount'];
+                        } else {
+                            $In += $Value['amount'];
+                        }
+                    }
                 }
-                $Data['query']['dealer_id'] = $this->_Search['dealer_id'];
+                $Data['content'] = array();
+                array_push($Data['content'], array(
+                    'order' => implode('<br />', $OutOrder),
+                    'out' => $Out,
+                    'in' => $In
+                ));
+                $Data['num'] = ONE;
             }
         } else {
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'请选择客户后查看客户账单';
             $this->Code = EXIT_ERROR;
         }
         $this->_ajax_return($Data);
-    }
-
-    /**
-     *
-     * @return void
-     */
-    public function add() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            if(!!($NewId = $this->dealer_account_book_model->insert($Post))) {
-                $this->Message = '新建成功, 刷新后生效!';
-            }else{
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
-                $this->Code = EXIT_ERROR;
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-    *
-    * @return void
-    */
-    public function edit() {
-        if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            $Where = $Post['v'];
-            unset($Post['v']);
-            if(!!($this->dealer_account_book_model->update($Post, $Where))){
-                $this->Message = '内容修改成功, 刷新后生效!';
-            }else{
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'内容修改失败';
-            }
-        }
-        $this->_ajax_return();
-    }
-
-    /**
-     *
-     * @param  int $id
-     * @return void
-     */
-    public function remove() {
-        $V = $this->input->post('v');
-        if (!is_array($V)) {
-            $_POST['v'] = explode(',', $V);
-        }
-        if ($this->_do_form_validation()) {
-            $Where = $this->input->post('v', true);
-            if ($this->dealer_account_book_model->delete($Where)) {
-                $this->Message = '删除成功，刷新后生效!';
-            } else {
-                $this->Code = EXIT_ERROR;
-                $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'删除失败!';
-            }
-        }
-        $this->_ajax_return();
     }
 }

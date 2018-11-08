@@ -10,6 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Product extends MY_Controller {
     private $__Search = array(
         'undelete' => NO,
+        'goods' => NO,
         'paging' => NO,
         'optimize' => NO
     );
@@ -55,6 +56,28 @@ class Product extends MY_Controller {
                     }
                 }
                 $Data['content'] = array_values($Data['content']);
+            } elseif (!empty($this->_Search['goods'])) {
+                $UnGoods = array(
+                    CABINET,
+                    WARDROBE,
+                    DOOR,
+                    WOOD
+                );
+                $TmpSource = array();
+                $TmpDes = array();
+                foreach ($Data['content'] as $key => $value){
+                    if (!in_array($value['v'], $UnGoods)) {
+                        $value = $this->_product_format($value);
+                        $TmpSource[$value['v']] = $value;
+                        $Child[$value['parent']][] = $value['v'];
+                    }
+                }
+                ksort($Child);
+                $Child = gh_infinity_category($Child);
+                while(list($key, $value) = each($Child)){
+                    $TmpDes[] = $TmpSource[$value];
+                }
+                $Data['content'] = $TmpDes;
             } else {
                 $TmpSource = array();
                 $TmpDes = array();

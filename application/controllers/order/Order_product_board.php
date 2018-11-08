@@ -33,6 +33,11 @@ class Order_product_board extends MY_Controller{
             if(!($Data = $this->order_product_board_model->select($this->_Search))){
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
                 $this->Code = EXIT_ERROR;
+            } else {
+                $this->load->helper('json_helper');
+                foreach ($Data['content'] as $Key => $Value) {
+                    $Data['content'][$Key]['warehouse_num'] = discode_warehouse_v($Value['warehouse_num']);
+                }
             }
             $Data['query']['order_id'] = $this->_Search['order_id'];
         } else {

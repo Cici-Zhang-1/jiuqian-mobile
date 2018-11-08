@@ -153,7 +153,7 @@ defined('O_DELIVERED') OR define('O_DELIVERED', 17);
 defined('O_BLANK_NOTE') OR define('O_BLANK_NOTE', 18);
 defined('O_MONEY_LOGISTICS') OR define('O_MONEY_LOGISTICS', 19);
 defined('O_OUTED') OR define('O_OUTED', 20);
-defined('O_CREATE') OR define('O_MINUS', -9999);
+defined('O_MINUS') OR define('O_MINUS', -9999);
 
 defined('OP_CREATE') OR define('OP_CREATE', 1);
 defined('OP_DISMANTLING') OR define('OP_DISMANTLING', 2);
@@ -292,6 +292,7 @@ defined('FIVE')  OR define('FIVE', 5);
 defined('TEN') OR define('TEN', 10);
 defined('ZERO') OR define('ZERO', 0);
 defined('EMPTY') OR define('EMPTY', 0);
+defined('NEGATIVE') OR define('NEGATIVE', -1);
 
 defined('SUPER_NO') OR define('SUPER_NO', 1); //超级管理员ID
 

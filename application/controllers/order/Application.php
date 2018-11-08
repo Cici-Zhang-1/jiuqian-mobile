@@ -120,7 +120,7 @@ class Application extends MY_Controller {
                             'source' => $Value['payterms'],
                             'des' => EASY_PRODUCE,
                             'status' => PASS,
-                            'remark' => $Post['remark']
+                            'remark' => $Post['a_remark'] . ', 金额:￥' . $NeedPay
                         );
                         if ($EasyProduceAutoPass || $MaxEasyProduce <= $Dealer[$Value['dealer_id']]) { // 当设置为自动通过或者客户余额大于最大宽松金额时，可以自动通过宽松生产
                             $Tmp['status'] = PASSED;
@@ -210,7 +210,7 @@ class Application extends MY_Controller {
                             'source' => $Value['payterms'],
                             'des' => EASY_DELIVERY,
                             'status' => PASS,
-                            'remark' => $Post['remark']
+                            'remark' => $Post['a_remark'] . ', 金额:￥' . $NeedPay
                         );
                         if ($EasyDeliveryAutoPass || $MaxEasyDelivery <= $Dealer[$Value['dealer_id']]) { // 当设置为自动通过或者客户余额大于最大宽松金额时，可以自动通过宽松生产
                             $Tmp['status'] = PASSED;

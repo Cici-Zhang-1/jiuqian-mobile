@@ -44,7 +44,7 @@ class Finance_pay_model extends MY_Model {
                         ->like('fp_remark', $Search['keyword'])
                         ->group_end();
                 }
-                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->order_by('fp_id', 'desc')->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,

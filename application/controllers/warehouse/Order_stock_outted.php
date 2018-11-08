@@ -148,7 +148,7 @@ class Order_stock_outted extends MY_Controller {
                 $Value['delivered'] = $Value['delivered'] - $this->_Order[$Value['v']];
                 $Query[$Key] = $Value;
             }
-            $this->order_stock_outted_model->trans_rollback();
+            // $this->order_stock_outted_model->trans_rollback();
             if (!($this->order_model->update_batch($Query))) {
                 $this->Code = EXIT_ERROR;
                 $this->Message = '订单重新发货失败!';

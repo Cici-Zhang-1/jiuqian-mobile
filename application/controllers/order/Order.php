@@ -91,6 +91,8 @@ class Order extends MY_Controller {
                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单详情不存在';
                 $this->Code = EXIT_ERROR;
             } else {
+                $this->load->helper('json_helper');
+                $Data['content']['warehouse_num'] = discode_warehouse_v($Data['content']['warehouse_num']);
                 $Data['content']['order_product'] = $this->_get_order_product_num();
             }
             $Data['query']['order_id'] = $this->_Search['order_id'];
@@ -129,16 +131,17 @@ class Order extends MY_Controller {
 	 * 根据经销商信息获取订单编号(登帐时使用)
 	 */
 	public function read_order_num(){
-	    $Did = $this->input->get('did', true);
+	    $Did = $this->input->get('dealer_id', true);
 	    $Days = $this->input->get('days', true);
 	    $Did = intval(trim($Did));
 	    $Days = intval(trim($Days));
 	    $StartDatetime = $Days <= 0?date('Y-m-d H:i:s', strtotime('-30 days')):date('Y-m-d H:i:s', strtotime('-'.$Days.' days'));
 	    $Data = array();
 	    if(!($Data = $this->order_model->select_order_num($Did, $StartDatetime))){
-	        $this->Failue .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'获取订单编号失败!';
+	        $this->Code = EXIT_ERROR;
+	        $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'获取订单编号失败!';
 	    }
-	    $this->_return($Data);
+	    $this->_ajax_return($Data);
 	}
 
 	public function read_wait_position() {

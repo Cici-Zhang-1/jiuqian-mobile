@@ -17,5 +17,7 @@ $config['dealer/dealer_account_book_model/select'] = array(
     'dab_balance' => 'balance',
     'dab_virtual_amount' => 'virtual_amount',
     'dab_virtual_balance' => 'virtual_balance',
-    'concat(d_num, "_", d_name, "_" , a_province, a_city, a_county, ifnull(d_address, ""), "_", dl_truename, "_", dl_mobilephone)' => 'dealer'
+    'concat(d_num, "_", d_name, "_" , a_province, a_city, a_county, ifnull(d_address, ""), "_", dl_truename, "_", dl_mobilephone)' => 'dealer',
+    'dab_inside' => 'inside',
+    'dab_source_status' => 'source_status'
 );

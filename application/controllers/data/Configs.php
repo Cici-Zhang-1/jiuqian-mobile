@@ -43,6 +43,16 @@ class Configs extends MY_Controller {
     }
 
     /**
+     * 读取某一条
+     */
+    public function item () {
+        $Key = $this->input->get('key', true);
+        $Key = gh_escape($Key);
+        $Data['config'] = intval($this->configs_model->select_by_name($Key));
+        $this->_ajax_return($Data);
+    }
+
+    /**
      *
      * @return void
      */

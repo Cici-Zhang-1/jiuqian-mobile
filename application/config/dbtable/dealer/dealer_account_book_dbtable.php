@@ -14,7 +14,9 @@ $config['dealer/dealer_account_book_model'] = array(
                                 'remark' => 'dab_remark',
                         'balance' => 'dab_balance',
     'virtual_amount' => 'dab_virtual_amount',
-    'virtual_balance' => 'dab_virtual_balance'
+    'virtual_balance' => 'dab_virtual_balance',
+    'inside' => 'dab_inside',
+    'source_status' => 'dab_source_status'
                     );
 $config['dealer/dealer_account_book_model/insert'] = array(
                                 'flow_num' => 'dab_flow_num',
@@ -29,7 +31,9 @@ $config['dealer/dealer_account_book_model/insert'] = array(
                                 'remark' => 'dab_remark',
                         'balance' => 'dab_balance',
     'virtual_amount' => 'dab_virtual_amount',
-    'virtual_balance' => 'dab_virtual_balance'
+    'virtual_balance' => 'dab_virtual_balance',
+    'inside' => 'dab_inside',
+    'source_status' => 'dab_source_status'
                     );
 $config['dealer/dealer_account_book_model/insert_batch'] = array(
                                 'flow_num' => 'dab_flow_num',
@@ -44,7 +48,9 @@ $config['dealer/dealer_account_book_model/insert_batch'] = array(
                                 'remark' => 'dab_remark',
                         'balance' => 'dab_balance',
     'virtual_amount' => 'dab_virtual_amount',
-    'virtual_balance' => 'dab_virtual_balance'
+    'virtual_balance' => 'dab_virtual_balance',
+    'inside' => 'dab_inside',
+    'source_status' => 'dab_source_status'
                     );
 $config['dealer/dealer_account_book_model/update'] = array(
                                 'flow_num' => 'dab_flow_num',
@@ -57,7 +63,9 @@ $config['dealer/dealer_account_book_model/update'] = array(
                                 'remark' => 'dab_remark',
                         'balance' => 'dab_balance',
     'virtual_amount' => 'dab_virtual_amount',
-    'virtual_balance' => 'dab_virtual_balance'
+    'virtual_balance' => 'dab_virtual_balance',
+    'inside' => 'dab_inside',
+    'source_status' => 'dab_source_status'
                     );
 $config['dealer/dealer_account_book_model/update_batch'] = array(
                                 'flow_num' => 'dab_flow_num',
@@ -71,5 +79,7 @@ $config['dealer/dealer_account_book_model/update_batch'] = array(
                                 'balance' => 'dab_balance',
     'virtual_amount' => 'dab_virtual_amount',
     'virtual_balance' => 'dab_virtual_balance',
-                        'v' => 'dab_id'
+                        'v' => 'dab_id',
+    'inside' => 'dab_inside',
+    'source_status' => 'dab_source_status'
                     );

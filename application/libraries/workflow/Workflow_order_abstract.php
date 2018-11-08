@@ -164,7 +164,7 @@ abstract class Workflow_order_abstract{
             'title' => $Order['order_num'],
             'category' => $this->_get_category($Direct),
             'source_id' => $Order['order_id'],
-            'remark' => ''
+            'remark' => '订单金额￥' . $Order['sum']
         );
         if ($Direct) {
             $Data['in'] = NO;
@@ -172,12 +172,16 @@ abstract class Workflow_order_abstract{
             $Data['virtual_amount'] = $Order['virtual_payed'] - $Order['virtual_sum'];
             $Data['balance'] = $Order['dealer_balance'] + $Data['amount'];
             $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Data['virtual_amount'];
+            $Data['inside'] = NO;
+            $Data['status'] = $Order['status'];
         } else {
             $Data['in'] = YES;
             $Data['amount'] = $Order['payed'];
             $Data['virtual_amount'] = $Order['virtual_payed'];
             $Data['balance'] = $Order['dealer_balance'] + $Order['payed'];
             $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Order['virtual_payed'];
+            $Data['inside'] = YES;
+            $Data['status'] = $Order['status'];
         }
         if ($this->_CI->dealer_account_book_model->insert($Data)) {
             return true;

@@ -14,6 +14,7 @@ abstract class P_abstract {
     protected $_OrderProduct = array('sum' => 0); // 新订单信息
     protected $_OrderProductInfo = array(); // 源订单信息
     private $_SumDiff = 0;
+    private $_Sum = 0;
 
     public function __construct(){
         $this->_CI = &get_instance();
@@ -50,6 +51,7 @@ abstract class P_abstract {
                 }
             }
             $Set['virtual_sum'] = $Set['sum'];
+            $this->_Sum = $Set['sum'];
             $this->_edit_order($Set);
             $this->_edit_dealer();
         }
@@ -91,9 +93,11 @@ abstract class P_abstract {
             'category' => $this->_get_category(),
             'source_id' => $this->_OrderProductInfo['order_id'],
             'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
-            'remark' => '',
+            'remark' => '订单金额￥' . $this->_Sum,
             'virtual_amount' => -1 * $this->_SumDiff,
-            'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff
+            'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff,
+            'inside' => $this->_SumDiff > ZERO ? NO : YES,
+            'source_status' => $this->_OrderProductInfo['status']
         );
         if ($this->_CI->dealer_account_book_model->insert($Data)) {
             return true;

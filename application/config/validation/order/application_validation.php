@@ -78,7 +78,7 @@ $config['order/application/easy_produce'] = array(
         'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
     ),
     array (
-        'field' => 'remark',
+        'field' => 'a_remark',
         'label' => '备注',
         'rules' => 'trim|required|max_length[128]'
     )
@@ -91,7 +91,7 @@ $config['order/application/easy_delivery'] = array(
         'rules' => 'trim|required|numeric|min_length[1]|max_length[10]'
     ),
     array (
-        'field' => 'remark',
+        'field' => 'a_remark',
         'label' => '备注',
         'rules' => 'trim|required|max_length[128]'
     )

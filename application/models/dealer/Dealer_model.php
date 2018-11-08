@@ -216,8 +216,13 @@ class Dealer_model extends MY_Model {
         return $Query->num_rows();
     }
 
+    public function is_valid ($V) {
+        return $this->_is_valid($V);
+    }
     private function _is_valid($V){
-        $Query = $this->HostDb->where('d_id', $V)->get('dealer');
+        $Item = $this->_Item . __FUNCTION__;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->where('d_id', $V)->get('dealer');
         if($Query->num_rows() > 0){
             $Row = $Query->row_array();
             $Query->free_result();

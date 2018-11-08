@@ -109,7 +109,7 @@ class Finance_pay extends MY_Controller {
             $this->_FinanceAccount = $this->_read_finance_account($Post['finance_account_id']);
         }
         $Data = array(
-            'balance' => $Post['amount'] - $this->_FinanceAccount['balance'],
+            'balance' => $this->_FinanceAccount['balance'] - $Post['amount'],
             'out' => $Post['amount'] + $this->_FinanceAccount['out'],
             'out_fee' => $Post['fee'] + $this->_FinanceAccount['out_fee']
         );

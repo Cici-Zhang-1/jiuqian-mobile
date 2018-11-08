@@ -91,3 +91,12 @@ $config['finance/finance_income_model/is_un_inned'] = array(
     'fi_status' => 'status',
     'fi_inned' => 'inned'
 );
+
+$config['finance/finance_income_model/select_for_debt'] = array(
+    'fi_id' => 'v',
+    'fi_finance_account' => 'name',
+    'fi_amount' => 'amount',
+    'fi_corresponding' => 'corresponding',
+    'fi_create_datetime' => 'create_datetime',
+    'fi_remark' => 'remark',
+);

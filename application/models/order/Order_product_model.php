@@ -909,7 +909,7 @@ class Order_product_model extends MY_Model{
     }
 
     public function select_brothers_by_order_id ($OrderV) {
-        $Query = $this->X->select('op_num as num')->from('order_product')
+        $Query = $this->HostDb->select('op_num as num')->from('order_product')
             ->where('op_order_id', $OrderV)
             ->where('op_status >= ', OP_CREATE)
             ->where_in('op_product_id', array(CABINET, WARDROBE, DOOR, WOOD))

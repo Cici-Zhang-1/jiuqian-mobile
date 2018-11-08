@@ -15,6 +15,7 @@ $config['dabc_order_remove'] = '订单作废';
 $config['dabc_order_direct'] = '订单出厂';
 $config['dabc_goods'] = '货款';
 $config['dabc_back'] = '返款';
+$config['dabc_discount'] = '优惠';
 $config['dabc_remove'] = '取消进账';
 $config['dabc_edit'] = '修改进账';
 $config['dabc_post_sale'] = '售后';

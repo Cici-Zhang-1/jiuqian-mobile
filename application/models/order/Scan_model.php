@@ -59,7 +59,7 @@ class Scan_model extends MY_Model {
         if ($Search['status'] == WP_SCAN) {
             $this->HostDb->where('opc_status', $Search['status']);
         } elseif ($Search['status'] == WP_SCANNING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opc_scan', $Search['scan']);
             }
@@ -100,7 +100,7 @@ class Scan_model extends MY_Model {
         if ($Search['status'] == WP_SCAN) {
             $this->HostDb->where('opb_status', $Search['status']);
         } elseif ($Search['status'] == WP_SCANNING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opb_scan', $Search['scan']);
             }
@@ -149,7 +149,7 @@ class Scan_model extends MY_Model {
         if ($Search['status'] == WP_SCAN) {
             $this->HostDb->where('opc_status', $Search['status']);
         } elseif ($Search['status'] == WP_SCANNING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opc_scan', $Search['scan']);
             }
@@ -157,7 +157,7 @@ class Scan_model extends MY_Model {
             $this->HostDb->where('opc_scan > ', ZERO);
             $this->HostDb->where('opc_scan_datetime is null');
         } else {
-            $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opc_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opc_scan', $Search['scan']);
             }
@@ -186,7 +186,7 @@ class Scan_model extends MY_Model {
         if ($Search['status'] == WP_SCAN) {
             $this->HostDb->where('opb_status', $Search['status']);
         } elseif ($Search['status'] == WP_SCANNING) { // 已经分配到某个封边组，但是还没有封边完成
-            $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opb_scan', $Search['scan']);
             }
@@ -194,7 +194,7 @@ class Scan_model extends MY_Model {
             $this->HostDb->where('opb_scan > ', ZERO);
             $this->HostDb->where('opb_scan_datetime is null');
         } else {
-            $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
+            // $this->HostDb->join('user as E', 'E.u_id = opb_scan', 'left');
             if (!empty($Search['scan'])) {
                 $this->HostDb->where('opb_scan', $Search['scan']);
             }

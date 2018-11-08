@@ -205,9 +205,11 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             'category' => $this->_get_category(),
             'source_id' => $this->_Order['order_id'],
             'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
-            'remark' => '',
+            'remark' => '订单金额￥' . $this->_Order['sum'],
             'virtual_amount' => -1 * $this->_VirtualNeedPay,
-            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay
+            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
+            'inside' => $this->_NeedPay > ZERO ? NO : YES,
+            'source_status' => $this->_Order['status'] // 订单状态
         );
         if ($this->_CI->dealer_account_book_model->insert($Data)) {
             return true;

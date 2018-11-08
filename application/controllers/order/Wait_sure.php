@@ -42,25 +42,34 @@ class Wait_sure extends MY_Controller{
         $_POST['v'] = is_array($V) ? $V : explode(',', $V);
         if ($this->_do_form_validation()) {
             $V = $this->input->post('v', true);
-            $Post = array(
-                'request_outdate' => $this->input->post('request_outdate', true)
-            );
             if (!!($Order = $this->order_model->are_status($V, O_WAIT_SURE))) {
-                $this->load->library('workflow/workflow');
-                $W = $this->workflow->initialize('order');
-                $this->Message = '订单确认生产成功!';
-                foreach ($Order as $Key => $Value) {
-                    if ($W->initialize($Value['v'], $Post)) {
-                        if ($W->produce() === false) {
+                $Post = array(
+                    'request_outdate' => $this->input->post('request_outdate', true),
+                    'down_payment' => $this->input->post('down_payment', true)
+                );
+                if ($Post['down_payment'] < MIN_DOWN_PAYMENT) {
+                    $Post['down_payment'] = MIN_DOWN_PAYMENT;
+                }
+                if(!!($this->order_model->update($Post, $V))){
+                    $this->load->library('workflow/workflow');
+                    $W = $this->workflow->initialize('order');
+                    $this->Message = '订单确认生产成功!';
+                    foreach ($Order as $Key => $Value) {
+                        if ($W->initialize($Value['v'])) {
+                            if ($W->produce() === false) {
+                                $this->Code = EXIT_ERROR;
+                                $this->Message = $W->get_failue();
+                                break;
+                            }
+                        } else {
                             $this->Code = EXIT_ERROR;
                             $this->Message = $W->get_failue();
                             break;
                         }
-                    } else {
-                        $this->Code = EXIT_ERROR;
-                        $this->Message = $W->get_failue();
-                        break;
                     }
+                }else{
+                    $this->Code = EXIT_ERROR;
+                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单确认失败';
                 }
             } else {
                 $this->Code = EXIT_ERROR;

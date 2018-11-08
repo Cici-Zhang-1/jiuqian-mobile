@@ -21,10 +21,15 @@ class Valuate extends MY_Controller{
     private $_OrderProduct = array();
     private $_SumDetail = array();  /*核价详情*/
     private $_SumDiff = 0;    /* 差价*/
+    private $_Sum = 0;
+
+    private $_AllowDiscount;
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Wait_asure Start!');
         $this->load->model('order/order_model');
+        $this->load->model('data/configs_model');
+        $this->_AllowDiscount = intval($this->configs_model->select_by_name('allow_discount')); // 分组方法
     }
 
     public function read(){
@@ -76,6 +81,8 @@ class Valuate extends MY_Controller{
             $this->_OrderId = $this->input->post('v', true);
         }
         $this->_OrderId = intval($this->_OrderId);
+        $this->_Sum = $this->input->post('sum', true);
+        $this->_Sum = intval($this->_Sum);
         if (!empty($this->_OrderId)) {
             if (!!($OrderProduct = $this->order_model->is_status($this->_OrderId, array(O_VALUATE, O_VALUATING)))) {
                 $this->_edit_cabinet();
@@ -126,6 +133,9 @@ class Valuate extends MY_Controller{
         );
         $Order['sum'] = ceil($Order['sum']);
         $Order['virtual_sum'] = $Order['sum'] + $Order['sum_diff'];
+        if ($this->_AllowDiscount) {
+            $Order['sum'] = ceil($this->_Sum);
+        }
 
         $this->order_model->update($Order, $this->_OrderId);
     }

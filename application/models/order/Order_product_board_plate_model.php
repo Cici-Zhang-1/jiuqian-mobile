@@ -31,7 +31,7 @@ class Order_product_board_plate_model extends MY_Model {
                     ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
                     ->join('workflow_procedure AS C', 'C.wp_id = opc_status', 'left')
                     ->where('opb_order_product_id', $Search['order_product_id'])
-                    ->order_by('opbp_qrcode')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                    ->order_by('opbp_qrcode')->order_by('opbp_id')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,

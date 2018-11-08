@@ -140,9 +140,11 @@ class Wait_delivery_workflow extends Workflow_order_abstract {
             'category' => $this->_get_category(),
             'source_id' => $this->_Order['v'],
             'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
-            'remark' => '',
+            'remark' => '订单金额￥' . $this->_Order['sum'],
             'virtual_amount' => -1 * $this->_VirtualNeedPay,
-            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay
+            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
+            'inside' => NO,
+            'source_status' => $this->_Order['status']
         );
         if ($this->_CI->dealer_account_book_model->insert($Data)) {
             return true;
