@@ -151,7 +151,8 @@ class Wait_delivery extends MY_Controller{
                     'end_datetime' => $this->input->post('end_datetime', true),
                     'collection' => array_sum($Collection), // 代收金额
                     'pack' => $Pack, // 发货件数
-                    'pack_detail' => '' // 明细
+                    'pack_detail' => '', // 明细
+                    'remark' => $this->input->post('remark')
                 );
                 $this->load->model('warehouse/stock_outted_model');
                 $Set = gh_escape($Set);

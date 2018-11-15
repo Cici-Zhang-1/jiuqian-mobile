@@ -73,9 +73,9 @@ function gh_location($_string,$_url){
 function gh_return($Code, $Message = '', $Location = '', $Data = array()) {
     if (preg_match('/json/', $_SERVER['HTTP_ACCEPT'])) {
         exit(json_encode(array(
-            'error' => $Code,
+            'code' => $Code,
             'message' => $Message,
-            'data' => $Data,
+            'contents' => $Data,
             'location' => $Location
         )));
     }else {

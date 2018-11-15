@@ -16,6 +16,11 @@ $config['order/wait_delivery/edit'] = array(
         'rules' => 'trim|required|max_length[64]'
     ),
     array(
+        'field' => 'remark',
+        'label' => '备注',
+        'rules' => 'trim|max_length[128]'
+    ),
+    array(
         'field' => 'order_product[]',
         'label' => '订单',
         'rules' => 'required'

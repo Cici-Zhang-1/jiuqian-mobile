@@ -169,7 +169,7 @@ class Dismantle extends MY_Controller{
     }
 
     public function dismantled () {
-        if (!!($OrderProduct = $this->_is_dismantlable())) {
+        if (!!($OrderProduct = $this->_is_dismantling())) {
             if ($this->_check_bd($OrderProduct)) {
                 $this->load->library('d/d');
                 if (is_array($this->_Id)) {
@@ -231,6 +231,38 @@ class Dismantle extends MY_Controller{
                 return $OrderProduct;
             } else {
                 $GLOBALS['error'] = '订单已经确认拆单或者删除，不能再次确认!';
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 如果是从等待拆单中确认拆单，需要判断是否是正在拆单
+     */
+    private function _is_dismantling () {
+        $this->_Id = $this->input->post('order_product_id', true);
+        $this->_Id = intval($this->_Id);
+        if (empty($this->_Id)) {
+            $this->_Id = $this->input->post('v', true);
+            if (is_array($this->_Id)) {
+                $this->_Id = array_map('intval', $this->_Id);
+            } else {
+                $this->_Id = array(
+                    intval($this->_Id)
+                );
+            }
+        } else {
+            $this->_Id = array(
+                $this->_Id
+            );
+        }
+        if (empty($this->_Id)) {
+            $GLOBALS['error'] = '请选择需要拆的订单!';
+        } else {
+            if (!!($OrderProduct = $this->order_product_model->are_dismantling($this->_Id))) {
+                return $OrderProduct;
+            } else {
+                $GLOBALS['error'] = '订单已经确认拆单、删除或者还未拆单，不能直接确认拆单!';
             }
         }
         return false;

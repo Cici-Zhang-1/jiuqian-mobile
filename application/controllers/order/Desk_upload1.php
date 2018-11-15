@@ -7,9 +7,9 @@
  * 上传文件
  */
 class Desk_upload extends MY_Controller{
-    // private $_Created = array();
+    private $_Created = array();
     private $_New = array(); // 新增的order_product_classify_id
-    // private $_DataUpdate = array();
+    private $_DataUpdate = array();
     private $_W;
     public function __construct(){
         parent::__construct();
@@ -38,8 +38,8 @@ class Desk_upload extends MY_Controller{
                 if (!empty($Post['plate'])) {
                     if ($this->_parse_order_product_classify($Post['plate'], $Post['batch_num'])) {
                         if ($this->_parse_saw($Saw, $Post['batch_num'])) {
-                            // $this->_edit_mrp($Post['batch_num']);
-                            // $this->_remove_mrp();
+                            $this->_edit_mrp($Post['batch_num']);
+                            $this->_remove_mrp();
                             $this->_edit_order_product_classify();
                         }
                     }
@@ -62,38 +62,7 @@ class Desk_upload extends MY_Controller{
      * @return bool
      */
     private function _parse_order_product_classify ($Plate, $BatchNum) {
-        if (!!($Mrp = $this->mrp_model->is_exist($BatchNum))) {
-            foreach ($Mrp as $Key => $Value) {
-                if (in_array($Value['status'], array(M_SHEAR, M_SHEARED))) {
-                    $Mrp[$Key] = $Value['v'];
-                } elseif ($Value['status'] == M_ELECTRONIC_SAW) {
-                    $this->Code = EXIT_ERROR;
-                    $this->Message .= $BatchNum . '已经安排下料，请返回后修改!';
-                    return false;
-                } elseif ($Value['status'] == M_ELECTRONIC_SAWED) {
-                    $this->Code = EXIT_ERROR;
-                    $this->Message .= $BatchNum . '已经下料，无法修改!';
-                    return false;
-                }
-            }
-            $this->_clear_mrp($Mrp);
-        }
         if (!!($OrderProductClassify = $this->order_product_board_plate_model->select_classify_batch_num($Plate))) {
-            foreach ($OrderProductClassify as $Key => $Value) {
-                if (!isset($this->_New[$Value['board']])) {
-                    $this->_New[$Value['board']] = array(
-                        'v' => array()
-                    );
-                }
-                array_push($this->_New[$Value['board']]['v'], $Value['v']);
-            }
-            return true;
-        } else {
-            $this->Code = EXIT_ERROR;
-            $this->Message .= '没有找到相关订单' . $BatchNum;
-            return false;
-        }
-        /*if (!!($OrderProductClassify = $this->order_product_board_plate_model->select_classify_batch_num($Plate))) {
             foreach ($OrderProductClassify as $Key => $Value) {
                 if ($Value['status'] == M_ELECTRONIC_SAW) {
                     $this->Code = EXIT_ERROR;
@@ -120,17 +89,7 @@ class Desk_upload extends MY_Controller{
             $this->Code = EXIT_ERROR;
             $this->Message .= '没有找到相关订单' . $BatchNum;
             return false;
-        }*/
-    }
-
-    /**
-     * 清除mrp
-     * @return bool
-     */
-    private function _clear_mrp ($Mrp) {
-        $this->order_product_classify_model->clear_mrp($Mrp);
-        $this->mrp_model->delete($Mrp);
-        return true;
+        }
     }
 
     /**
@@ -144,13 +103,8 @@ class Desk_upload extends MY_Controller{
             $Item = explode('____', $Value);
             $Board = trim($Item[1]);
             $Num = intval(trim($Item[50])); // 板块数量
-            // $IKey = $BatchNum . $Board;
-            if ($this->_add_new_mrp($BatchNum, $Board, $Num)) {
-                continue;
-            } else {
-                return false;
-            }
-            /*if (isset($this->_Created[$IKey])) { // 如果是已经上传的则更新板块数量
+            $IKey = $BatchNum . $Board;
+            if (isset($this->_Created[$IKey])) { // 如果是已经上传的则更新板块数量
                 $this->_DataUpdate[] = array(
                     'v' => $this->_Created[$IKey],
                     'num' => $Num,
@@ -162,7 +116,7 @@ class Desk_upload extends MY_Controller{
                 } else {
                     return false;
                 }
-            }*/
+            }
         }
         return true;
     }
@@ -192,51 +146,36 @@ class Desk_upload extends MY_Controller{
             }
         } else {
             $this->Code = EXIT_ERROR;
-            $this->Message .= $BatchNum . $Board . '没有找到对应颜色!';
+            $this->Message .= $BatchNum . $Board . '没有找到对应订单!';
             return false;
         }
     }
 
-    /*private function _edit_mrp ($BatchNum) {
+    private function _edit_mrp ($BatchNum) {
         if (!empty($this->_DataUpdate)) { // 已经上传的进行数据更新
             $this->mrp_model->update_batch($this->_DataUpdate);
             $this->Message .= $BatchNum . 'MRP修改成功! <br />';
         }
         return true;
-    }*/
+    }
 
-    /*private function _remove_mrp () {
+    private function _remove_mrp () {
         if (!empty($this->_Created)) { // 批次号改变的需要删除没用的
             $this->mrp_model->delete($this->_Created);
         }
         return true;
-    }*/
+    }
 
     private function _edit_order_product_classify () {
         if (!empty($this->_New)) {
-            $Set = array();
             foreach ($this->_New as $Key => $Value) {
-                if (empty($Value['mrp_id'])) {
-                    unset($this->_New[$Key]);
-                } else {
-                    foreach ($Value['v'] as $Ikey => $Ivalue) {
-                        array_push($Set, array(
-                            'mrp_id' => $Value['mrp_id'],
-                            'v' => $Ivalue
-                        ));
+                if (!empty($Value['mrp_id'])) {
+                    if (!($this->order_product_classify_model->update(array('mrp_id' => $Value['mrp_id']), $Value['v']))) {
+                        $this->Code = EXIT_ERROR;
+                        $this->Message = '更新板材分类MRP时出错!';
+                        return false;
                     }
                 }
-            }
-            if (!empty($Set)) {
-                if (!($this->order_product_classify_model->update_batch($Set))) {
-                    $this->Code = EXIT_ERROR;
-                    $this->Message = '更新板材分类MRP时出错!';
-                    return false;
-                }
-            } else {
-                $this->Code = EXIT_ERROR;
-                $this->Message = '系统中没有找到对应的订单!';
-                return false;
             }
         }
         return true;

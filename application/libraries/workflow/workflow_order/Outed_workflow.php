@@ -16,6 +16,11 @@ class Outed_workflow extends Workflow_order_abstract {
         return true;
     }
 
+    public function re_delivery() {
+        $this->_Workflow->edit_current_workflow(Workflow_order::$AllWorkflow['delivering']);
+        return $this->_Workflow->re_delivery();
+    }
+
     public function __call($name, $arguments){
         return true;
     }

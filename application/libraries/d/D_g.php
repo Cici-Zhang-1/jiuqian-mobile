@@ -72,7 +72,7 @@ class D_g extends D_abstract{
                 continue;
             } else {
                 if (!($OtherInfo = $this->_is_valid_other($Value['goods_speci_id'], $Value['other']))) {
-                    $Value['purchase_unit'] = 0;
+                    $Value['purchase_unit'] = '--';
                     $Value['purchase'] = 0;
                     $Value['unit_price'] = 0;
                 } else {
@@ -119,7 +119,9 @@ class D_g extends D_abstract{
         $this->_Save = 'dismantling';
         $this->_OderProductId = $To['v'];
         $this->_OrderProductNum = $To['order_product_num'];
-
+        $this->_OrderProduct['product'] = $From['product'];
+        $this->_OrderProduct['remark'] = $From['order_product_remark'];
+        $this->_edit_order_product();
         $this->_get_other($From);
 
         if (!empty(self::$_Other)) {

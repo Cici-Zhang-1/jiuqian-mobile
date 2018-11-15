@@ -52,6 +52,11 @@ $config['order/mrp_model/is_exist_batch_num'] = array(
     'm_status' => 'status'
 );
 
+$config['order/mrp_model/is_exist'] = array(
+    'm_id' => 'v',
+    'm_status' => 'status'
+);
+
 $config['order/mrp_model/select_order_product_v_by_v'] = array(
     'opc_order_product_id' => 'order_product_v'
 );

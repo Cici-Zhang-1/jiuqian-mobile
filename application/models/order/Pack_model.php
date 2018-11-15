@@ -52,7 +52,7 @@ class Pack_model extends MY_Model {
             ->join('classify', 'c_id = opc_classify_id', 'left')
             ->join('workflow_procedure', 'wp_id = opc_status', 'left')
             ->join('order_product', 'op_id = opc_order_product_id', 'left')
-            ->join('product', 'p_id = op_id', 'left')
+            ->join('product', 'p_id = op_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->join('user', 'u_id = opc_pack', 'left');
         if ($Search['status'] == WP_PACK) {

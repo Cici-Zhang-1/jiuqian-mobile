@@ -420,7 +420,5 @@ $config['order/order_product_board_plate_model/select_produce_prehandled'] = arr
 $config['order/order_product_board_plate_model/select_classify_batch_num'] = array(
     'opc_id' => 'v',
     'opc_batch_num' => 'batch_num',
-    'opc_board' => 'board',
-    'm_id' => 'mrp_v',
-    'm_status' => 'status'
+    'opc_board' => 'board'
 );

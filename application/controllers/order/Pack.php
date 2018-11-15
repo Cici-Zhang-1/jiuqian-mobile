@@ -13,6 +13,9 @@ class Pack extends MY_Controller{
         'end_date' => '',
         'status' => WP_PACK
     );
+    private $_User;
+    private $_Classify = array();
+    private $_Board = array();
     private $_PackGroupMethod = 0;
     public function __construct() {
         parent::__construct();
@@ -43,6 +46,10 @@ class Pack extends MY_Controller{
         if ($this->_Search['status'] == WP_PACKED && $this->_Search['start_date'] == '') {
             $this->_Search['start_date'] = date('Y-m-01');
         }
+        if ($this->_Search['pack'] == WP_PACK) {
+            $this->_Search['start_date'] = '';
+            $this->_Search['end_date'] = '';
+        }
         $Data = array();
         if(!($Data = $this->pack_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取打包任务信息失败';
@@ -66,7 +73,7 @@ class Pack extends MY_Controller{
         $this->_ajax_return();
     }
     private function _is_user () {
-        $Scan = gh_escape($_POST['scan']);
+        $Scan = gh_escape($_POST['pack']);
         $this->load->model('manage/user_model');
         if (!!($this->_User = $this->user_model->is_exist($Scan))) {
             return true;
@@ -81,12 +88,12 @@ class Pack extends MY_Controller{
         if (!empty($this->_Classify)) {
             $Post = gh_escape($_POST);
             $this->load->model('order/order_product_classify_model');
-            if (!!($Scan = $this->order_product_classify_model->are_packed_and_brothers($this->_Classify))) {
-                foreach ($Scan as $Key => $Value) {
-                    $Scan[$Key] = $Value['v'];
+            if (!!($Pack = $this->order_product_classify_model->are_packed_and_brothers($this->_Classify))) {
+                foreach ($Pack as $Key => $Value) {
+                    $Pack[$Key] = $Value['v'];
                 }
                 $W = $this->_workflow_order_product_classify();
-                if ($W->initialize($Scan)) {
+                if ($W->initialize($Pack)) {
                     $W->set_data(array('pack' => $Post['pack']));
                     $W->store_message('打包矫正到' . $this->_User['truename']);
                     $this->Message = '打包矫正成功, 刷新后生效!';
@@ -107,12 +114,12 @@ class Pack extends MY_Controller{
         if (!empty($this->_Board)) {
             $Post = gh_escape($_POST);
             $this->load->model('order/order_product_board_model');
-            if (!!($Scan = $this->order_product_board_model->are_packed_and_brothers($this->_Board))) {
-                foreach ($Scan as $Key => $Value) {
-                    $Scan[$Key] = $Value['v'];
+            if (!!($Pack = $this->order_product_board_model->are_packed_and_brothers($this->_Board))) {
+                foreach ($Pack as $Key => $Value) {
+                    $Pack[$Key] = $Value['v'];
                 }
                 $W = $this->_workflow_order_product_board();
-                if ($W->initialize($Scan)) {
+                if ($W->initialize($Pack)) {
                     $W->set_data(array('pack' => $Post['pack']));
                     $W->store_message('打包矫正到' . $this->_User['truename']);
                     $this->Message = '打包矫正成功, 刷新后生效!';
@@ -147,9 +154,9 @@ class Pack extends MY_Controller{
         }
         foreach ($V as $Key => $Value) {
             if (empty($Relate)) {
-                if ($Type == ZERO) {
+                if ($Type == ZERO) { // Classify 类
                     array_push($this->_Classify, $Value);
-                } else {
+                } else { // Board类
                     array_push($this->_Board, $Value);
                 }
             } else {

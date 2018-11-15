@@ -60,6 +60,12 @@ abstract class  D_abstract {
         $this->_CI->load->model('product/board_model');
         if (!!($Board = $this->_CI->board_model->select())) {
             foreach ($Board as $Key => $Value) {
+                if (empty($Value['length'])) {
+                    $Value['length'] = MAX_LENGTH;
+                }
+                if (empty($Value['width'])) {
+                    $Value['width'] = MAX_WIDTH;
+                }
                 self::$_Board[$Value['name']] = $Value;
             }
             return true;

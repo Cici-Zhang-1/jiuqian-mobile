@@ -32,6 +32,10 @@ class Scan_statistic extends MY_Controller{
         if ($this->_Search['start_date'] == '') {
             $this->_Search['start_date'] = date('Y-m-01');
         }
+        if ($this->_Search['scan'] == WP_SCAN) {
+            $this->_Search['start_date'] = '';
+            $this->_Search['end_date'] = '';
+        }
         $Data = array();
         if(!($Data = $this->scan_model->select($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
@@ -84,8 +88,8 @@ class Scan_statistic extends MY_Controller{
                 array_push($Data['content'], array(
                     'label' => '补单',
                     'name' => implode(',', $BOrderProductNum),
-                    'area' => $BAmount,
-                    'amount' => $BArea
+                    'area' => $BArea,
+                    'amount' => $BAmount
                 ));
             }
             $Data['num'] = count($Data['content']);

@@ -193,6 +193,41 @@ class Order_product_classify_model extends MY_Model {
         }
         return $Return;
     }
+
+    /**
+     * 通过批次号获取订单信息
+     * @param $Mrp
+     * @return array|bool
+     */
+    public function select_by_mrp_id ($Mrp) {
+        $Item = $this->_Item . __FUNCTION__ ;
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Mrp);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('order_product_classify')
+                ->join('order_product', 'op_id = opc_order_product_id', 'left')
+                ->where('op_status > ', O_REMOVE)
+                ->where_in('opc_mrp_id', $Mrp)
+                ->group_by('op_id')
+                ->order_by('op_order_id')->order_by('op_id');
+
+            $Query = $this->HostDb->get();
+            if ($Query->num_rows() > 0) {
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有找到该批次号的订单';
+            }
+        }
+        return $Return;
+    }
     /**
      * 判断是否是某种状态以及兄弟项
      * @param $Vs
@@ -249,19 +284,53 @@ class Order_product_classify_model extends MY_Model {
     public function are_scanned_and_brothers ($Vs) {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
-        $Sql = $this->_unformat_as($Item);
-        $Query = $this->HostDb->select($Sql)->from('order_product_classify')
-            ->where_in('opc_id', $Vs)
-            ->where('opc_scan > ', ZERO)
-            ->where('opc_scan_datetime is not null')
-            ->get();
+        $S = $this->HostDb->select('opc_order_product_id, opc_classify_id')->from('order_product_classify')
+            ->where('opc_scan > ', ZERO)->where('opc_scan_datetime is not null')
+            ->where_in('opc_id', $Vs)->limit(ONE)->get();
+        if ($S->num_rows() > 0) {
+            $Row = $S->row_array();
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product_classify')
+                ->where('opc_order_product_id', $Row['opc_order_product_id'])
+                ->where('opc_classify_id', $Row['opc_classify_id'])
+                ->where('opc_scan > ', ZERO)
+                ->where('opc_scan_datetime is not null')
+                ->get();
 
-        /* $Query = $this->HostDb->select($Sql)->from('order_product_classify')
-            ->where_in('opc_order_product_id', $S, false)
-            ->where('opc_scan > ', ZERO)
-            ->where('opc_scan_datetime is not null')->get(); */
-        if ($Query->num_rows() > 0) {
-            $Return = $Query->result_array();
+            /* $Query = $this->HostDb->select($Sql)->from('order_product_classify')
+                ->where_in('opc_order_product_id', $S, false)
+                ->where('opc_scan > ', ZERO)
+                ->where('opc_scan_datetime is not null')->get(); */
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+            }
+        }
+        return $Return;
+    }
+
+    /**
+     * 是否已打包和兄弟元素
+     * @param $Vs
+     * @return bool
+     */
+    public function are_packed_and_brothers ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $S = $this->HostDb->select('opc_order_product_id, opc_classify_id')->from('order_product_classify')
+            ->where('opc_pack > ', ZERO)->where('opc_pack_datetime is not null')
+            ->where_in('opc_id', $Vs)->limit(ONE)->get();
+        if ($S->num_rows() > 0) {
+            $Row = $S->row_array();
+            $Sql = $this->_unformat_as($Item);
+            $Query = $this->HostDb->select($Sql)->from('order_product_classify')
+                ->where('opc_order_product_id', $Row['opc_order_product_id'])
+                ->where('opc_classify_id', $Row['opc_classify_id'])
+                ->where('opc_pack > ', ZERO)
+                ->where('opc_pack_datetime is not null')
+                ->get();
+            if ($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+            }
         }
         return $Return;
     }
@@ -609,6 +678,19 @@ class Order_product_classify_model extends MY_Model {
             return false;
         }
     }
+
+    /**
+     * 清除mrp
+     * @param $Mrp
+     * @return bool
+     */
+    public function clear_mrp ($Mrp) {
+        $this->HostDb->set('opc_mrp_id', ZERO)
+            ->where_in('opc_mrp_id', $Mrp);
+        $this->HostDb->update('order_product_classify');
+        $this->remove_cache($this->_Module);
+        return true;
+    }
     /**
      * Delete data from table order_product_classify
      * @param $Where
@@ -625,6 +707,7 @@ class Order_product_classify_model extends MY_Model {
         $this->remove_cache($this->_Module);
         return true;
     }
+
 
     /**
      * 清除订单产品板块分类信息

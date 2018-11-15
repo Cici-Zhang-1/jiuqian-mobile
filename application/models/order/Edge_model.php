@@ -27,7 +27,7 @@ class Edge_model extends MY_Model {
                     ->join('board', 'b_name = opb_board', 'left')
                     ->join('workflow_procedure', 'wp_id = opb_status', 'left')
                     ->join('order_product', 'op_id = opb_order_product_id', 'left')
-                    ->join('product', 'p_id = op_id', 'left')
+                    ->join('product', 'p_id = op_product_id', 'left')
                     ->join('order', 'o_id = op_order_id', 'left')
                     ->join('user', 'u_id = opb_edge', 'left');
                 if ($Search['status'] == WP_EDGE) {

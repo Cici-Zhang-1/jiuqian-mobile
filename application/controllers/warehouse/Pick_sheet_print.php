@@ -236,6 +236,7 @@ class Pick_sheet_print extends MY_Controller {
                     'page_pack' => $Pack,
                     'page_collection' => $Value['collection'],
                     'dealer_remark' => $Value['dealer_remark'],
+                    'remark' => $this->_StockOutted['remark'],
                     'trs' => array()
                 );
                 $this->_Flag[$Value['order_v']] = false;

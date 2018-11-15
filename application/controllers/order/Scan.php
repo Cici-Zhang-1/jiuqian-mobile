@@ -43,6 +43,10 @@ class Scan extends MY_Controller{
                 $this->_Search['start_date'] = date('Y-m-01');
             }
         }
+        if ($this->_Search['scan'] == WP_SCAN) {
+            $this->_Search['start_date'] = '';
+            $this->_Search['end_date'] = '';
+        }
 
         $Data = array();
         if(!($Data = $this->scan_model->select($this->_Search))){

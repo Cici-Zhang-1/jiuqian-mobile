@@ -19,8 +19,11 @@ class Producing extends MY_Controller{
         ),     /*橱柜、衣柜*/
         'status' => array(
             OP_PRODUCING,
-            OP_PACKING
-        )        /*正在生产*/
+            OP_PACKING,
+            OP_PACKED,
+            OP_INED
+        ),        /*正在生产*/
+        'all' => YES
     );
 
     public function __construct(){
@@ -33,7 +36,7 @@ class Producing extends MY_Controller{
         $this->_Search = array_merge($this->_Search, $this->__Search);
         $this->get_page_search();
         $Data = array();
-        if(!($Data = $this->order_product_model->select($this->_Search))){
+        if(!($Data = $this->order_product_model->select_producing($this->_Search))){
             $this->Code = EXIT_ERROR;
             $this->Message = '没有获取到生产中的订单';
         }

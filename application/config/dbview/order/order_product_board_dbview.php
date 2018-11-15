@@ -240,6 +240,10 @@ $config['order/order_product_board_model/are_scanned_and_brothers'] = array(
     'opb_id' => 'v',
     'opb_board' => 'board'
 );
+$config['order/order_product_board_model/are_packed_and_brothers'] = array(
+    'opb_id' => 'v',
+    'opb_board' => 'board'
+);
 $config['order/order_product_board_model/had_status_and_brothers'] = array(
     'opb_id' => 'v',
     'opb_board' => 'board',
@@ -253,6 +257,7 @@ $config['order/order_product_board_model/select_user_current_work'] = array(
 
 $config['order/order_product_board_model/select_packable_by_order_product_id'] = array(
     'opb_id' => 'v',
+    'b_thick' => 'thick',
     'opb_status' => 'status',
     'opb_procedure' => 'procedure'
 );

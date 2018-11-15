@@ -164,6 +164,10 @@ class D_m extends D_abstract{
 
             $BoardPlate[$key] = $value;
         }
+        foreach ($Board as $Key => $Value) {
+            $Board[$Key]['sum'] = ceil($Value['area'] * $Value['unit_price']);
+            $Board[$Key]['virtual_sum'] = ceil($Value['virtual_area'] * $Value['unit_price']);
+        }
         $this->_CI->order_product_board_door_model->delete_by_order_product_id($OrderProductId);
         if(!empty($Opbids)){
             $this->_CI->order_product_board_model->delete_not_in($OrderProductId, $Opbids);
@@ -197,7 +201,9 @@ class D_m extends D_abstract{
 
         $this->_OderProductId = $To['v'];
         $this->_OrderProductNum = $To['order_product_num'];
-
+        $this->_OrderProduct['product'] = $From['product'];
+        $this->_OrderProduct['remark'] = $From['order_product_remark'];
+        $this->_edit_order_product();
         $this->_get_door($From);
 
         $this->_get_board_plate($From);

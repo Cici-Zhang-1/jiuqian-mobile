@@ -27,7 +27,6 @@ class Permit{
      * 判断用户是否可以执行当前操作
      */
     public function is_permit(){
-        $Return = false;
         if (ENVIRONMENT === 'development') {
             if(!$this->_is_public()){
                 if($this->_get_operation()){
@@ -47,7 +46,7 @@ class Permit{
         }
 
         if(!$Return){
-            gh_return(EXIT_PERMISSION, 'Sorry, you visit non-exist page or you can not visit this page!');
+            gh_return(EXIT_PERMISSION, '不好意思，你访问的内容不存在或者无权访问!');
         }
     }
 

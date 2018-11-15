@@ -137,7 +137,9 @@ class D_f extends D_abstract{
         $this->_Save = 'dismantling';
         $this->_OderProductId = $To['v'];
         $this->_OrderProductNum = $To['order_product_num'];
-
+        $this->_OrderProduct['product'] = $From['product'];
+        $this->_OrderProduct['remark'] = $From['order_product_remark'];
+        $this->_edit_order_product();
         $this->_get_server($From);
 
         if (!empty(self::$_Server)) {

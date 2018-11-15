@@ -81,7 +81,8 @@ class D_y extends D_abstract{
                 continue;
             } else if (!($BoardInfo = $this->_is_valid_board($Value['board']))) {
                 return false;
-            } elseif (($Value['length'] > MAX_LENGTH || $Value['width'] > MAX_LENGTH) || ($Value['length'] > MAX_WIDTH && $Value['width'] > MAX_WIDTH)) {
+            } elseif (($Value['length'] > $BoardInfo['length'] || $Value['width'] > $BoardInfo['length']) || ($Value['length'] > $BoardInfo['width'] && $Value['width'] > $BoardInfo['width'])) {
+            // } elseif (($Value['length'] > MAX_LENGTH || $Value['width'] > MAX_LENGTH) || ($Value['length'] > MAX_WIDTH && $Value['width'] > MAX_WIDTH)) {
                 $GLOBALS['error'] = $Value['qrcode'] . $Value['plate_name'] .  '的板块尺寸太长';
                 return false;
             } else {
@@ -190,6 +191,10 @@ class D_y extends D_abstract{
             }
             $BoardPlate[$key] = $value;
         }
+        foreach ($Board as $Key => $Value) {
+            $Board[$Key]['sum'] = ceil($Value['area'] * $Value['unit_price']);
+            $Board[$Key]['virtual_sum'] = ceil($Value['virtual_area'] * $Value['unit_price']);
+        }
         $this->_CI->order_product_board_plate_model->delete_by_order_product_id($OrderProductId);
         if(!empty($Opbids)){
             $this->_CI->order_product_board_model->delete_not_in($OrderProductId, $Opbids);
@@ -223,7 +228,10 @@ class D_y extends D_abstract{
 
         $this->_OderProductId = $To['v'];
         $this->_OrderProductNum = $To['order_product_num'];
-
+        $this->_OrderProduct['bd'] = $From['bd'];
+        $this->_OrderProduct['product'] = $From['product'];
+        $this->_OrderProduct['remark'] = $From['order_product_remark'];
+        $this->_edit_order_product();
         $this->_get_wardrobe_struct($From);
 
         $this->_get_board_plate($From);

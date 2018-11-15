@@ -79,10 +79,21 @@ $config['order/order_product_classify_model/are_scanned_and_brothers'] = array(
     'opc_board' => 'board'
 );
 
+$config['order/order_product_classify_model/are_packed_and_brothers'] = array(
+    'opc_id' => 'v',
+    'opc_board' => 'board'
+);
+
 $config['order/order_product_classify_model/is_exist_batch_num'] = array(
     'opc_id' => 'v'
 );
 
 $config['order/order_product_classify_model/are_status_by_mrp_id'] = array(
     'opc_id' => 'v'
+);
+
+$config['order/order_product_classify_model/select_by_mrp_id'] = array(
+    'op_id' => 'v',
+    'op_order_id' => 'order_id',
+    'op_num' => 'num'
 );

@@ -15,7 +15,8 @@ $config['order/order_model/is_deliveriable'] = array(
 );
 
 $config['order/order_model/is_exist_order_num'] = array(
-    'o_id' => 'v'
+    'o_id' => 'v',
+    'o_status' => 'status'
 );
 
 $config['order/order_model/is_dismantlable'] = array(

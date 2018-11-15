@@ -61,6 +61,9 @@ class D_p extends D_abstract{
             } elseif (empty($Value['goods_speci_id'])) {
                 $this->_CI->load->model('product/goods_speci_model');
                 if (!($FittingInfo = $this->_CI->goods_speci_model->is_valid_goods_speci($Value['fitting'], $Value['speci'], $Value['unit']))) {
+                    $FittingInfo['purchase'] = 0;
+                    $FittingInfo['saler_unit_price'] = 0;
+                    $FittingInfo['purchase_unit'] = $Value['unit'];
                     $Value['goods_speci_id'] = 0;
                     /* unset($Fitting[$Key]);
                     continue; */
@@ -121,7 +124,9 @@ class D_p extends D_abstract{
 
         $this->_OderProductId = $To['v'];
         $this->_OrderProductNum = $To['order_product_num'];
-
+        $this->_OrderProduct['product'] = $From['product'];
+        $this->_OrderProduct['remark'] = $From['order_product_remark'];
+        $this->_edit_order_product();
         $this->_get_fitting($From);
 
         if (!empty(self::$_Fitting)) {

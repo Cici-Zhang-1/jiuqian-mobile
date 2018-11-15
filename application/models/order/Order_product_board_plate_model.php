@@ -172,7 +172,7 @@ class Order_product_board_plate_model extends MY_Model {
      * @param $OrderProductId
      * @return bool | array
      */
-    public function select_scan_list($OrderProductId){
+    public function select_scan_list($OrderProductId, $Thick = ''){
         $Item = $this->_Item.__FUNCTION__;
         $Sql = $this->_unformat_as($Item, $this->_Module);
         $this->HostDb->select($Sql, false);
@@ -181,6 +181,11 @@ class Order_product_board_plate_model extends MY_Model {
         $this->HostDb->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left');
         $this->HostDb->join('order_product', 'op_id = opb_order_product_id', 'left');
         $this->HostDb->where(array('op_id' => $OrderProductId));
+        if ($Thick === '1') {
+            $this->HostDb->where('opbp_thick > ', THICK);
+        } elseif ($Thick === '0') {
+            $this->HostDb->where('opbp_thick < ', THICK);
+        }
         $this->HostDb->order_by('opbp_thick');
         $this->HostDb->order_by('opbp_qrcode');
         $Query = $this->HostDb->get();
@@ -458,7 +463,6 @@ class Order_product_board_plate_model extends MY_Model {
         $Query = $this->HostDb->select($Sql)->from('order_product_board_plate')
             ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
             ->join('order_product', 'op_id = opc_order_product_id', 'left')
-            ->join('mrp', 'm_id = opc_mrp_id', 'left')
             ->where('op_status', OP_PRE_PRODUCING)
             ->where_in('opbp_qrcode', $Qrcode)
             ->group_by('opc_id')->get();

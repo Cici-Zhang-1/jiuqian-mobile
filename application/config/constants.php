@@ -85,6 +85,7 @@ defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automat
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 defined('EXIT_SIGNIN')         OR define('EXIT_SIGNIN', 10); // signin error
+defined('EXIT_PERMISSION')     OR define('EXIT_PERMISSION', 11);
 
 /**
  * DAY
@@ -338,7 +339,7 @@ defined('SERVER_NUM') OR define('SERVER_NUM','F');
 
 defined('REG_ORDER') OR define('REG_ORDER', '/[xXbB][\d]{10}/');
 defined('REG_ORDER_PRODUCT') OR define('REG_ORDER_PRODUCT', '/[xXbB][\d]{10}-[wWyYmMpPgGkKaA][\d]{1,}/');
-defined('REG_ORDER_PRODUCT_STRICT') OR define('REG_ORDER_PRODUCT_STRICT', '/^[xXbB][\d]{10}-[wWyYmMpPgGkKaA][\d]{1,}$/');
+defined('REG_ORDER_PRODUCT_STRICT') OR define('REG_ORDER_PRODUCT_STRICT', '/^[xXbB][\d]{10}-[wWyYmMpPgGkKfFaA][\d]{1,}$/');
 defined('REG_ORDER_QRCODE') OR define('REG_ORDER_QRCODE', '/([xXbB][\d]{10})-([wWyYmMpPgGkKaA][\d]{1,})-([\d]{1,})/');
 defined('REG_PACK_LABEL') OR define('REG_PACK_LABEL', '/(([xXbB][\d]{10})-[wWyYmMpPgGkKaA][\d]{1,})-([\d]{1,4})-([\d]{1,4})-(.*)$/');   // 标签
 defined('REG_RECOMMEND') OR define('REG_RECOMMEND', '/(([xXbB][\d]{10})-[wWyYmMpPgGkKaA][\d]{1,})(-([\d]{1,4})-[\d]{1,4}-(.*))?/'); // 推荐货位

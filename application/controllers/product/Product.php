@@ -124,6 +124,7 @@ class Product extends MY_Controller {
             } else {
                 $Post['class'] = 0;
             }
+            $Post['delete'] = 1;
             if(!!($NewId = $this->product_model->insert($Post))) {
                 $this->Message = '新建成功, 刷新后生效!';
             }else{

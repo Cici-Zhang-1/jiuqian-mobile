@@ -128,10 +128,16 @@ class Pack_label extends MY_Controller {
         return false;
     }
 
+    /**
+     * 订单产品分类---可打包
+     * @param $OrderProductId
+     * @return array|bool
+     */
     private function _is_packable_order_product_classify ($OrderProductId) {
         $this->load->model('order/order_product_classify_model');
         $Data = array('pack_type' => array(), 'packer' => array());
         if (!!($this->_OrderProductClassify = $this->order_product_classify_model->select_packable_by_order_product_id($OrderProductId))) {
+            $UnScan = false;
             foreach ($this->_OrderProductClassify as $Key => $Value) {
                 if ($Value['procedure'] == P_PACK) {  // 合包
                     if (!in_array('both', $Data['pack_type'])) {
@@ -168,19 +174,61 @@ class Pack_label extends MY_Controller {
                         }
                     }
                 }
+                if ($Value['status'] < WP_PACK) {
+                    $UnScan = true;
+                }
             }
-            $Data['un_scanned'] = $this->_read_un_scanned($OrderProductId); // 是否缺板材
+            if ($UnScan) {
+                $Data['un_scanned'] = $this->_read_un_scanned($OrderProductId); // 是否缺板材
+            } else {
+                $Data['un_scanned'] = false;
+            }
             return $Data;
         }
         return false;
     }
 
+    /**
+     * 订单产品板材---可打包
+     * @param $OrderProductId
+     * @return array|bool
+     */
     private function _is_packable_order_product_board ($OrderProductId) {
         $this->load->model('order/order_product_board_model');
         $Data = array('pack_type' => array());
         if (!!($this->_OrderProductBoard = $this->order_product_board_model->select_packable_by_order_product_id($OrderProductId))) {
-            array_push($Data['pack_type'], 'both'); // 是否缺板材
-            return $Data;
+            $UnScan = false;
+            foreach ($this->_OrderProductBoard as $Key => $Value) {
+                if ($Value['thick'] > THICK) {
+                    if (!in_array('thick', $Data['pack_type'])) {
+                        array_push($Data['pack_type'], 'thick');
+                    }
+                } else {
+                    if (!in_array('thin', $Data['pack_type'])) {
+                        array_push($Data['pack_type'], 'thin');
+                    }
+                }
+                if ($Value['status'] < WP_PACK) {
+                    unset($this->_OrderProductBoard[$Key]);
+                    $UnScan = true;
+                }
+            }
+            if (empty($this->_OrderProductBoard)) {
+                return false;
+            } else {
+                if (count($Data['pack_type']) == ONE) {
+                    $Data['pack_type'] = array(
+                        'both'
+                    );
+                }
+                $this->_OrderProductBoard = array_values($this->_OrderProductBoard);
+                if ($UnScan) {
+                    $Data['un_scanned'] = $this->_read_un_scanned($OrderProductId); // 是否缺板材
+                } else {
+                    $Data['un_scanned'] = false;
+                }
+                return $Data;
+            }
         }
         return false;
     }
@@ -244,7 +292,7 @@ class Pack_label extends MY_Controller {
                 if (!!($OrderProductClassify = $this->_is_packable_order_product_classify($this->_OrderProductId))) {
                     $this->_edit_order_product_classify();
                 } elseif (!!($OrProductBoard = $this->_is_packable_order_product_board($this->_OrderProductId))) {
-                    $this->_edit_order_product_board();
+                    $this->_edit_order_product_board($OrProductBoard['pack_type']);
                 } else {
                     $this->Message = $OrderProduct['num'] . '当前订单状态不能打包';
                     $this->Code = EXIT_ERROR;
@@ -338,19 +386,44 @@ class Pack_label extends MY_Controller {
             return false;
         }
     }
-    private function _edit_order_product_board () {
+    private function _edit_order_product_board ($PackType) {
         $OrderProductBoardId = array();
-        foreach ($this->_OrderProductBoard as $Key => $Value) {
-            array_push($OrderProductBoardId, $Value['v']);
+        $Packed = true;
+
+        if ('both' == $this->_Classify) {
+            foreach ($this->_OrderProductBoard as $Key => $Value) {
+                array_push($OrderProductBoardId, $Value['v']);
+            }
+            $Message = '打包所有, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        } elseif ('thick' == $this->_Classify){
+            foreach ($this->_OrderProductBoard as $Key => $Value) {
+                if ($Value['thick'] > THICK) {
+                    array_push($OrderProductBoardId, $Value['v']);
+                }
+            }
+            $PackDetail = json_decode($this->_PackDetail, true);
+            if (in_array('thin', $PackType) && empty($PackDetail['thin'])) {
+                $Packed = false;
+            }
+            $Message = '打包厚板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        } elseif ('thin' == $this->_Classify){
+            foreach ($this->_OrderProductBoard as $Key => $Value) {
+                if ($Value['thick'] < THICK) {
+                    array_push($OrderProductBoardId, $Value['v']);
+                }
+            }
+            $PackDetail = json_decode($this->_PackDetail, true);
+            if (in_array('thick', $PackType) && empty($PackDetail['thick'])) {
+                $Packed = false;
+            }
+            $Message = '打包薄板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
+        }else{
+            foreach ($this->_OrderProductBoard as $Key => $Value) {
+                array_push($OrderProductBoardId, $Value['v']);
+            }
+            $Message = '打包入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
         }
         if (!empty($OrderProductBoardId)) {
-            if ('thick' == $this->_Classify){
-                $Message = '打包厚板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
-            }elseif ('thin' == $this->_Classify){
-                $Message = '打包薄板, 入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
-            }else{
-                $Message = '打包入库' . $this->_Pack . '件, 总件数' . $this->_Sum . '件';
-            }
             if($this->_Brothers){
                 $Message .= ', 这次为合包, 且打印包标签';
             }
@@ -361,7 +434,7 @@ class Pack_label extends MY_Controller {
             if ($W->packed($Message, array(
                 'pack' => $this->_Sum,
                 'pack_detail' => $this->_PackDetail,
-                'packed' => true
+                'packed' => $Packed
             ))) {
                 // $this->_edit_order_product();
                 return true;

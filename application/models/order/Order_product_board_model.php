@@ -79,14 +79,29 @@ class Order_product_board_model extends MY_Model{
         $Return = false;
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->join('board', 'b_name = opb_board', 'left')
             ->where('opb_order_product_id', $OrderProductId)
-            ->where('opb_status >= ', WP_PACK)
+            // ->where('opb_status >= ', WP_PACK)
             ->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
         }
         return $Return;
     }
+    /*public function select_un_packable_by_order_product_id ($OrderProductId) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->join('board', 'b_name = opb_board', 'left')
+            ->where('opb_order_product_id', $OrderProductId)
+            ->where('opb_status < ', WP_PACK)
+            ->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }*/
     /**
      * 是否可以转换
      * @param $Vs
@@ -335,6 +350,25 @@ class Order_product_board_model extends MY_Model{
             ->where_in('opb_order_product_id', $S, false)
             ->where('opb_scan > ', ZERO)
             ->where('opb_scan_datetime is not null')->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->result_array();
+        }
+        return $Return;
+    }
+
+    public function are_packed_and_brothers ($Vs) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $S = $this->HostDb->select('opb_order_product_id')->from('order_product_board')
+            ->where_in('opb_id', $Vs)
+            ->where('opb_pack > ', ZERO)
+            ->where('opb_pack_datetime is not null')
+            ->group_by('opb_order_product_id')->get_compiled_select();
+        $Sql = $this->_unformat_as($Item);
+        $Query = $this->HostDb->select($Sql)->from('order_product_board')
+            ->where_in('opb_order_product_id', $S, false)
+            ->where('opb_pack > ', ZERO)
+            ->where('opb_pack_datetime is not null')->get();
         if ($Query->num_rows() > 0) {
             $Return = $Query->result_array();
         }

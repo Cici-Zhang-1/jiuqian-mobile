@@ -27,9 +27,14 @@ class Packed_workflow extends Workflow_order_product_board_abstract {
             }
         }
         $this->_Workflow->store_message('==分类板块已经打包');
-        // $Packed = $Data['packed'];
+        $Packed = $Data['packed'];
         unset($Data['packed']);
-        return $this->_workflow_propagation('packed', $Msg, $Data);
+        if ($Packed) {
+            return $this->_workflow_propagation('packed', $Msg, $Data);
+        } else {
+            return $this->_workflow_propagation('packing', $Msg, $Data);
+        }
+        // return $this->_workflow_propagation('packed', $Msg, $Data);
     }
 
     public function __call($name, $arguments){

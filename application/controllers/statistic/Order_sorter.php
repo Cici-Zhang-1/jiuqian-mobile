@@ -56,9 +56,12 @@ class Order_sorter extends MY_Controller {
             for ($I = 0; $I < $K; $I++) { //排序
                 for ($J = 0; $J < $K - $I - 1; $J++) {
                     if ($Tmp2[$J]['sum'] < $Tmp2[$J + 1]['sum']) {
-                        $Tmp3 = $Tmp2[$J]['sum'];
+                        /*$Tmp3 = $Tmp2[$J]['sum'];
                         $Tmp2[$J]['sum'] = $Tmp2[$J + 1]['sum'];
-                        $Tmp2[$J + 1]['sum'] = $Tmp3;
+                        $Tmp2[$J + 1]['sum'] = $Tmp3;*/
+                        $Tmp3 = $Tmp2[$J];
+                        $Tmp2[$J] = $Tmp2[$J + 1];
+                        $Tmp2[$J + 1] = $Tmp3;
                     }
                 }
             }

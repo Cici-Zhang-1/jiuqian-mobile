@@ -57,25 +57,31 @@ class Unqrcode extends MY_Controller {
     public function add() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
+            $Post['order_product_num'] = strtoupper($Post['order_product_num']);
             $this->load->model('order/order_model');
             if (!!($Query = $this->order_model->is_exist_order_num($Post['order_product_num']))) {
-                $Post['order_id'] = $Query['v'];
-                if (!!($Query = $this->unqrcode_model->has_brother($Post['order_id']))) {
-                    if (preg_match('/[X|B][\d]{10,10}-[\w]([\d]+)/', $Query['num'], $Matches)) {
-                        $Matches[1]++;
-                        $Post['num'] = $Post['order_product_num'] . '-A' . $Matches[1];
+                if ($Query['status'] > O_DELIVERED) {
+                    $this->Message = '订单已经出厂, 不能再增加无码入库, 请直接和成品库沟通!';
+                    $this->Code = EXIT_ERROR;
+                } else {
+                    $Post['order_id'] = $Query['v'];
+                    if (!!($Query = $this->unqrcode_model->has_brother($Post['order_id']))) {
+                        if (preg_match('/[X|B][\d]{10,10}-[\w]([\d]+)/', $Query['num'], $Matches)) {
+                            $Matches[1]++;
+                            $Post['num'] = $Post['order_product_num'] . '-A' . $Matches[1];
+                        } else {
+                            $Post['num'] = $Post['order_product_num'] . '-A1';
+                        }
                     } else {
                         $Post['num'] = $Post['order_product_num'] . '-A1';
                     }
-                } else {
-                    $Post['num'] = $Post['order_product_num'] . '-A1';
-                }
-                $Post['pack_detail'] = json_encode(array('total' => $Post['pack'])); // 为和订单产品保持一致
-                if(!!($NewId = $this->unqrcode_model->insert($Post))) {
-                    $this->Message = '新建成功, 刷新后生效!';
-                }else{
-                    $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
-                    $this->Code = EXIT_ERROR;
+                    $Post['pack_detail'] = json_encode(array('total' => $Post['pack'])); // 为和订单产品保持一致
+                    if(!!($NewId = $this->unqrcode_model->insert($Post))) {
+                        $this->Message = '新建成功, 刷新后生效!';
+                    }else{
+                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'新建失败!';
+                        $this->Code = EXIT_ERROR;
+                    }
                 }
             } else {
                 $this->Message = '订单编号不存在!';

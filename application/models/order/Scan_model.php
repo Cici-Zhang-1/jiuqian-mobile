@@ -53,7 +53,7 @@ class Scan_model extends MY_Model {
             ->join('classify', 'c_id = opc_classify_id', 'left')
             ->join('workflow_procedure', 'wp_id = opc_status', 'left')
             ->join('order_product', 'op_id = opc_order_product_id', 'left')
-            ->join('product', 'p_id = op_id', 'left')
+            ->join('product', 'p_id = op_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->join('user', 'u_id = opc_scan', 'left');
         if ($Search['status'] == WP_SCAN) {
@@ -94,7 +94,7 @@ class Scan_model extends MY_Model {
         $this->HostDb->select($Sql)->from('order_product_board')
             ->join('workflow_procedure', 'wp_id = opb_status', 'left')
             ->join('order_product', 'op_id = opb_order_product_id', 'left')
-            ->join('product', 'p_id = op_id', 'left')
+            ->join('product', 'p_id = op_product_id', 'left')
             ->join('order', 'o_id = op_order_id', 'left')
             ->join('user', 'u_id = opb_scan', 'left');
         if ($Search['status'] == WP_SCAN) {

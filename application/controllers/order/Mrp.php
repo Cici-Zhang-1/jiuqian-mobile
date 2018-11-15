@@ -45,7 +45,7 @@ class Mrp extends MY_Controller {
                 $WorkflowMessage = '';
                 foreach ($Distribution as $Key => $Value) {
                     $Where[] = $Value['v'];
-                    $WorkflowMessage .= $Value['board'];
+                    // $WorkflowMessage .= $Value['board'];
                 }
                 $this->load->model('order/order_product_classify_model');
                 if (!!($this->order_product_classify_model->are_status_by_mrp_id($Where, array(WP_SHEAR, WP_SHEARED, WP_ELECTRONIC_SAW), TRUE))) {

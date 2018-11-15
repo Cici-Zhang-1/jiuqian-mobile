@@ -8,6 +8,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 板件扫描
  */
 class Scan_board extends MY_Controller{
+    private $__Search = array(
+        'qrcode' => '',
+        'thick' => ''
+    );
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Scan_board Start!');
@@ -15,8 +19,11 @@ class Scan_board extends MY_Controller{
     }
 
     public function read(){
-        $Qrcode = $this->input->get('qrcode', TRUE);
-        $Qrcode = trim($Qrcode);
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        /*$Qrcode = $this->input->get('qrcode', TRUE);
+        $Qrcode = trim($Qrcode);*/
+        $Qrcode = $this->_Search['qrcode'];
         $Data = array();
         if($Qrcode && preg_match(REG_ORDER_QRCODE, $Qrcode)){
             log_message('debug', '$Qrcode is'.$Qrcode);
@@ -30,11 +37,17 @@ class Scan_board extends MY_Controller{
                     $this->Code = EXIT_ERROR;
                 } else {
                     if ($OrderProduct['thick'] > THICK) {
+                        if ($this->_Search['thick'] === '0') {
+                            $this->_Search['thick'] = '';
+                        }
                         $Thick = true;
                     } else {
+                        if ($this->_Search['thick'] === '1') {
+                            $this->_Search['thick'] = '';
+                        }
                         $Thick = false;
                     }
-                    $Data = $this->order_product_board_plate_model->select_scan_list($OrderProduct['order_product_id']);
+                    $Data = $this->order_product_board_plate_model->select_scan_list($OrderProduct['order_product_id'], $this->_Search['thick']);
                     $ScanDatetime = '0000-00-00 00:00:00';
                     foreach ($Data['content'] as $Key => $Value) {
                         if (!empty($Value['scanner'])) {

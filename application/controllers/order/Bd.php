@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Bd extends MY_Controller{
     private $__Search = array(
-        'status' => NO,
+        'status' => NO
     );
     public function __construct(){
         parent::__construct();

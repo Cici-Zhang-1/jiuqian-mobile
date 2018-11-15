@@ -32,6 +32,10 @@ class Electronic_saw_statistic extends MY_Controller {
         if ($this->_Search['start_date'] == '') {
             $this->_Search['start_date'] = date('Y-m-01');
         }
+        if ($this->_Search['status'] == M_ELECTRONIC_SAW) {
+            $this->_Search['start_date'] = '';
+            $this->_Search['end_date'] = '';
+        }
         $Data = array();
         if(!($Data = $this->mrp_model->select_electronic_saw($this->_Search))){
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';

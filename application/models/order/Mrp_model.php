@@ -414,6 +414,23 @@ class Mrp_model extends MY_Model {
         }
         return $Return;
     }
+    public function is_exist ($BatchNum) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.$BatchNum;
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql, FALSE);
+            $this->HostDb->from('mrp')
+                ->where('m_batch_num', $BatchNum);
+            $Query = $this->HostDb->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, HOURS);
+            }
+        }
+        return $Return;
+    }
 
     /**
      * 通过V获取订单产品V

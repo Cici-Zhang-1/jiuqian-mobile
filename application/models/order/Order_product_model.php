@@ -251,6 +251,93 @@ class Order_product_model extends MY_Model{
         return $Return;
     }
 
+    /**
+     * 获取生产订单
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_producing ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_num_producing($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order_product')
+                    ->join('workflow_order_product', 'wop_id = op_status', 'left')
+                    ->join('order', 'o_id = op_order_id', 'left')
+                    ->join('task_level', 'tl_id = o_task_level', 'left')
+                    ->join('order_product_classify', 'opc_order_product_id = op_id', 'left')
+                    ->join('mrp', 'm_id = opc_mrp_id', 'left');
+                if (!empty($Search['status'])) {
+                    $this->HostDb->where_in('op_status', $Search['status']);
+                }
+                if (!empty($Search['order_id'])) {
+                    $this->HostDb->where('op_order_id', $Search['order_id']);
+                }
+                $this->HostDb->where('o_status > ', O_PRODUCE);
+                if (isset($Search['keyword']) && $Search['keyword'] != '') {
+                    $this->HostDb->group_start()
+                        ->like('o_num', $Search['keyword'])
+                        ->or_like('o_dealer', $Search['keyword'])
+                        ->or_like('o_owner', $Search['keyword'])
+                        ->or_like('m_batch_num', $Search['keyword'])
+                        ->group_end();
+                }
+                $this->HostDb->order_by('op_producing_datetime', 'desc');
+                $this->HostDb->group_by('op_id');
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的生产中订单';
+            }
+        }
+        return $Return;
+    }
+    private function _page_num_producing ($Search) {
+        $this->HostDb->select('op_id', FALSE)->from('order_product')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->join('order_product_classify', 'opc_order_product_id = op_id', 'left')
+            ->join('mrp', 'm_id = opc_mrp_id', 'left');
+        if (!empty($Search['status'])) {
+            $this->HostDb->where_in('op_status', $Search['status']);
+        }
+        if (!empty($Search['order_id'])) {
+            $this->HostDb->where('op_order_id', $Search['order_id']);
+        }
+        $this->HostDb->where('o_status > ', O_PRODUCE);
+        if (isset($Search['keyword']) && $Search['keyword'] != '') {
+            $this->HostDb->group_start()
+                ->like('o_num', $Search['keyword'])
+                ->or_like('o_dealer', $Search['keyword'])
+                ->or_like('o_owner', $Search['keyword'])
+                ->or_like('m_batch_num', $Search['keyword'])
+                ->group_end();
+        }
+        $this->HostDb->group_by('op_id');
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->num_rows();
+            $Query->free_result();
+            $this->_Num = $Row;
+            if(intval($Row%$Search['pagesize']) == 0){
+                $Pn = intval($Row/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
     public function select_produce_process_tracking ($Search) {
         $Item = $this->_Item . __FUNCTION__;
         $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
@@ -832,6 +919,32 @@ class Order_product_model extends MY_Model{
         return $Query->num_rows() == 0;
     }
 
+    /**
+     * 判断是否有过拆单动作
+     * @param $Ids
+     * @return bool
+     */
+    public function are_dismantling($Ids){
+        $In = '('.implode(',', $Ids).')';
+        /*'op_id' => 'order_product_id',
+    'op_num' => 'num',
+    'op_order_id' => 'order_id',
+    'op_product_id' => 'product_id',
+    'p_code' => 'code'*/
+        $Query = $this->HostDb->query("(SELECT op_id as order_product_id, op_num as num, op_order_id as order_id, p_code as code, op_product_id as product_id FROM j_order_product_board LEFT JOIN j_order_product ON op_id = opb_order_product_id LEFT JOIN j_product ON p_id = op_product_id WHERE opb_order_product_id IN $In GROUP BY op_id) 
+        UNION (SELECT op_id as order_product_id, op_num as num, op_order_id as order_id, p_code as code, op_product_id as product_id FROM j_order_product_fitting LEFT JOIN j_order_product ON op_id = opf_order_product_id LEFT JOIN j_product ON p_id = op_product_id WHERE opf_order_product_id IN $In GROUP BY op_id) 
+        UNION (SELECT op_id as order_product_id, op_num as num, op_order_id as order_id, p_code as code, op_product_id as product_id FROM j_order_product_other LEFT JOIN j_order_product ON op_id = opo_order_product_id LEFT JOIN j_product ON p_id = op_product_id WHERE opo_order_product_id IN $In GROUP BY op_id) 
+        UNION (SELECT op_id as order_product_id, op_num as num, op_order_id as order_id, p_code as code, op_product_id as product_id FROM j_order_product_server LEFT JOIN j_order_product ON op_id = ops_order_product_id LEFT JOIN j_product ON p_id = op_product_id WHERE ops_order_product_id IN $In GROUP BY op_id)
+	        ");
+        if($Query->num_rows() > 0){
+            $Return = $Query->result_array();
+            $Query->free_result();
+            return $Return;
+        }else{
+            $GLOBALS['error'] = '当前订单产品没有拆单或已经作废, 不能确认拆单!';
+            return false;
+        }
+    }
     /**
      * 判断状态
      * @param $Vs

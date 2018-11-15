@@ -446,8 +446,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     let Classify = $Form.find('input[name="classify"]').val();
                                     if ($.inArray(Classify, res.contents['pack_type']) < 0) { // 当前分类不在打包类型中
                                         if ($.inArray('both', res.contents['pack_type']) >= 0) { // 如果是合包类型
-                                            $Form.find('p.error').html('该订单不包含对应打包类型');
-                                            return false
+                                            Text += '建议所有一起打包...<br />'
+                                            /*$Form.find('p.error').html('该订单不包含对应打包类型');
+                                            return false*/
                                         } else {
                                             if (Classify === 'both') {
                                                 Text += '建议厚薄各自打包...<br />'

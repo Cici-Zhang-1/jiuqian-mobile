@@ -152,7 +152,7 @@ class Edge extends MY_Controller{
             if (!!($Edge = $this->edge_model->has_brothers($this->_Board))) {
                 $GLOBALS['workflow_msg'] = '';
                 foreach ($Edge as $Key => $Value) {
-                    $GLOBALS['workflow_msg'] .= $Value['board'];
+                    // $GLOBALS['workflow_msg'] .= $Value['board'];
                     $Edge[$Key] = $Value['v'];
                 }
                 $W = $this->_workflow_order_product_board();

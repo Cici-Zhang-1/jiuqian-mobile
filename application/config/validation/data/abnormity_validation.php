@@ -28,7 +28,7 @@ $config['data/abnormity/edit'] = array(
                                 array (
             'field' => 'name',
             'label' => '名称',
-            'rules' => 'trim|required|max_length[64]|is_unique[abnormity.a_name]'
+            'rules' => 'trim|required|max_length[64]'
         ),
                                 array (
             'field' => 'print_list',

@@ -467,7 +467,7 @@ class Order_model extends MY_Model{
         $Item = $this->_Item.__FUNCTION__;
         $Sql = $this->_unformat_as($Item);
         $Query = $this->HostDb->select($Sql)->from('order')
-            ->where('o_num', $OrderNum)->limit(1)->get();
+            ->where('o_num', $OrderNum)->where('o_status > ', O_REMOVE)->limit(1)->get();
         if($Query->num_rows() > 0){
             $Return = $Query->row_array();
             $Query->free_result();
