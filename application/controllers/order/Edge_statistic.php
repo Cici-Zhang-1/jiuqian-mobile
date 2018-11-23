@@ -41,6 +41,9 @@ class Edge_statistic extends MY_Controller{
             $BOrderProductNum = array();
             $BArea = 0;
             $BAmount = 0;
+            $BMOrderProductNum = array();
+            $BMArea = 0;
+            $BMAmount = 0;
             foreach ($Data['content'] as $Key => $Value) {
                 if ($Value['order_type'] == 'X') {
                     if (!isset($X[$Value['product']])) {
@@ -59,12 +62,23 @@ class Edge_statistic extends MY_Controller{
                         }
                     }
                 } elseif ($Value['order_type'] == 'B') {
-                    $BArea += $Value['area'];
-                    if (!in_array($Value['num'], $BOrderProductNum)) {
-                        array_push($BOrderProductNum, $Value['num']);
-                        $BAmount++;
-                        if ($BAmount % 5 == 0) {
-                            array_push($BOrderProductNum, '<br />');
+                    if ($Value['area'] > 1.8) {
+                        $BMArea += $Value['area'];
+                        if (!in_array($Value['num'], $BMOrderProductNum)) {
+                            array_push($BMOrderProductNum, $Value['num']);
+                            $BMAmount++;
+                            if ($BMAmount % 5 == 0) {
+                                array_push($BMOrderProductNum, '<br />');
+                            }
+                        }
+                    } else {
+                        $BArea += $Value['area'];
+                        if (!in_array($Value['num'], $BOrderProductNum)) {
+                            array_push($BOrderProductNum, $Value['num']);
+                            $BAmount++;
+                            if ($BAmount % 5 == 0) {
+                                array_push($BOrderProductNum, '<br />');
+                            }
                         }
                     }
                 }
@@ -80,12 +94,20 @@ class Edge_statistic extends MY_Controller{
                     ));
                 }
             }
+            if (count($BMOrderProductNum) > 0) {
+                array_push($Data['content'], array(
+                    'label' => '面积补单(1.8)',
+                    'name' => implode(',', $BMOrderProductNum),
+                    'area' => $BMArea,
+                    'amount' => $BMAmount
+                ));
+            }
             if (count($BOrderProductNum) > 0) {
                 array_push($Data['content'], array(
                     'label' => '补单',
                     'name' => implode(',', $BOrderProductNum),
-                    'area' => $BAmount,
-                    'amount' => $BArea
+                    'area' => $BArea,
+                    'amount' => $BAmount
                 ));
             }
             $Data['num'] = count($Data['content']);

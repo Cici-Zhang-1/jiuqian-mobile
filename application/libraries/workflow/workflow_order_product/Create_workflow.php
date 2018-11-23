@@ -27,6 +27,11 @@ class Create_workflow extends \Wop\Workflow_order_product_abstract {
         return $this->_Workflow->dismantled();
     }
 
+    public function init_post_sale () {
+        $this->_Workflow->store_message('初始化送装');
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['dismantled']);
+        return true;
+    }
     public function __call($name, $arguments){
         ;
     }

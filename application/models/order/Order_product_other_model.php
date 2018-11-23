@@ -75,7 +75,7 @@ class Order_product_other_model extends MY_Model{
     }
 
     /**
-     * 售后服务
+     * 送装服务
      * @param $OrderProductId
      * @return array
      */

@@ -216,51 +216,136 @@ class To {
         $ProductionLine = ZERO;
         $Flag = true;
         if (!empty($Classify)) {
+            $MaxFlag = 0;
+            $Max = 0;
             foreach ($Classify as $key => $value){
-                if($value['plate'] != '' && $value['plate'] != $Data['plate_name']){
-                    $Flag = false;
+                if($value['plate'] != ''){
+                    if ($value['plate'] != $Data['plate_name']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
                 if($value['width_min'] < $value['width_max'] && $value['length_min'] < $value['length_max']){   /*Length + Width*/
                     if(!(($Data['width'] >= $value['width_min'] && $Data['width'] < $value['width_max']) ||
                         ($Data['length'] >= $value['length_min'] && $Data['length'] < $value['length_max']))){
                         $Flag = false;
+                    } else {
+                        $Max++;
                     }
                 }elseif ($value['width_min'] < $value['width_max'] && $value['length_min'] == $value['length_max']){    /*Width*/
                     if(!($Data['width'] >= $value['width_min'] && $Data['width'] < $value['width_max'])){
                         $Flag = false;
+                    } else {
+                        $Max++;
                     }
                 }elseif ($value['width_min'] == $value['width_max'] && $value['length_min'] < $value['length_max']){    /*Length*/
                     if(!($Data['length'] >= $value['length_min'] && $Data['length'] < $value['length_max'])){
                         $Flag = false;
+                    } else {
+                        $Max++;
                     }
                 }
 
-                if($value['thick'] != 0 && $value['thick'] != $Data['thick']){
-                    $Flag = false;
+                if($value['thick'] != 0){
+                    if ($value['thick'] != $Data['thick']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
-                if($value['edge'] != '' && $value['edge'] != $Data['edge']){
-                    $Flag = false;
+                if($value['edge'] != ''){
+                    if ($value['edge'] != $Data['edge']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
-                if($value['slot'] != '' && $value['slot'] != $Data['slot']){
-                    $Flag = false;
+                if($value['slot'] != ''){
+                    if ($value['slot'] != $Data['slot']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
-                if ($value['decide_size'] != '' && $value['decide_size'] != $Data['decide_size']) {
-                    $Flag = false;
+                if ($value['decide_size'] != '') {
+                    if ($value['decide_size'] != $Data['decide_size']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
-                if ($value['abnormity'] != ZERO && $value['abnormity'] != $Data['abnormity']) {
-                    $Flag = false;
+                if ($value['abnormity'] != ZERO) {
+                    if ($value['abnormity'] != $Data['abnormity']) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
-                if($value['remark'] != '' && !(preg_match('/'.$value['remark'].'/', $Data['remark']))){
-                    $Flag = false;
+                if($value['remark'] != ''){
+                    if (!(preg_match('/'.$value['remark'].'/', $Data['remark']))) {
+                        $Flag = false;
+                    } else {
+                        $Max++;
+                    }
                 }
                 if(true == $Flag){
-                    $Parent = $value['parent'];
-                    $ProductionLine = $value['production_line'];
-                    break;
+                    if ($Max > $MaxFlag) {
+                        $Parent = $value['parent'];
+                        $ProductionLine = $value['production_line'];
+                        $MaxFlag = $Max;
+                        $Max = 0;
+                    }
+                    // break;
                 } else {
                     $Flag = true;
                 }
             }
+//            foreach ($Classify as $key => $value){
+//                if($value['plate'] != '' && $value['plate'] != $Data['plate_name']){
+//                    $Flag = false;
+//                }
+//                if($value['width_min'] < $value['width_max'] && $value['length_min'] < $value['length_max']){   /*Length + Width*/
+//                    if(!(($Data['width'] >= $value['width_min'] && $Data['width'] < $value['width_max']) ||
+//                        ($Data['length'] >= $value['length_min'] && $Data['length'] < $value['length_max']))){
+//                        $Flag = false;
+//                    }
+//                }elseif ($value['width_min'] < $value['width_max'] && $value['length_min'] == $value['length_max']){    /*Width*/
+//                    if(!($Data['width'] >= $value['width_min'] && $Data['width'] < $value['width_max'])){
+//                        $Flag = false;
+//                    }
+//                }elseif ($value['width_min'] == $value['width_max'] && $value['length_min'] < $value['length_max']){    /*Length*/
+//                    if(!($Data['length'] >= $value['length_min'] && $Data['length'] < $value['length_max'])){
+//                        $Flag = false;
+//                    }
+//                }
+//
+//                if($value['thick'] != 0 && $value['thick'] != $Data['thick']){
+//                    $Flag = false;
+//                }
+//                if($value['edge'] != '' && $value['edge'] != $Data['edge']){
+//                    $Flag = false;
+//                }
+//                if($value['slot'] != '' && $value['slot'] != $Data['slot']){
+//                    $Flag = false;
+//                }
+//                if ($value['decide_size'] != '' && $value['decide_size'] != $Data['decide_size']) {
+//                    $Flag = false;
+//                }
+//                if ($value['abnormity'] != ZERO && $value['abnormity'] != $Data['abnormity']) {
+//                    $Flag = false;
+//                }
+//                if($value['remark'] != '' && !(preg_match('/'.$value['remark'].'/', $Data['remark']))){
+//                    $Flag = false;
+//                }
+//                if(true == $Flag){
+//                    $Parent = $value['parent'];
+//                    $ProductionLine = $value['production_line'];
+//                    break;
+//                } else {
+//                    $Flag = true;
+//                }
+//            }
         }
         if (!empty($Parent)) {
             $Return['classify_id'] = $Parent;

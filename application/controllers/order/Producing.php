@@ -18,6 +18,7 @@ class Producing extends MY_Controller{
             FITTING
         ),     /*橱柜、衣柜*/
         'status' => array(
+            OP_PRE_PRODUCING,
             OP_PRODUCING,
             OP_PACKING,
             OP_PACKED,

@@ -14,13 +14,19 @@ class Abnormity_model extends MY_Model {
         log_message('debug', 'Model data/Abnormity_model Start!');
     }
 
-    private function _select () {
+    private function _select ($PrintList, $Scan) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ ;
+        $Cache = $this->_Cache . __FUNCTION__ . intval($PrintList) . intval($Scan);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('abnormity');
+            if(false !== $PrintList){
+                $this->HostDb->where('a_print_list', $PrintList);
+            }
+            if(false !== $Scan){
+                $this->HostDb->where('a_scan', $Scan);
+            }
             $Query = $this->HostDb->get();
             if ($Query->num_rows() > 0) {
                 $Return = $Query->result_array();
@@ -31,12 +37,17 @@ class Abnormity_model extends MY_Model {
         }
         return $Return;
     }
+
     /**
-     * Select from table abnormity
+     * 获取异形
+     * @param array $Search
+     * @param $PrintList
+     * @param $Scan
+     * @return array|bool
      */
-    public function select($Search = array()) {
+    public function select($Search, $PrintList = false, $Scan = false) {
         if (empty($Search)) {
-            return $this->_select();
+            return $this->_select($PrintList, $Scan);
         } else {
             $Item = $this->_Item . __FUNCTION__;
             $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
@@ -46,6 +57,12 @@ class Abnormity_model extends MY_Model {
                 if(!empty($Search['pn'])){
                     $Sql = $this->_unformat_as($Item);
                     $this->HostDb->select($Sql)->from('abnormity');
+                    if(isset($Search['print_list']) && false !== $Search['print_list']){
+                        $this->HostDb->where('a_print_list', $Search['print_list']);
+                    }
+                    if(isset($Search['scan']) && false !== $Search['scan']){
+                        $this->HostDb->where('a_scan', $Search['scan']);
+                    }
                     if (isset($Search['keyword']) && $Search['keyword'] != '') {
                     }
                     $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
@@ -67,6 +84,12 @@ class Abnormity_model extends MY_Model {
 
     private function _page_num($Search){
         $this->HostDb->select('count(a_name) as num', FALSE);
+        if(isset($Search['print_list']) && false !== $Search['print_list']){
+            $this->HostDb->where('a_print_list', $Search['print_list']);
+        }
+        if(isset($Search['scan']) && false !== $Search['scan']){
+            $this->HostDb->where('a_scan', $Search['scan']);
+        }
         if (isset($Search['keyword']) && $Search['keyword'] != '') {
         }
         $this->HostDb->from('abnormity');

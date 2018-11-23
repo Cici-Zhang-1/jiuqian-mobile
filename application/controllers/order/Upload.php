@@ -624,33 +624,43 @@ class Upload extends MY_Controller {
             $this->load->model('order/order_product_model');
             $FileName = $FileInfo['raw_name'];
             $FileName = strtoupper($FileName);
-            $FileNames = explode('-', $FileName);
-            $Drawing = array();
-            if(count($FileNames) < 2){
-                $this->Message = '图纸文件名不正确，请重新上传';
-                return false;
-            }elseif (count($FileNames) >= 4){
-                $Drawing['type'] = 1;
-            }else{
-                $Drawing['type'] = 0;
-            }
-            if(!!($this->drawing_model->update_drawing($FileName))){
-                $this->Message = $FileName.'图纸上传成功';
-            }else{
-                $OrderProductNum = implode('-', array_slice($FileNames, 0, 2));
-                if (!!($OrderProduct = $this->order_product_model->is_exist($OrderProductNum))) {
-                    $Drawing = array(
-                        'order_product_id' => $OrderProduct['v'],
-                        'name' => $FileName,
-                        'path' => $FileInfo['full_path']
-                    );
-                    if (!!($this->drawing_model->insert($Drawing))) {
-                        $this->Message = $FileName.'图纸上传成功';
-                    } else {
-                        $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'图纸上传失败!';
-                    }
+            if (preg_match('/^F[\d]{6,6}$/', $FileName)) { // 上传活动图片
+                $this->load->model('activity/activity_model');
+                $FileInfo['full_path'] = $FileInfo['full_path'].'?_='.time();
+                if (!!($this->activity_model->update_image(gh_escape($FileInfo['full_path']), $FileName))) {
+                    $this->Message = '上传活动图片成功';
                 } else {
-                    $this->Message = '当前订单不存在';
+                    $this->Message = '上传活动图片失败';
+                }
+            } else { // 上传图纸
+                $FileNames = explode('-', $FileName);
+                $Drawing = array();
+                if(count($FileNames) < 2){
+                    $this->Message = '图纸文件名不正确，请重新上传';
+                    return false;
+                }elseif (count($FileNames) >= 4){
+                    $Drawing['type'] = 1;
+                }else{
+                    $Drawing['type'] = 0;
+                }
+                if(!!($this->drawing_model->update_drawing($FileName))){
+                    $this->Message = $FileName.'图纸上传成功';
+                }else{
+                    $OrderProductNum = implode('-', array_slice($FileNames, 0, 2));
+                    if (!!($OrderProduct = $this->order_product_model->is_exist($OrderProductNum))) {
+                        $Drawing = array(
+                            'order_product_id' => $OrderProduct['v'],
+                            'name' => $FileName,
+                            'path' => $FileInfo['full_path']
+                        );
+                        if (!!($this->drawing_model->insert($Drawing))) {
+                            $this->Message = $FileName.'图纸上传成功';
+                        } else {
+                            $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'图纸上传失败!';
+                        }
+                    } else {
+                        $this->Message = '当前订单不存在';
+                    }
                 }
             }
         }else{

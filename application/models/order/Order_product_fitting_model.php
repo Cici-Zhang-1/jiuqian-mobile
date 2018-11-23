@@ -71,7 +71,7 @@ class Order_product_fitting_model extends MY_Model{
     }
 
     /**
-     * 售后服务
+     * 送装服务
      * @param $OrderProductId
      * @return bool
      */

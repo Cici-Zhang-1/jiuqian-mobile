@@ -47,6 +47,26 @@ $config['order/order_model/select_current_workflow'] = array(
 	'wo_label' => 'label',
 	'wo_file' => 'file',
 );
+
+$config['order/order_model/is_order_post_salable'] = array(
+    'o_id' => 'order_id',
+    'o_num' => 'num',
+    'o_dealer' => 'dealer',
+    'o_dealer_id' => 'dealer_id',
+    'o_owner' => 'owner',
+    'o_status' => 'status',
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_payed' => 'payed',
+    'o_pay_status' => 'pay_status',
+    'd_balance' => 'dealer_balance',
+    'd_produce' => 'dealer_produce',
+    'd_delivered' => 'dealer_delivered',
+    'd_virtual_balance' => 'dealer_virtual_balance',
+    'd_virtual_produce' => 'dealer_virtual_produce',
+    'd_virtual_delivered' => 'dealer_virtual_delivered',
+);
 /*
 $config['order/order_model/select_delivered'] = array(
 	'o_id' => 'v',
@@ -281,6 +301,20 @@ $config['order/order_model/select_wait_delivery'] = array(
     'ps_label' => 'pay_status_label',
     'a_id' => 'application_id',
     'a_status' => 'application_status'
+);
+$config['order/order_model/select_overdue'] = array(
+    'o_id' => 'v',
+    'o_num' => 'num',
+    'o_sum' => 'sum',
+    'o_payed' => 'payed',
+    'o_pay_status' => 'pay_status',
+    'o_dealer' => 'dealer',
+    'u_truename' => 'owner',
+    'o_remark' => 'remark',
+    'd_id' => 'dealer_id',
+    'd_balance' => 'balance',
+    'ps_label' => 'pay_status_label',
+    'od_inned_datetime' => 'inned_datetime'
 );
 $config['order/order_model/select_wait_delivery_by_ids'] = array(
 	'o_id' => 'v',

@@ -585,12 +585,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         }
                         let PackLabel = '';
                         let Url = '';
+
+                        let PackType = ''
+                        if (Classify == 'thick') {
+                            PackType = '--柜体'
+                        } else if (Classify == 'thin') {
+                            PackType = '--背板'
+                        }
                         for (let I = 1; I <= Pack; I++) {
                             Url = PubUrl + '/' + OrderProduct['num'] + '-' + Pack + '-' + I + '-' + Classify;
                             PackLabel = PackLabel + '<div class="print-label">' +
                                 '<div class="delivery-address"><div class="middle">' + OrderProduct['delivery_area'] + '</div></div>' +
                                 '<div class="order-product-num"><div class="middle">' + OrderProduct['num'] + '</div></div>' +
-                                '<div class="package-type"><div class="middle">产品: ' + OrderProduct['product'] + '</div></div>' +
+                                '<div class="package-type"><div class="middle">产品: ' + OrderProduct['product'] + PackType + '</div></div>' +
                                 '<div class="dealer"><div class="middle">' + DealerName + '</div></div>' +
                                 '<div class="delivery-linker"><div class="middle">收货: ' + OrderProduct['delivery_linker'] + '</div></div>' +
                                 '<div class="owner"><div class="middle">业主: ' + OrderProduct['owner'] + '</div></div>' +

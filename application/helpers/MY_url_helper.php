@@ -24,7 +24,8 @@ if(! function_exists('m_url')){
 if(! function_exists('drawing_url')){
     /**
      * 生成图纸url
-     * @param unknown $String
+     * @param $String
+     * @return string
      */
     function drawing_url($String){
         return base_url(substr($String, strlen(ROOTDIR)));

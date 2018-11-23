@@ -94,7 +94,7 @@ abstract class  D_abstract {
      */
     private function _get_abnormity () {
         $this->_CI->load->model('data/abnormity_model');
-        if (!!($Abnormity = $this->_CI->abnormity_model->select())) {
+        if (!!($Abnormity = $this->_CI->abnormity_model->select(array(), YES))) {
             foreach ($Abnormity as $Key => $Value) {
                 self::$_Abnormity[$Value['name']] = $Value;
             }

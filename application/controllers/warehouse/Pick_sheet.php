@@ -138,12 +138,12 @@ class Pick_sheet extends MY_Controller {
                 }
                 $this->order_stock_outted_model->trans_begin();
                 $this->_re_delivery_order_product($OrderProduct);
-                $this->_re_delivery_order($Order);
+                $this->_re_delivery_order();
                 if (!($this->stock_outted_model->update(array('status' => 0), $ReDeliverable))) {
                     $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'重新发货失败';
                     $this->Code = EXIT_ERROR;
                 } else {
-                    $this->_workflow(array_keys($Order));
+                    $this->_workflow(array_keys($this->_Order));
                 }
                 if ($this->order_stock_outted_model->trans_status() === FALSE) {
                     $this->order_stock_outted_model->trans_rollback();

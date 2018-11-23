@@ -204,7 +204,7 @@ class Workflow_order_product {
         return $this->_Source_ids;
     }
     public function __call($name, $arguments){
-        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'optimize', 'printed_list', 'pre_produce', 're_shear', 'electronic_sawed', 'edged', 'punched', 'scanned', 'producing', 'packing', 'packed', 'inned', 'remove', 'to_board', 'to_classify', 'post_sale');
+        $Methods = array('create', 'dismantling', 'dismantled', 're_dismantle', 'served', 'optimize', 'printed_list', 'pre_produce', 're_shear', 'electronic_sawed', 'edged', 'punched', 'scanned', 'producing', 'packing', 'packed', 'inned', 'remove', 'to_board', 'to_classify', 'init_post_sale', 'post_sale');
         if (in_array($name, $Methods)) {
             return $this->_Workflow->{$name}();
         }

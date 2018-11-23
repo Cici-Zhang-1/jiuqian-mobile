@@ -103,6 +103,7 @@ class Order_product_board_plate_model extends MY_Model {
             $Query = $this->HostDb->select($Sql,false)
                 ->from('order_product_board_plate')
                 ->join('order_product_classify', 'opc_id = opbp_order_product_classify_id', 'left')
+                ->join('classify', 'c_id = opc_classify_id', 'left')
                 ->join('order_product', 'op_id = opc_order_product_id', 'left')
                 ->join('order','o_id = op_order_id', 'left')
                 ->join('dealer','d_id = o_dealer_id', 'left')

@@ -161,7 +161,7 @@ class Dealer_model extends MY_Model {
             if($Query->num_rows() > 0){
                 $Return = array(
                     'content' => $Query->result_array(),
-                    'num' => $this->_Num,
+                    'num' => $Query->num_rows(),
                     'p' => ONE,
                     'pn' => ONE,
                     'pagesize' => ALL_PAGESIZE

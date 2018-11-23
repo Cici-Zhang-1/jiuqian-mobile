@@ -367,6 +367,71 @@ class Order_model extends MY_Model{
         }
         return false;
     }
+
+    /**
+     * 是否是可以送装的订单
+     * @param $V
+     * @return bool
+     */
+    public function is_order_post_salable ($V) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Return = false;
+        $Sql = $this->_unformat_as($Item);
+        $this->HostDb->select($Sql)->from('order')
+            ->join('dealer', 'd_id = o_dealer_id', 'left')
+            ->where('o_status > ', O_WAIT_SURE);  /*已经确认的订单*/
+        if (preg_match(REG_ORDER, $V)) {
+            $this->HostDb->where('o_num', $V);
+        } else {
+            $this->HostDb->where('o_id', $V);
+        }
+        $Query = $this->HostDb->limit(ONE)->get();
+        if ($Query->num_rows() > 0) {
+            $Return = $Query->row_array();
+        }
+        return $Return;
+    }
+    /**
+     * 获取逾期未付的订单
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_overdue ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . implode('_', $Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Sql = $this->_unformat_as($Item);
+            $this->HostDb->select($Sql)->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->join('dealer', 'd_id = o_dealer_id', 'left')
+                ->join('pay_status', 'ps_name = o_pay_status', 'left')
+                ->join('j_dealer_owner', 'do_dealer_id = d_id && do_primary = ' . YES, 'left', false)
+                ->join('user', 'u_id = do_owner_id', 'left')
+                ->where_in('o_status', array(O_WAIT_DELIVERY, O_DELIVERING))
+                ->where('od_inned_datetime < ', date('Y-m-d'));
+
+            if (isset($Search['keyword'])) {
+                $this->HostDb->group_start()
+                    ->like('o_dealer', $Search['keyword'])
+                    ->or_like('o_num', $Search['keyword'])
+                    ->group_end();
+            }
+
+            $Query = $this->HostDb->order_by('od_inned_datetime')->get();
+            if ($Query->num_rows() > 0) {
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $Query->num_rows(),
+                    'p' => ONE,
+                    'pn' => ONE,
+                    'pagesize' => ALL_PAGESIZE
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            }
+        }
+        return $Return;
+    }
     /**
      * 获取当前订单的工作流
      */
@@ -608,7 +673,7 @@ class Order_model extends MY_Model{
             ->join('dealer', 'd_id = o_dealer_id', 'left')
             ->where_in('o_id', $Vs)
             ->where('o_status > ', O_REMOVE)
-            ->where('o_status <= ', O_WAIT_DELIVERY)
+            ->where('o_status < ', O_WAIT_DELIVERY)
             ->get();
         if($Query->num_rows() > 0){
             return $Query->result_array();

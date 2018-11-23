@@ -11,7 +11,7 @@ class Dealer_money extends MY_Controller{
     public function __construct(){
         parent::__construct();
         $this->load->model('dealer/dealer_model');
-        log_message('debug', 'Controller Dealer/dealer Start!');
+        log_message('debug', 'Controller Dealer/Dealer_money Start!');
     }
 
     public function read(){

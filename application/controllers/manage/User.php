@@ -121,8 +121,14 @@ class User extends MY_Controller{
             $_POST['v'] = explode(',', $V);
         }
         if ($this->_do_form_validation()) {
-            $Post = gh_escape($_POST);
-            if (!!($this->user_model->update(array('status' => START_WORK), $Post))) {
+            $Post = gh_escape($_POST['v']);
+            foreach ($Post as $Key => $Value) {
+                $Post[$Key] = array(
+                    'status' => START_WORK,
+                    'v' => $Value
+                );
+            }
+            if (!!($this->user_model->update_batch($Post))) {
                 $this->Message = '启用成功, 刷新后生效!';
             } else {
                 $this->Code = EXIT_ERROR;

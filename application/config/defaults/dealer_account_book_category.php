@@ -18,5 +18,5 @@ $config['dabc_back'] = '返款';
 $config['dabc_discount'] = '优惠';
 $config['dabc_remove'] = '取消进账';
 $config['dabc_edit'] = '修改进账';
-$config['dabc_post_sale'] = '售后';
+$config['dabc_post_sale'] = '送装';
 $config['dabc_other'] = '其它';

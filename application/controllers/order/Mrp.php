@@ -43,10 +43,16 @@ class Mrp extends MY_Controller {
             if (!!($Distribution = $this->mrp_model->is_status_and_brothers($Where, array(M_ELECTRONIC_SAW, M_SHEAR, M_SHEARED)))) {
                 $Where = array();
                 $WorkflowMessage = '';
+                $Board = array();
                 foreach ($Distribution as $Key => $Value) {
                     $Where[] = $Value['v'];
-                    // $WorkflowMessage .= $Value['board'];
+                    $Ikey = $Value['batch_num'] . $Value['board'];
+                    if (!in_array($Ikey, $Board)) {
+                        $WorkflowMessage .= $Ikey;
+                        array_push($Board, $Ikey);
+                    }
                 }
+                unset($Board);
                 $this->load->model('order/order_product_classify_model');
                 if (!!($this->order_product_classify_model->are_status_by_mrp_id($Where, array(WP_SHEAR, WP_SHEARED, WP_ELECTRONIC_SAW), TRUE))) {
                     $this->Code = EXIT_ERROR;

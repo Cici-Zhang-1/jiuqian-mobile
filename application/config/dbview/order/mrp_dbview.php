@@ -39,6 +39,7 @@ $config['order/mrp_model/is_electronic_saw'] = array(
 
 $config['order/mrp_model/is_status_and_brothers'] = array(
     'm_id' => 'v',
+    'm_batch_num' => 'batch_num',
     'm_board' => 'board'
 );
 

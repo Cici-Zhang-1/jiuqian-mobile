@@ -25,6 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </div>
                         <button class="btn btn-primary" data-action="" type="submit" id="dealerDebtBtn" value="查询">查询</button>
                         <strong>余额:<?php echo $Info['balance'];?></strong>
+                        <strong>生产欠款:<?php echo $Info['received'] - ($Info['delivered'] + $Info['produce']);?></strong>
                     </form>
                 </div>
             </div>

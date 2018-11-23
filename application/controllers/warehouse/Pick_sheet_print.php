@@ -237,6 +237,7 @@ class Pick_sheet_print extends MY_Controller {
                     'page_collection' => $Value['collection'],
                     'dealer_remark' => $Value['dealer_remark'],
                     'remark' => $this->_StockOutted['remark'],
+                    'num' => $this->_StockOutted['num'],
                     'trs' => array()
                 );
                 $this->_Flag[$Value['order_v']] = false;
@@ -279,6 +280,9 @@ class Pick_sheet_print extends MY_Controller {
     */
     public function edit() {
         $_POST['v'] = isset($_POST['v']) ? $_POST['v'] : $this->input->post('stock_outted_v'); // 通过v或者stock_outted_v传递
+        if (empty($_POST['v'])) {
+            $_POST['v'] = $this->input->post('stock_outted_id');
+        }
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
             $Where = $Post['v'];

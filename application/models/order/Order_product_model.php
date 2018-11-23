@@ -226,19 +226,21 @@ class Order_product_model extends MY_Model{
      * @param $OrderId
      * @return bool
      */
-    public function select_post_sale ($OrderId) {
+    public function select_post_sale ($OrderId, $ProductId) {
         $Item = $this->_Item . __FUNCTION__;
-        $Cache = $this->_Cache . __FUNCTION__ . $OrderId;
+        $Cache = $this->_Cache . __FUNCTION__ . $OrderId . implode(',', $ProductId);
         $Return = false;
         if (!($Return = $this->cache->get($Cache))) {
             $Sql = $this->_unformat_as($Item);
             $this->HostDb->select($Sql)->from('order_product')
                 ->join('workflow_order_product', 'wop_id = op_status', 'left')
                 ->join('product', 'p_id = op_product_id', 'left')
-                ->join('order', 'o_id = op_order_id', 'left');
-
-            $this->HostDb->where('op_status >= ', OP_DISMANTLED);
-            $this->HostDb->where('op_order_id', $OrderId);
+                ->join('order', 'o_id = op_order_id', 'left')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('op_status >= ', OP_DISMANTLED)
+                ->where('op_order_id', $OrderId)
+                ->where_in('op_product_id', $ProductId)
+                ->where('op_create_datetime > od_sure_datetime');
 
             $Query = $this->HostDb->order_by('op_status')->order_by('op_id')->get();
             if ($Query->num_rows() > 0) {

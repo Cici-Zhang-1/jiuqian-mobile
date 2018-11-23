@@ -12,6 +12,7 @@ class Scan_board extends MY_Controller{
         'qrcode' => '',
         'thick' => ''
     );
+    static $_Scan;
     public function __construct(){
         parent::__construct();
         log_message('debug', 'Controller Order/Scan_board Start!');
@@ -61,6 +62,7 @@ class Scan_board extends MY_Controller{
                                 }
                             }
                         }
+                        $Data['content'][$Key]['abnormity'] = $this->_is_scan($Value['remark']);
                     }
                     $Data['order_product'] = $OrderProduct;
                     $this->Message = '获取待扫描列表成功';
@@ -76,6 +78,36 @@ class Scan_board extends MY_Controller{
         $this->_ajax_return($Data);
     }
 
+    /**
+     * 判断是否需要扫描
+     * @param $Name
+     * @return int
+     */
+    private function _is_scan ($Name) {
+        if (!isset(self::$_Scan)) {
+            $this->_get_scan();
+        }
+        $Flag = 0;
+        if(!empty(self::$_Scan)){
+            foreach (self::$_Scan as $key => $value){
+                if(preg_match('/'.$value['name'].'/', $Name)){
+                    $Flag = 1;
+                    break;
+                }
+            }
+        }
+        return $Flag;
+    }
+    private function _get_scan () {
+        $this->load->model('data/abnormity_model');
+        if (!!($Scan = $this->abnormity_model->select(array(), false, YES))) {
+            foreach ($Scan as $Key => $Value) {
+                self::$_Scan[$Value['name']] = $Value;
+            }
+            return true;
+        }
+        return false;
+    }
     private function _read_workflow_procedure ($WorkflowProcedure) {
         $this->load->model('workflow/workflow_procedure_model');
         if (!!($Query = $this->workflow_procedure_model->is_exist($WorkflowProcedure))) {

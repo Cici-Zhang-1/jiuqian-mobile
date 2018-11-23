@@ -95,11 +95,11 @@ abstract class Workflow_order_product_abstract{
     }
 
     /**
-     * 售后
+     * 送装
      * @return bool
      */
     public function post_sale(){
-        $this->_Workflow->store_message('订单产品执行了售后操作');
+        $this->_Workflow->store_message('订单产品执行了送装操作');
         return true;
     }
 }
