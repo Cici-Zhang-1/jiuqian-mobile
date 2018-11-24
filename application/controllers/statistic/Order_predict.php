@@ -21,6 +21,14 @@ class Order_predict extends MY_Controller {
         'server' => 0,
         'sum' => 0
     );
+    private $_Cabinet = array();
+    private $_Wardrobe = array();
+    private $_Door = array();
+    private $_Wood = array();
+    private $_Fitting = array();
+    private $_Other = array();
+    private $_Server = array();
+    private $_Sum = array();
     private $_Predict1 = array(); // 确认后
     private $_Predict2 = array(); // 核价后
     private $_Predict3 = array(); // 确认后预计
@@ -115,6 +123,28 @@ class Order_predict extends MY_Controller {
                     $SumDetail = json_decode($value['sum_detail'], true);
                     $SumDetail['sum'] = $value['sum'];
                     $this->_Predict2 = element_sum($this->_Predict2, $SumDetail);
+                    if ($SumDetail['cabinet'] > ZERO) {
+                        array_push($this->_Cabinet, $SumDetail['cabinet']);
+                    }
+                    if ($SumDetail['wardrobe'] > ZERO) {
+                        array_push($this->_Wardrobe, $SumDetail['wardrobe']);
+                    }
+                    if ($SumDetail['door'] > ZERO) {
+                        array_push($this->_Door, $SumDetail['door']);
+                    }
+                    if ($SumDetail['wood'] > ZERO) {
+                        array_push($this->_Wood, $SumDetail['wood']);
+                    }
+                    if ($SumDetail['fitting'] > ZERO) {
+                        array_push($this->_Fitting, $SumDetail['fitting']);
+                    }
+                    if ($SumDetail['other'] > ZERO) {
+                        array_push($this->_Other, $SumDetail['other']);
+                    }
+                    if ($SumDetail['server'] > ZERO) {
+                        array_push($this->_Server, $SumDetail['server']);
+                    }
+                    array_push($this->_Sum, $SumDetail['sum']);
                 }
             }
         }
@@ -126,6 +156,136 @@ class Order_predict extends MY_Controller {
         foreach ($this->_Predict2 as $key => $value){
             $this->_Predict4[$key] = round(($value/$this->_Search['current_day'])*$this->_Search['days']*M_REGULAR)/M_REGULAR;
         }
-        return $this->_Predict4;
+        /*$this->_Predict4['cabinet'] = $this->_produce_cabinet_predict();
+        $this->_Predict4['wardrobe'] = $this->_produce_wardrobe_predict();
+        $this->_Predict4['door'] = $this->_produce_door_predict();
+        $this->_Predict4['wood'] = $this->_produce_wood_predict();
+        $this->_Predict4['other'] = $this->_produce_other_predict();
+        $this->_Predict4['server'] = $this->_produce_server_predict();
+        $this->_Predict4['sum'] = $this->_produce_sum_predict();
+        return $this->_Predict4;*/
+    }
+
+    private function _produce_cabinet_predict () {
+        $Mid = 0;
+        $Num = count($this->_Cabinet);
+        if ($Num > 0) {
+            sort($this->_Cabinet);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Cabinet);
+                array_shift($this->_Cabinet);
+                $Mid = array_sum($this->_Cabinet) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Cabinet) / $Num;
+            }
+            /*if ($Num % TWO === 0) {
+                $Mid = ($this->_Cabinet[$Num/TWO] + $this->_Controller[$Num/TWO + ONE])/TWO;
+            } else {
+                $Mid = $this->_Cabinet[($Num + 1) / TWO];
+            }*/
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_wardrobe_predict () {
+        $Mid = 0;
+        $Num = count($this->_Wardrobe);
+        if ($Num > 0) {
+            sort($this->_Wardrobe);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Wardrobe);
+                array_shift($this->_Wardrobe);
+                $Mid = array_sum($this->_Wardrobe) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Wardrobe) / $Num;
+            }
+            /*if ($Num % TWO === 0) {
+                $Mid = ($this->_Wardrobe[$Num/TWO] + $this->_Wardrobe[$Num/TWO + ONE])/TWO;
+            } else {
+                $Mid = $this->_Wardrobe[($Num + 1) / TWO];
+            }*/
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_door_predict () {
+        $Mid = 0;
+        $Num = count($this->_Door);
+        if ($Num > 0) {
+            sort($this->_Door);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Door);
+                array_shift($this->_Door);
+                $Mid = array_sum($this->_Door) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Door) / $Num;
+            }
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_wood_predict () {
+        $Mid = 0;
+        $Num = count($this->_Wood);
+        if ($Num > 0) {
+            sort($this->_Wood);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Wood);
+                array_shift($this->_Wood);
+                $Mid = array_sum($this->_Wood) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Wood) / $Num;
+            }
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_other_predict () {
+        $Mid = 0;
+        $Num = count($this->_Other);
+        if ($Num > 0) {
+            sort($this->_Other);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Other);
+                array_shift($this->_Other);
+                $Mid = array_sum($this->_Other) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Other) / $Num;
+            }
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_server_predict () {
+        $Mid = 0;
+        $Num = count($this->_Server);
+        if ($Num > 0) {
+            sort($this->_Server);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Server);
+                array_shift($this->_Server);
+                $Mid = array_sum($this->_Server) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Server) / $Num;
+            }
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid *M_REGULAR)/M_REGULAR;
+        return $Mid;
+    }
+    private function _produce_sum_predict () {
+        $Mid = 0;
+        $Num = count($this->_Sum);
+        if ($Num > 0) {
+            sort($this->_Sum);
+            if ($Num >= THREE && $this->_Search['current_day'] <= ($this->_Search['days'] - TWO)) {
+                array_pop($this->_Sum);
+                array_shift($this->_Sum);
+                $Mid = array_sum($this->_Sum) / ($Num - TWO);
+            } else {
+                $Mid = array_sum($this->_Sum) / $Num;
+            }
+        }
+        $Mid = round(($Num/$this->_Search['current_day'])*$this->_Search['days'] * $Mid * M_REGULAR)/M_REGULAR;
+        return $Mid;
     }
 }

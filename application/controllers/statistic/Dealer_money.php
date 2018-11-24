@@ -20,6 +20,22 @@ class Dealer_money extends MY_Controller{
         if (!($Data = $this->dealer_model->select_dealer_money($this->_Search))) {
             $this->Code = EXIT_ERROR;
             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'读取信息失败';
+        } else {
+            $Sum = 0;
+            $VirtualSum = 0;
+            foreach ($Data['content'] as $Key => $Value) {
+                $Sum += $Value['balance'];
+                $VirtualSum += $Value['virtual_balance'];
+            }
+            array_unshift($Data['content'], array(
+                'v' => ZERO,
+                'dealer_id' => ZERO,
+                'dealer' => '---',
+                'balance' => $Sum,
+                'virtual_balance' => $VirtualSum,
+                'owner' => '总计'
+            ));
+            $Data['num']++;
         }
         $this->_ajax_return($Data);
     }

@@ -97,9 +97,8 @@ class Board_predict extends MY_Controller {
             foreach ($Query as $Key => $Value) {
                 if ($Value['status'] > O_WAIT_SURE) {
                     $this->_read_produce($Value);
-                } else {
-                    $this->_read_wait_sure($Value);
                 }
+                $this->_read_wait_sure($Value);
             }
         }
     }
