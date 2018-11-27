@@ -122,7 +122,7 @@ class D_g extends D_abstract{
         $this->_OrderProduct['product'] = $From['product'];
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
-        $this->_get_other($From);
+        $this->_get_other($From['order_product_id']);
 
         if (!empty(self::$_Other)) {
             $this->_add_order_product_other();

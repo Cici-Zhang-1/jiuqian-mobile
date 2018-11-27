@@ -22,6 +22,12 @@ class Inned_workflow extends Workflow_order_product_abstract {
         $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['packed']);
         return $this->_Workflow->packed();
     }
+
+    public function packing () {
+        $this->_Workflow->store_message('订单产品【所有->厚薄】重新打包!');
+        $this->_Workflow->edit_current_workflow(Workflow_order_product::$AllWorkflow['packed']);
+        return $this->_Workflow->packed();
+    }
     
     public function __call($name, $arguments){
         $this->_execute_record($name);

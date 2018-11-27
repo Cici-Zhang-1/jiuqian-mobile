@@ -810,6 +810,32 @@ class Order_model extends MY_Model{
         }
         return $Return;
     }
+    public function select_sample_after_produce($Con){
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Con);
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item);
+
+            $Query = $this->HostDb->select($Sql, FALSE)
+                ->from('order')
+                ->join('order_datetime', 'od_order_id = o_id', 'left')
+                ->where('od_sure_datetime > ', $Con['sample_start_date'])
+                ->where('od_sure_datetime < ', $Con['sample_end_date'])
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('o_sum > ', ZERO)
+                ->get();
+
+            if($Query->num_rows() > 0) {
+                $Return = $Query->result_array();
+                $Query->free_result();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '本月还没有开始销售!';
+                $Return = false;
+            }
+        }
+        return $Return;
+    }
 
     public function select_everyday_sured ($Con) {
         $Item = $this->_Item.__FUNCTION__;

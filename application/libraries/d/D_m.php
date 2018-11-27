@@ -204,9 +204,9 @@ class D_m extends D_abstract{
         $this->_OrderProduct['product'] = $From['product'];
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
-        $this->_get_door($From);
+        $this->_get_door($From['order_product_id']);
 
-        $this->_get_board_plate($From);
+        $this->_get_board_plate($From['order_product_id']);
 
         if (!empty(self::$_Door)) {
             $this->_edit_order_product_door();
@@ -228,6 +228,7 @@ class D_m extends D_abstract{
                 $Door['order_product_id'] = $this->_OderProductId;
                 self::$_Door = $Door;
             } else {
+                $GLOBALS['error'] = '';
                 return false;
             }
         }

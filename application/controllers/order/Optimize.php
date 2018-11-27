@@ -278,7 +278,12 @@ class Optimize extends MY_Controller{
             $this->load->library('workflow/workflow');
             $W = $this->workflow->initialize('order_product');
             if ($W->initialize($Query)) {
-                $W->to_board();
+                if ($W->to_board()) {
+                    $this->Message = '已转推台锯';
+                } else {
+                    $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']: $W->get_failue();
+                    $this->Code = EXIT_ERROR;
+                }
             } else {
                 $this->Message .= isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']: $W->get_failue();
                 $this->Code = EXIT_ERROR;

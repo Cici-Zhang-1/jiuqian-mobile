@@ -238,9 +238,9 @@ class D_w extends D_abstract{
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
 
-        $this->_get_cabinet_struct($From);
+        $this->_get_cabinet_struct($From['order_product_id']);
 
-        $this->_get_board_plate($From);
+        $this->_get_board_plate($From['order_product_id']);
 
         if (!empty(self::$_CabinetStruct)) {
             $this->_edit_order_product_cabinet_struct();
@@ -262,6 +262,7 @@ class D_w extends D_abstract{
                 $CabinetStruct['order_product_id'] = $this->_OderProductId;
                 self::$_CabinetStruct = $CabinetStruct;
             } else {
+                $GLOBALS['error'] = '';
                 return false;
             }
         }

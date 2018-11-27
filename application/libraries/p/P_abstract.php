@@ -42,9 +42,11 @@ abstract class P_abstract {
                 'sum_detail' => json_encode($SumDetail),
                 'sum' => $this->_OrderProductInfo['sum'] + $this->_SumDiff
             );
+            $Set['payed'] = $Set['sum'];
+            $Set['virtual_payed'] = $Set['sum'];
             if ($this->_OrderProductInfo['status'] > O_WAIT_DELIVERY) {
-                $Set['payed'] = $Set['sum'];
-                $Set['virtual_payed'] = $Set['sum'];
+                /*$Set['payed'] = $Set['sum'];
+                $Set['virtual_payed'] = $Set['sum'];*/
             } else {
                 if ($this->_SumDiff > 0 && $this->_OrderProductInfo['pay_status'] == PAYED) { // 未出厂的，如果已经支付，则改为部分支付
                     $Set['pay_status'] = PAY;
@@ -75,9 +77,12 @@ abstract class P_abstract {
             $this->_add_dealer_account_book();
         } else {
             $this->_CI->dealer_model->update(array(
+                'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
+                'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff,
                 'produce' => $this->_OrderProductInfo['dealer_produce'] + $this->_SumDiff,
                 'virtual_produce' => $this->_OrderProductInfo['dealer_virtual_produce'] + $this->_SumDiff
             ), $this->_OrderProductInfo['dealer_id']);
+            $this->_add_dealer_account_book();
         }
         return true;
     }

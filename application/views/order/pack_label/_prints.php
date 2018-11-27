@@ -451,7 +451,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             return false*/
                                         } else {
                                             if (Classify === 'both') {
-                                                Text += '建议厚薄各自打包...<br />'
+                                                if (res.contents['order_type'] === 'X') {
+                                                    $Form.find('p.error').html('请厚薄各自打包...');
+                                                    return false
+                                                } else {
+                                                    Text += '建议厚薄各自打包...<br />'
+                                                }
                                             } else {
                                                 $Form.find('p.error').html('该订单不包含对应打包类型');
                                                 return false
@@ -463,6 +468,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             IsPacked = true
                                         }
                                     }
+
                                     $Form.find('input[name="num"]').val(res.contents.num);
                                     if(undefined !== res.contents.thin){
                                         Text += '薄板[   '+ res.contents.thin +'   ]包, ';

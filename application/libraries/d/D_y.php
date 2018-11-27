@@ -232,9 +232,9 @@ class D_y extends D_abstract{
         $this->_OrderProduct['product'] = $From['product'];
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
-        $this->_get_wardrobe_struct($From);
+        $this->_get_wardrobe_struct($From['order_product_id']);
 
-        $this->_get_board_plate($From);
+        $this->_get_board_plate($From['order_product_id']);
 
         if (!empty(self::$_WardrobeStruct)) {
             $this->_edit_order_product_wardrobe_struct();
@@ -256,6 +256,7 @@ class D_y extends D_abstract{
                 $WardrobeStruct['order_product_id'] = $this->_OderProductId;
                 self::$_WardrobeStruct = $WardrobeStruct;
             } else {
+                $GLOBALS['error'] = '';
                 return false;
             }
         }

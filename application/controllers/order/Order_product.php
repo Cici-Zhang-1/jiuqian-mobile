@@ -189,7 +189,7 @@ class Order_product extends MY_Controller {
                     foreach ($Query as $key => $value){
                         if(!!($W->initialize($value['v']))){
                             $W->create();
-                            if (!($D->repeat($value, $OrderProduct['order_product_id']))) {
+                            if (!($D->repeat($value, $OrderProduct))) {
                                 $this->Code = EXIT_ERROR;
                                 $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单板块复制失败!';
                                 break;
@@ -228,7 +228,7 @@ class Order_product extends MY_Controller {
                     } else {
                         $this->load->library('d/d');
                         $D = $this->d->initialize($From['code']);
-                        if (!($D->repeat($To, $From['v']))) {
+                        if (!($D->repeat($To, $From))) {
                             $this->Code = EXIT_ERROR;
                             $this->Message = isset($GLOBALS['error'])?is_array($GLOBALS['error'])?implode(',', $GLOBALS['error']):$GLOBALS['error']:'订单板块复制失败!';
                         } else {

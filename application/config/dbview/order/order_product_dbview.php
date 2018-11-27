@@ -228,7 +228,10 @@ $config['order/order_product_model/select_current_workflow'] = array(
 );
 
 $config['order/order_product_model/is_exist'] = array(
-    'op_id' => 'v',
+    'op_id' => array(
+        'v',
+        'order_product_id',
+    ),
     'op_num' => 'num',
     'op_product' => 'product',
     'op_pack' => 'pack',
@@ -244,6 +247,7 @@ $config['order/order_product_model/is_exist'] = array(
         'order_v',
         'order_id'
     ),
+    'o_order_type' => 'order_type',
     'o_warehouse_num' => 'warehouse_v',
     'o_dealer' => 'dealer',
     'o_owner' => 'owner',
@@ -276,8 +280,12 @@ $config['order/order_product_model/is_order_dismantlable'] = array(
     'op_num' => 'order_product_num',
     'op_product_id' => 'product_id',
     'op_product' => 'product',
-    'op_remark' => 'remark',
+    'op_remark' => array(
+        'remark',
+        'order_product_remark',
+    ),
     'op_design_atlas' => 'design_atlas',
+    'op_bd' => 'bd',
     'p_code' => 'code'
 );
 

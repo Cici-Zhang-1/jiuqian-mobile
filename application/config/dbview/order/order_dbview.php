@@ -489,7 +489,16 @@ $config['order/order_model/select_after_produce'] = array(
     'o_sum' => 'sum',
     'o_sum_detail' => 'sum_detail',
     'o_virtual_sum' => 'virtual_sum',
-    'o_status' => 'status'
+    'o_status' => 'status',
+    'od_sure_datetime' => 'sure_datetime'
+);
+
+$config['order/order_model/select_sample_after_produce'] = array(
+    'o_sum' => 'sum',
+    'o_sum_detail' => 'sum_detail',
+    'o_virtual_sum' => 'virtual_sum',
+    'o_status' => 'status',
+    'od_sure_datetime' => 'sure_datetime'
 );
 
 $config['order/order_model/select_everyday_sured'] = array(

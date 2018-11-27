@@ -17,7 +17,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private $_Classify = array();
 
     private $_Bd = array();
-    private $_UnBdCount = ZERO;
+    private $_UnBdCount = ONE;
     public function __construct($Source_id){
         $this->_Source_id = $Source_id;
     }
@@ -246,7 +246,7 @@ class Wait_sure_workflow extends Workflow_order_abstract {
         $this->_CI->load->model('order/order_product_board_plate_model');
         if (!!($Qrcode = $this->_CI->order_product_board_plate_model->select_for_sure($OrderProductId))) {
             $this->_CI->load->model('order/order_product_classify_model');
-            $this->_UnBdCount = ZERO;
+            $this->_UnBdCount = ONE;
             $this->_Bd = array();
             foreach ($Qrcode as $Key => $Value) {
                 $Value['order_product_classify_id'] = $this->_get_order_product_classify_id($Value);

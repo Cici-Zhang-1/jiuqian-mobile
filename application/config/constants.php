@@ -294,6 +294,7 @@ defined('TEN') OR define('TEN', 10);
 defined('ZERO') OR define('ZERO', 0);
 defined('EMPTY') OR define('EMPTY', 0);
 defined('NEGATIVE') OR define('NEGATIVE', -1);
+defined('THIRTY') OR define('THIRTY', 30);
 
 defined('SUPER_NO') OR define('SUPER_NO', 1); //超级管理员ID
 

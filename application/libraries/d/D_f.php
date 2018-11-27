@@ -140,7 +140,7 @@ class D_f extends D_abstract{
         $this->_OrderProduct['product'] = $From['product'];
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
-        $this->_get_server($From);
+        $this->_get_server($From['order_product_id']);
 
         if (!empty(self::$_Server)) {
             $this->_add_order_product_server();

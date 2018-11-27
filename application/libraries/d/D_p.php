@@ -127,7 +127,7 @@ class D_p extends D_abstract{
         $this->_OrderProduct['product'] = $From['product'];
         $this->_OrderProduct['remark'] = $From['order_product_remark'];
         $this->_edit_order_product();
-        $this->_get_fitting($From);
+        $this->_get_fitting($From['order_product_id']);
 
         if (!empty(self::$_Fitting)) {
             $this->_add_order_product_fitting();
