@@ -152,6 +152,7 @@ class Pick_sheet extends MY_Controller {
                 } else {
                     if ($this->Code == EXIT_SUCCESS) {
                         $this->order_stock_outted_model->trans_commit();
+                        $this->Message = '成功重新发货!';
                     } else {
                         $this->order_stock_outted_model->trans_rollback();
                     }
