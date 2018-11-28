@@ -132,9 +132,9 @@ class Edge_model extends MY_Model {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format_re($Data, $Item);
         if (is_array($Where)) {
-            $this->HostDb->where_in('e_name', $Where);
+            $this->HostDb->where_in('e_id', $Where);
         } else {
-            $this->HostDb->where('e_name', $Where);
+            $this->HostDb->where('e_id', $Where);
         }
         $this->HostDb->update('edge', $Data);
         $this->remove_cache($this->_Module);
@@ -149,7 +149,7 @@ class Edge_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('edge', $Data, 'e_name');
+        $this->HostDb->update_batch('edge', $Data, 'e_id');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -161,9 +161,9 @@ class Edge_model extends MY_Model {
      */
     public function delete($Where) {
         if(is_array($Where)){
-            $this->HostDb->where_in('e_name', $Where);
+            $this->HostDb->where_in('e_id', $Where);
         } else {
-            $this->HostDb->where('e_name', $Where);
+            $this->HostDb->where('e_id', $Where);
         }
 
         $this->HostDb->delete('edge');

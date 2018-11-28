@@ -40,6 +40,11 @@ $config['data/edge/edit'] = array(
             'label' => '编号',
             'rules' => 'trim|required|max_length[64]'
         ),
+    array(
+        'field' => 'id',
+        'label' => 'ID',
+        'rules' => 'trim|required|numeric|max_length[4]'
+    ),
                                 array (
             'field' => 'name',
             'label' => '名称',
@@ -74,8 +79,8 @@ $config['data/edge/edit'] = array(
 
 $config['data/edge/remove'] = array(
             array(
-            'field' => 'v[]',
+            'field' => 'relate[]',
             'label' => '选择项',
-            'rules' => 'trim|required|max_length[64]'
+            'rules' => 'trim|required|numeric|max_length[10]'
         )
                         );

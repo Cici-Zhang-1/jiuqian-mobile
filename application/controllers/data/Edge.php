@@ -81,8 +81,8 @@ class Edge extends MY_Controller {
     public function edit() {
         if ($this->_do_form_validation()) {
             $Post = gh_escape($_POST);
-            $Where = $Post['v'];
-            unset($Post['v']);
+            $Where = $Post['id'];
+            unset($Post['v'], $Post['v']);
             if(!!($this->edge_model->update($Post, $Where))){
                 $this->Message = '内容修改成功, 刷新后生效!';
             }else{
@@ -99,12 +99,13 @@ class Edge extends MY_Controller {
      * @return void
      */
     public function remove() {
-        $V = $this->input->post('v');
-        if (!is_array($V)) {
-            $_POST['v'] = explode(',', $V);
+        $Relate = $this->input->post('relate');
+        foreach ($Relate as $Key => $Value) {
+            $Relate[$Key] = intval($Value['id']);
         }
+        $_POST['relate'] = $Relate;
         if ($this->_do_form_validation()) {
-            $Where = $this->input->post('v', true);
+            $Where = $this->input->post('relate', true);
             if ($this->edge_model->delete($Where)) {
                 $this->Message = '删除成功，刷新后生效!';
             } else {

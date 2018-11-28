@@ -10,7 +10,8 @@ $config['data/edge_model/select'] = array(
     'e_up' => 'ups',
     'e_down' => 'downs',
     'e_left' => 'lefts',
-    'e_right' => 'rights'
+    'e_right' => 'rights',
+    'e_id' => 'id'
 );
 
 $config['data/edge_model/_select'] = array(
@@ -22,5 +23,6 @@ $config['data/edge_model/_select'] = array(
     'e_up' => 'ups',
     'e_down' => 'downs',
     'e_left' => 'lefts',
-    'e_right' => 'rights'
+    'e_right' => 'rights',
+    'e_id' => 'id'
 );
