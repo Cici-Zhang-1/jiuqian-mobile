@@ -243,7 +243,7 @@ class Wait_delivery extends MY_Controller{
         $this->_W = $this->workflow->initialize('order');
     }
     private function _edit_delivered ($OrderId, $Delivered) {
-        $this->_W->initialize($OrderId, array('delivered' => $Delivered));
+        $this->_W->initialize($OrderId, array('delivered' => $Delivered, 'end_date' => $this->input->post('end_datetime', true)));
         if (!$this->_W->delivered()) {
             $this->Code = EXIT_ERROR;
             $this->Message = $this->_W->get_failue();

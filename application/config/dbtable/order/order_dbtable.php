@@ -62,7 +62,8 @@ $config['order/order_model/update'] = array(
     'pack' => 'o_pack',
     'pack_detail' => 'o_pack_detail',
     'delivered' => 'o_delivered',
-    'collection' => 'o_collection'
+    'collection' => 'o_collection',
+    'end_date' => 'o_end_date'
 );
 $config['order/order_model/update_workflow'] = array(
 	'status' => 'o_status',
@@ -73,7 +74,8 @@ $config['order/order_model/update_workflow'] = array(
 	'pack_detail' => 'o_pack_detail',
     'pay_status' => 'o_pay_status',
     'payed' => 'o_payed',
-    'virtual_payed' => 'o_virtual_payed'
+    'virtual_payed' => 'o_virtual_payed',
+    'end_date' => 'o_end_date'
 );
 $config['order/order_model/update_batch'] = array(
 	'v' => 'o_id',
@@ -82,7 +84,8 @@ $config['order/order_model/update_batch'] = array(
 	'cargo_no' => 'o_cargo_no',
     'warehouse_v' => 'o_warehouse_num',
     'delivered' => 'o_delivered',
-    'collection' => 'o_collection'
+    'collection' => 'o_collection',
+    'end_date' => 'o_end_date'
 );
 $config['order/order_model/update_status'] = array(
 	'id' => 'o_id',

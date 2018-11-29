@@ -120,6 +120,7 @@ $config['order/order_model/select'] = array(
 	'o_delivery_phone' => 'delivery_phone',
     'o_remark' => 'remark',
     'o_dealer_remark' => 'dealer_remark',
+    'o_end_date' => 'end_date'
 );
 $config['order/order_model/select_valuate'] = array(
     'o_id' => 'v',
@@ -224,7 +225,8 @@ $config['order/order_model/select_detail'] = array(
     'C.u_truename' => 'creator',
     'od_create_datetime' => 'create_datetime',
     'od_sure_datetime' => 'produce_datetime',
-    'od_delivery_datetime' => 'end_datetime',
+    'o_end_date' => 'end_datetime',
+    // 'od_delivery_datetime' => 'end_datetime',
     'wo_label' => 'status_label',
     'd_balance' => 'dealer_balance',
     'd_produce' => 'dealer_produce',
