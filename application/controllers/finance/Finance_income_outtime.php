@@ -238,6 +238,8 @@ class Finance_income_outtime extends MY_Controller {
                         $Value['fee'] = -1 * $Value['fee'];
                         $Value['corresponding'] = -1 * $Value['corresponding'];
                         $this->_edit_finance_account($Value);
+                    } else {
+                        $Value['corresponding'] = -1 * $Value['corresponding'];
                     }
                     if (!empty($Value['dealer_id'])) { // 如果已经挂到某个客户，则要清除
                         $this->_FinanceIncomeId = $Value['v'];
