@@ -109,7 +109,7 @@ class Application extends MY_Controller {
                     if (!isset($Dealer[$Value['dealer_id']])) {
                         $Dealer[$Value['dealer_id']] = $Value['dealer_balance'];
                     }
-                    $Dealer[$Value['dealer_id']] = $Dealer[$Value['dealer_id']] - $NeedPay;
+                    $Dealer[$Value['dealer_id']] = bcsub($Dealer[$Value['dealer_id']], $NeedPay, 2);
                     if (ZERO <= $Dealer[$Value['dealer_id']]) { // 低于客户余额的不需要申请宽松生产，但是从余额中扣除需要支付的金额
                         continue;
                     } else {
@@ -199,7 +199,7 @@ class Application extends MY_Controller {
                     if (!isset($Dealer[$Value['dealer_id']])) {
                         $Dealer[$Value['dealer_id']] = $Value['dealer_balance'];
                     }
-                    $Dealer[$Value['dealer_id']] = $Dealer[$Value['dealer_id']] - $NeedPay;
+                    $Dealer[$Value['dealer_id']] = bcsub($Dealer[$Value['dealer_id']], $NeedPay, 2);
                     if (ZERO <= $Dealer[$Value['dealer_id']]) { // 低于客户余额的不需要申请宽松发货，但是从余额中扣除需要支付的金额
                         continue;
                     } else {

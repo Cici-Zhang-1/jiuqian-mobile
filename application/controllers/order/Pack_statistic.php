@@ -54,7 +54,8 @@ class Pack_statistic extends MY_Controller{
                             'amount' => 0
                         );
                     }
-                    $X[$Value['product']]['area'] += $Value['area'];
+                    $X[$Value['product']]['area'] = bcadd($X[$Value['product']]['area'], $Value['area'], 3);
+                    // $X[$Value['product']]['area'] += $Value['area'];
                     if (!in_array($Value['num'], $X[$Value['product']]['num'])) {
                         array_push($X[$Value['product']]['num'], $Value['num']);
                         $X[$Value['product']]['amount']++;
@@ -63,7 +64,8 @@ class Pack_statistic extends MY_Controller{
                         }
                     }
                 } elseif ($Value['order_type'] == 'B') {
-                    $BArea += $Value['area'];
+                    $BArea = bcadd($BArea, $Value['area'], 3);
+                    // $BArea += $Value['area'];
                     if (!in_array($Value['num'], $BOrderProductNum)) {
                         array_push($BOrderProductNum, $Value['num']);
                         $BAmount++;

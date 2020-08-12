@@ -55,7 +55,7 @@ class D_w extends D_abstract{
             $GLOBALS['error'] = '请选择需要确认的订单产品!';
             return false;
         } elseif (empty(self::$_BoardPlate) || !($this->_check_board_plate())) {
-            $GLOBALS['error'] = '请添加板块信息!';
+            $GLOBALS['error'] .= '请添加板块信息!!!';
             return false;
         } else {
             $this->_edit_order_product();
@@ -174,8 +174,10 @@ class D_w extends D_abstract{
                 array_push($Opbids, $Board[$value['board']]['v']);
             }else{
                 $Board[$value['board']]['amount']++;
-                $Board[$value['board']]['area'] += $value['area'];
-                $Board[$value['board']]['virtual_area'] += $value['area'];
+                $Board[$value['board']]['area'] = bcadd($Board[$value['board']]['area'], $value['area']);
+                // $Board[$value['board']]['area'] += $value['area'];
+                $Board[$value['board']]['virtual_area'] = bcadd($Board[$value['board']]['virtual_area'], $value['area']);
+                // $Board[$value['board']]['virtual_area'] += $value['area'];
                 $Board[$value['board']]['sum'] += $value['sum'];
                 $Board[$value['board']]['virtual_sum'] += $value['sum'];
             }

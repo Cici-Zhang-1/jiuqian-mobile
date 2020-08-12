@@ -468,7 +468,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             IsPacked = true
                                         }
                                     }
-
                                     $Form.find('input[name="num"]').val(res.contents.num);
                                     if(undefined !== res.contents.thin){
                                         Text += '薄板[   '+ res.contents.thin +'   ]包, ';

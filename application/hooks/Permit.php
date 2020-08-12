@@ -21,6 +21,7 @@ class Permit{
         log_message('debug', "Hook Permit/__construct Start");
         $this->_CI = & get_instance();
         $this->_Ugid = $this->_CI->session->userdata('ugid');
+        log_message('debug', 'Ugid is  ' . $this->_Ugid);
     }
     
     /**

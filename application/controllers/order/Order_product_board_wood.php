@@ -106,7 +106,8 @@ class Order_product_board_wood extends MY_Controller {
             $value['m_length'] = $value['length'] - 3;
 
             if(isset($List[$Tmp2])){
-                $List[$Tmp2]['area'] += $value['area'];
+                $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                // $List[$Tmp2]['area'] += $value['area'];
                 $List[$Tmp2]['amount'] += 1;
                 $value['key'] = $List[$Tmp2]['key'];
             }else{
@@ -114,7 +115,8 @@ class Order_product_board_wood extends MY_Controller {
                 $List[$Tmp2] = $value;
             }
             $this->_parse_wood($value, $value['key']);
-            $this->_Statistic['total_area'] += $value['area'];
+            $this->_Statistic['total_area'] = bcadd($this->_Statistic['total_area'], $value['area'], 3);
+            // $this->_Statistic['total_area'] += $value['area'];
         }
         $this->_Statistic['total_amount'] = count($BoardWood);
         $Tmp = array();
@@ -132,7 +134,7 @@ class Order_product_board_wood extends MY_Controller {
                 'flag' => $K,
                 'name' => '中横',
                 'board' => $Wood['board'],
-                'length' => $Wood['width'] - $BoardWidth*2,
+                'length' => bcsub($Wood['width'], $BoardWidth*2),
                 'width' => $BoardWidth,
                 'amount' => $Wood['amount']
             );
@@ -148,7 +150,7 @@ class Order_product_board_wood extends MY_Controller {
                 'flag' => $K,
                 'name' => '中横',
                 'board' => $Wood['board'],
-                'length' => $Wood['width'] - $BoardWidth*2,
+                'length' => bcsub($Wood['width'], $BoardWidth*2),
                 'width' => $BoardWidth,
                 'amount' => $Wood['amount']
             );
@@ -191,7 +193,7 @@ class Order_product_board_wood extends MY_Controller {
             $this->_Vertical[$Key] = $Vertical;
         }
         if(preg_match('/百叶/', $Wood['wood_name'])) {
-            $Blinds = array('flag' => $K, 'name' => '小百叶', 'board' => $Wood['board'], 'length' => $Wood['width'] - $BoardWidth * 2 + 12, 'width' => $ItemWidth);
+            $Blinds = array('flag' => $K, 'name' => '小百叶', 'board' => $Wood['board'], 'length' => bcadd($Wood['width'] - $BoardWidth * 2, 12), 'width' => $ItemWidth);
             if (1 == $CenterFlag) {
                 $Blinds['amount'] = $Wood['amount'] * ceil((($Wood['length'] - $BoardWidth * 3) / 2 + 12) / $ItemWidth) * 2;
             } elseif (2 == $CenterFlag) {
@@ -249,7 +251,7 @@ class Order_product_board_wood extends MY_Controller {
                     $this->_Blinds[$Key] = $Blinds;
                 }
             }else {
-                $Blinds['length'] = $Wood['length'] - $BoardWidth*2 + 12;
+                $Blinds['length'] = bcadd($Wood['length'] - $BoardWidth*2, 12);
                 $Blinds['amount'] = $Wood['amount'];
                 // array_push($this->_Blinds, $Blinds);
                 $Key = implode('_', $Blinds);

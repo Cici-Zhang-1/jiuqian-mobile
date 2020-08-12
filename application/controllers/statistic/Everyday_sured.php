@@ -57,4 +57,36 @@ class Everyday_sured extends MY_Controller {
         }
         $this->_ajax_return($Data);
     }
+
+    public function customer_statistic () {
+        $this->_Search = array_merge($this->_Search, $this->__Search);
+        $this->get_page_search();
+        $Days = $this->input->get('days', true);
+        if (empty($Days)) {
+            $this->_Search['start_date'] = date('Y-m-d');
+        } else {
+            $Days = '-' . $Days . ' days';
+            $this->_Search['start_date'] = date('Y-m-d', strtotime($Days));
+        }
+        $this->_Search['end_date'] = date('Y-m-d', strtotime('+1 day'));
+        $Data = array('list' => array());
+        if (!!($Query = $this->order_model->select_everyday_sured($this->_Search))) {
+            $Tmp = array();
+            foreach ($Query as $Key => $Value) {
+                if (!isset($Tmp[$Value['sure']])) {
+                    $Tmp[$Value['sure']] = array(
+                        'sum' => 0
+                    );
+                }
+                $Tmp[$Value['sure']]['sum'] += $Value['sum'];
+            }
+            foreach ($Tmp as $Key => $Value) {
+                $Data['list'][] = array(
+                    'name' => $Key,
+                    'value' => $Value['sum']
+                );
+            }
+        }
+        $this->_ajax_return($Data);
+    }
 }

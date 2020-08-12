@@ -514,7 +514,8 @@ $config['order/order_model/select_everyday_sured'] = array(
     'o_sum' => 'sum',
     'o_virtual_sum' => 'virtual_sum',
     'A.thick' => 'thick',
-    'u_truename' => 'sure',
+    'US.u_truename' => 'sure',
+    'UD.u_truename' => 'dismantle',
     'od_sure_datetime' => 'sure_datetime'
 );
 

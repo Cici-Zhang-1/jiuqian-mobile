@@ -1,0 +1,89 @@
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generate_order_product_num`(IN `id` INT(10), IN `num` INT(5), IN `code` VARCHAR(2), IN `product` VARCHAR(64), IN `product_id` SMALLINT(4), OUT `opid` VARCHAR(1024), OUT `orderProductNum` VARCHAR(1024))
+begin
+ declare maxNum int default 0;
+ declare step int default 1;
+ declare orderNum varchar(16) default '';
+ declare prefix varchar(64) default '';
+ declare old varchar(64) default '';
+ declare new varchar(64) default '';
+
+ select o_num into orderNum from j_order where o_id = id;
+ select concat(orderNum,'-',code) into prefix;
+ select ifnull(op_num, '') into old
+ from j_order_product where op_num REGEXP concat('^',prefix)
+ order by substring(op_num,CHAR_LENGTH(prefix) + 1)+0 desc limit 1;
+ if old != '' then
+ set maxNum = convert(substring(old, CHAR_LENGTH(prefix) + 1), decimal);
+ end if;
+
+ set opid = '';
+ set orderProductNum = '';
+ label1: LOOP
+select concat(prefix, (maxNum+step)) into new;
+insert into j_order_product(op_order_id, op_num,op_product_id, op_product) values (id, new, product_id, product);
+    select concat(orderProductNum, ',', new) into orderProductNum;
+    select concat(opid, ',', LAST_INSERT_ID()) into opid;
+    if step < num then
+        set step = step + 1;
+        ITERATE label1;
+    END IF;
+    LEAVE label1;
+ END LOOP label1;
+ END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `generate_order_num`(IN `type` VARCHAR(2) CHARSET utf8, IN `num` INT(10), IN `suffix` INT(10), IN `s` TINYINT(1) UNSIGNED, OUT `newOrderNum` VARCHAR(16) CHARSET utf8, OUT `v` INT(10) UNSIGNED)
+    NO SQL
+    COMMENT '生成订单编号'
+BEGIN
+ declare currentDate varchar(8);
+ declare maxNum int default 0;
+ declare oldOrderNum varchar(16) default '';
+ if(num = 6) then
+ select date_format(now(), '%Y%m') into currentDate;
+ else
+ select date_format(now(), '%Y%m%d') into currentDate;
+ end if;
+ IF (s = 1) then
+select IFNULL(o_num, '') into oldOrderNum
+ from j_order
+ where o_num REGEXP concat('[XB]',currentDate)
+ order by o_id desc limit 1;
+ select concat(type, currentDate) into currentDate;
+ ELSE
+ select concat(type, currentDate) into currentDate;
+    select IFNULL(o_num, '') into oldOrderNum
+    from j_order
+    where o_num REGEXP concat('^',currentDate)
+    order by o_num desc limit 1;
+ END IF;
+ if oldOrderNum != '' then
+ set maxNum = convert(substring(oldOrderNum, -1 * suffix), decimal);
+ end if;
+ select concat(currentDate, LPAD((maxNum+1),suffix,'0')) into newOrderNum;
+ insert into j_order(o_num, o_order_type) values (newOrderNum, type);
+ select LAST_INSERT_ID() into v;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_order_num`(IN `oid` INT(10), IN `num` INT(10))
+begin
+declare newOrderNum varchar(16);
+declare currentDate varchar(8);
+declare maxNum int default 0;
+declare oldOrderNum varchar(16) default '';
+select date_format(now(), '%Y%m%d') into currentDate;
+select IFNULL(o_num, '') into oldOrderNum
+from n9_order
+where substring(o_num,1,num) = currentDate && o_id != oid
+order by o_num desc limit 1;
+if oldOrderNum != '' then
+set maxNum = convert(substring(oldOrderNum, -3), decimal);
+end if;
+select concat(currentDate, LPAD((maxNum+1),3,'0')) into newOrderNum;
+update n9_order set o_num = newOrderNum where o_id = oid;
+end$$
+DELIMITER ;

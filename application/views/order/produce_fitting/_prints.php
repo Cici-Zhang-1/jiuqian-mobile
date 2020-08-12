@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <td>$K</td>
     <td>$value[dealer]</td>
     <td>$key</td>
-    <td>$First[name]</td>
+    <td>$First[code]_$First[name]</td>
     <td>$First[speci]</td>
     <td>$First[amount]</td>
     <td>$First[unit]</td>
@@ -52,7 +52,7 @@ END;
     <td></td>
     <td></td>
     <td></td>
-    <td>$ivalue[name]</td>
+    <td>$ivalue[code]_$ivalue[name]</td>
     <td>$ivalue[speci]</td>
     <td>$ivalue[amount]</td>
     <td>$ivalue[unit]</td>

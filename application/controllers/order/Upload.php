@@ -439,12 +439,12 @@ class Upload extends MY_Controller {
                     list($Length, $Width) = array($Width, $Length);
                     list($Left, $Right, $Down, $Up) = array($Up, $Down, $Left, $Right);
                 }
-                $Width = $Width - $Up - $Down;
-                $Length = $Length - $Left - $Right;
+                $Width = bcsub($Width, $Up + $Down);
+                $Length = bcsub($Length, $Left + $Right);
                 unset($Up, $Down, $Left, $Right);
                 $Edge = $this->_get_source_edge_thick((string)$xml['FBSTR'], (int)$xml['BH']);
-                $Width = $Width + $Edge['up_edge'] + $Edge['down_edge'];
-                $Length = $Length + $Edge['left_edge'] + $Edge['right_edge'];
+                $Width = bcadd($Width, $Edge['up_edge'] + $Edge['down_edge'], 1);
+                $Length = bcadd($Length, $Edge['left_edge'] + $Edge['right_edge'], 1);
                 $Edge = $this->_get_edge_thick((string)$xml['FBSTR'], (int)$xml['BH']);
 
                 $KcFaceInfo = '';
@@ -523,7 +523,7 @@ class Upload extends MY_Controller {
                             /*之前已经上传*/
                             if(!!($this->order_product_board_plate_model->update($Data, $Opbpid['opbpid']))){
                                 $Opbid = array(
-                                    'area' => $Opbpid['area'] + ($Data['area'] - $Opbpid['plate_area'])
+                                    'area' => bcadd($Opbpid['area'], bcsub($Data['area'], $Opbpid['plate_area'], 3), 3)
                                 );
                                 if(!!($this->order_product_board_model->update($Opbid, $Opbpid['opbid']))){
                                     $this->Success = $FileInfo['raw_name'].'文件上传成功';
@@ -538,7 +538,8 @@ class Upload extends MY_Controller {
                                 $Data['opbid'] = $Opbid['opbid'];
                                 unset($Opbid['opbid']);
                                 $Opbid['amount'] += 1;
-                                $Opbid['area'] += $Data['area'];
+                                $Opbid['area'] = bcadd($Opbid['area'], $Data['area'], 3);
+                                // $Opbid['area'] += $Data['area'];
                                 $this->order_product_board_model->update($Opbid, $Data['opbid']);
                             }else{
                                 $Data['opbid'] = $this->order_product_board_model->insert($Board);

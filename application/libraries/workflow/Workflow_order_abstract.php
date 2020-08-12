@@ -29,7 +29,7 @@ abstract class Workflow_order_abstract{
             $this->_CI->order_model->trans_begin();
             foreach ($Order as $Key => $Value) {
                 if ($Value['status'] > O_WAIT_SURE && $Value['payed'] > ZERO) { // 如果订单是已经确认之后的
-                    if (!($this->_edit_dealer_finance($Value) && $this->_add_dealer_account_book($Value))) {
+                    if (!($this->_edit_dealer_finance($Value) && $this->_add_dealer_account_book($Value, NO))) {
                         break;
                     }
                 }
@@ -108,8 +108,8 @@ abstract class Workflow_order_abstract{
      */
     private function _add_order_finance_flow ($Order) {
         $this->_CI->load->model('order/order_finance_flow_model');
-        $Diff = $Order['sum'] - $Order['payed'];
-        $VirtualDiff = $Order['virtual_sum'] - $Order['virtual_payed'];
+        $Diff = bcsub($Order['sum'], $Order['payed'], 2);
+        $VirtualDiff = bcsub($Order['virtual_sum'], $Order['virtual_payed'], 2);
         return $this->_CI->order_finance_flow_model->insert(array(
             'order_id' => $Order['order_id'],
             'payed_money' => $Diff,
@@ -126,22 +126,32 @@ abstract class Workflow_order_abstract{
      */
     private function _edit_dealer_finance ($Order, $Direct = false) {
         if ($Direct) {
-            $Diff = $Order['sum'] - $Order['payed'];
-            $VirtualDiff = $Order['virtual_sum'] - $Order['virtual_payed'];
+            $Diff = bcsub($Order['sum'], $Order['payed'], 2);
+            $VirtualDiff = bcsub($Order['virtual_sum'], $Order['virtual_payed'], 2);
             $Set = array(
-                'balance' => $Order['dealer_balance'] - $Diff,
+                'balance' => bcsub($Order['dealer_balance'], $Diff, 2),
+                'produce' => bcsub($Order['dealer_produce'], $Order['sum'], 2),
+                'delivered' => bcadd($Order['dealer_delivered'], $Order['sum'], 2),
+                'virtual_balance' => bcsub($Order['dealer_virtual_balance'], $VirtualDiff, 2),
+                'virtual_produce' => bcsub($Order['dealer_virtual_produce'], $Order['virtual_sum'], 2),
+                'virtual_delivered' => bcadd($Order['dealer_virtual_delivered'], $Order['virtual_sum'], 2)
+                /*'balance' => $Order['dealer_balance'] - $Diff,
                 'produce' => $Order['dealer_produce'] - $Order['sum'],
                 'delivered' => $Order['dealer_delivered'] + $Order['sum'],
                 'virtual_balance' => $Order['dealer_virtual_balance'] - $VirtualDiff,
                 'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum'],
-                'virtual_delivered' => $Order['dealer_virtual_delivered'] + $Order['virtual_sum']
+                'virtual_delivered' => $Order['dealer_virtual_delivered'] + $Order['virtual_sum']*/
             );
         } else {
             $Set = array(
-                'balance' => $Order['dealer_balance'] + $Order['payed'],
+                'balance' => bcadd($Order['dealer_balance'], $Order['payed'], 2),
+                'produce' => bcsub($Order['dealer_produce'], $Order['sum'], 2),
+                'virtual_balance' => bcadd($Order['dealer_virtual_balance'], $Order['virtual_payed'], 2),
+                'virtual_produce' => bcsub($Order['dealer_virtual_produce'], $Order['virtual_sum'], 2)
+                /*'balance' => $Order['dealer_balance'] + $Order['payed'],
                 'produce' => $Order['dealer_produce'] - $Order['sum'],
                 'virtual_balance' => $Order['dealer_virtual_balance'] + $Order['virtual_payed'],
-                'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum']
+                'virtual_produce' => $Order['dealer_virtual_produce'] - $Order['virtual_sum']*/
             );
         }
         if ($this->_CI->dealer_model->update($Set, $Order['dealer_id'])) {
@@ -168,18 +178,24 @@ abstract class Workflow_order_abstract{
         );
         if ($Direct) {
             $Data['in'] = NO;
-            $Data['amount'] = $Order['payed'] - $Order['sum'];
+            $Data['amount'] = bcsub($Order['payed'], $Order['sum'], 2);
+            $Data['virtual_amount'] = bcsub($Order['virtual_payed'], $Order['virtual_sum'], 2);
+            $Data['balance'] = bcadd($Order['dealer_balance'], $Data['amount'], 2);
+            $Data['virtual_balance'] = bcadd($Order['dealer_virtual_balance'], $Data['virtual_amount'], 2);
+            /*$Data['amount'] = $Order['payed'] - $Order['sum'];
             $Data['virtual_amount'] = $Order['virtual_payed'] - $Order['virtual_sum'];
             $Data['balance'] = $Order['dealer_balance'] + $Data['amount'];
-            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Data['virtual_amount'];
+            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Data['virtual_amount'];*/
             $Data['inside'] = NO;
             $Data['status'] = $Order['status'];
         } else {
             $Data['in'] = YES;
             $Data['amount'] = $Order['payed'];
             $Data['virtual_amount'] = $Order['virtual_payed'];
-            $Data['balance'] = $Order['dealer_balance'] + $Order['payed'];
-            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Order['virtual_payed'];
+            $Data['balance'] = bcadd($Order['dealer_balance'], $Order['payed'], 2);
+            $Data['virtual_balance'] = bcadd($Order['dealer_virtual_balance'], $Order['virtual_payed'], 2);
+            /*$Data['balance'] = $Order['dealer_balance'] + $Order['payed'];
+            $Data['virtual_balance'] = $Order['dealer_virtual_balance'] + $Order['virtual_payed'];*/
             $Data['inside'] = YES;
             $Data['status'] = $Order['status'];
         }

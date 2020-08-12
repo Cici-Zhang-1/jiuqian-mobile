@@ -73,8 +73,8 @@ class Wait_delivery_workflow extends Workflow_order_abstract {
             $this->_PayStatus = PAYED;
             return true;
         } else {
-            $this->_Payed = $this->_NeedPay = $this->_Order['sum'] - $this->_Order['payed'];
-            $this->_VirtualNeedPay = $this->_Order['virtual_sum'] - $this->_Order['virtual_payed'];
+            $this->_Payed = $this->_NeedPay = bcsub($this->_Order['sum'], $this->_Order['payed'], 2);
+            $this->_VirtualNeedPay = bcsub($this->_Order['virtual_sum'], $this->_Order['virtual_payed'], 2);
             if ($this->_NeedPay > 0) {
                 if ($this->_NeedPay <= $this->_Order['dealer_balance']) {
                     $this->_PayStatus = PAYED;
@@ -116,12 +116,18 @@ class Wait_delivery_workflow extends Workflow_order_abstract {
     private function _edit_dealer_finance () {
         $this->_CI->load->model('dealer/dealer_model');
         return $this->_CI->dealer_model->update(array(
-            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay, // 客户账户余额
+            'balance' => bcsub($this->_Order['dealer_balance'], $this->_NeedPay, 2), // 客户账户余额
+            'produce' => bcsub($this->_Order['dealer_produce'], $this->_Order['sum'], 2), // 正在生产金额
+            'delivered' => bcadd($this->_Order['dealer_delivered'], $this->_Order['sum'], 2), // 已发货金额
+            'virtual_balance' => bcsub($this->_Order['dealer_virtual_balance'], $this->_VirtualNeedPay, 2),
+            'virtual_produce' => bcsub($this->_Order['dealer_virtual_produce'], $this->_Order['virtual_sum'], 2),
+            'virtual_delivered' => bcadd($this->_Order['dealer_virtual_delivered'], $this->_Order['virtual_sum'], 2)
+            /*'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay, // 客户账户余额
             'produce' => $this->_Order['dealer_produce'] - $this->_Order['sum'], // 正在生产金额
             'delivered' => $this->_Order['dealer_delivered'] + $this->_Order['sum'], // 已发货金额
             'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
             'virtual_produce' => $this->_Order['dealer_virtual_produce'] - $this->_Order['virtual_sum'],
-            'virtual_delivered' => $this->_Order['dealer_virtual_delivered'] + $this->_Order['virtual_sum']
+            'virtual_delivered' => $this->_Order['dealer_virtual_delivered'] + $this->_Order['virtual_sum']*/
         ), $this->_Order['dealer_id']);
     }
 
@@ -139,10 +145,10 @@ class Wait_delivery_workflow extends Workflow_order_abstract {
             'title' => $this->_Order['num'],
             'category' => $this->_get_category(),
             'source_id' => $this->_Order['v'],
-            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
+            'balance' => bcsub($this->_Order['dealer_balance'], $this->_NeedPay, 2),
             'remark' => '订单金额￥' . $this->_Order['sum'],
             'virtual_amount' => -1 * $this->_VirtualNeedPay,
-            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
+            'virtual_balance' => bcsub($this->_Order['dealer_virtual_balance'], $this->_VirtualNeedPay, 2),
             'inside' => NO,
             'source_status' => $this->_Order['status']
         );

@@ -57,7 +57,8 @@ class Punch_statistic extends MY_Controller{
                             'amount' => 0
                         );
                     }
-                    $X[$Value['product']]['area'] += $Value['area'];
+                    $X[$Value['product']]['area'] = bcadd($X[$Value['product']]['area'], $Value['area'], 3);
+                    // $X[$Value['product']]['area'] += $Value['area'];
                     if (!in_array($Value['order_product_num'], $X[$Value['product']]['order_product_num'])) {
                         array_push($X[$Value['product']]['order_product_num'], $Value['order_product_num']);
                         $X[$Value['product']]['amount']++;
@@ -66,7 +67,8 @@ class Punch_statistic extends MY_Controller{
                         }
                     }
                 } elseif ($Value['order_type'] == 'B') {
-                    $BArea += $Value['area'];
+                    $BArea = bcadd($BArea, $Value['area'], 3);
+                    // $BArea += $Value['area'];
                     if (!in_array($Value['order_product_num'], $BOrderProductNum)) {
                         array_push($BOrderProductNum, $Value['order_product_num']);
                         $BAmount++;

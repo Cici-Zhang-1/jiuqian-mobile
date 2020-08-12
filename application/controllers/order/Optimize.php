@@ -161,8 +161,8 @@ class Optimize extends MY_Controller{
             $Value = array();
             $ivalue['full_width'] = $ivalue['width'];
             $ivalue['full_length'] = $ivalue['length'];
-            $ivalue['width'] = $ivalue['width'] - $ivalue['up_edge'] - $ivalue['down_edge'];
-            $ivalue['length'] = $ivalue['length'] - $ivalue['left_edge'] - $ivalue['right_edge'];
+            $ivalue['width'] = bcsub($ivalue['width'], $ivalue['up_edge'] + $ivalue['down_edge'], 1);
+            $ivalue['length'] = bcsub($ivalue['length'], $ivalue['left_edge'] + $ivalue['right_edge'], 1);
             foreach ($this->_ExcelTitle as $kkey => $kvalue){
                 if(empty($kvalue)){
                     $Value[] = '';
@@ -209,7 +209,7 @@ class Optimize extends MY_Controller{
     }
 
     private function _default_download($Name, $Tmp){
-        static $No = 1, $Abnormity = array(), $Face = array();
+        static $No = 1, $Abnormity = array(), $Face = array(), $FaceKeys = array();
         $Return = '';
         switch ($Name){
             case 'no':
@@ -237,6 +237,7 @@ class Optimize extends MY_Controller{
                 if (empty($Face)) {
                     $this->load->helper('dismantle_helper');
                     $Face = $this->_get_face();
+                    $FaceKeys = array_keys($Face);
                 }
                 if (isset($Face[$Tmp['punch'] . $Tmp['slot']])) {
                     $Return = $Face[$Tmp['punch'] . $Tmp['slot']];
@@ -244,6 +245,13 @@ class Optimize extends MY_Controller{
                     $Return = $Face[A_ALL . $Tmp['slot']];
                 }elseif (isset($Face[$Tmp['punch'] . A_ALL])) {
                     $Return = $Face[$Tmp['punch'] . A_ALL];
+                } else {
+                    foreach ($FaceKeys as $Key => $Value) {
+                        if (preg_match('/^' . $Value . '$/', $Tmp['punch']. $Tmp['slot'])) {
+                            $Return = $Face[$Value];
+                            break;
+                        }
+                    }
                 }
         }
         return $Return;

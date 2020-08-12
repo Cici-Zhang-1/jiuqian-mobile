@@ -90,6 +90,34 @@ class Order_product_board_plate_model extends MY_Model {
     }
 
     /**
+     * 获取预优化数据
+     * @param $Ids
+     * @return bool
+     */
+    public function select_pre_optimize ($Ids) {
+        $Item = $this->_Item.__FUNCTION__;
+        $Cache = $this->_Cache.__FUNCTION__.implode('_', $Ids);
+        $Return = false;
+        if(!($Return = $this->cache->get($Cache))){
+            $Sql = $this->_unformat_as($Item, $this->_Module);
+            $Query = $this->HostDb->select($Sql,false)
+                ->from('order_product_board_plate')
+                ->join('order_product_board', 'opb_id = opbp_order_product_board_id', 'left')
+                ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                ->join('order','o_id = op_order_id', 'left')
+                ->join('dealer','d_id = o_dealer_id', 'left')
+                ->join('shop', 's_id = o_shop_id', 'left')
+                ->where_in('opbp_order_product_board_id', $Ids)->get();
+            if($Query->num_rows() > 0){
+                $Return = $Query->result_array();
+                $this->cache->save($Cache, $Return, HOURS);
+            }else{
+                $GLOBALS['error'] = '没有符合要求需要预优化的订单清单!';
+            }
+        }
+        return $Return;
+    }
+    /**
      * 获取需要优化的板块
      * @param $Ids
      * @return bool

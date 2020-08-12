@@ -85,7 +85,8 @@ class Self_dismantle extends MY_Controller{
             foreach ($Return as $key => $value){
                 if (isset($SizeName[$value['board']])) {
                     $Statictic[$value['name']][$SizeName[$value['board']]] = $value['area'];
-                    $Sum[$SizeName[$value['board']]] += $value['area'];
+                    $Sum[$SizeName[$value['board']]] = bcadd($Sum[$SizeName[$value['board']]], $value['area'], 3);
+                    // $Sum[$SizeName[$value['board']]] += $value['area'];
                 }
             }
             $Statictic['总面积'] = array_merge($Statictic['总面积'], $Sum);

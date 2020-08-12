@@ -174,10 +174,14 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _edit_dealer_finance () {
         $this->_CI->load->model('dealer/dealer_model');
         return $this->_CI->dealer_model->update(array(
-            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
+            'balance' => bcsub($this->_Order['dealer_balance'], $this->_NeedPay, 2),
+            'produce' => bcadd($this->_Order['dealer_produce'], $this->_Order['sum'], 2),
+            'virtual_balance' => bcsub($this->_Order['dealer_virtual_balance'], $this->_VirtualNeedPay, 2),
+            'virtual_produce' => bcadd($this->_Order['dealer_virtual_produce'], $this->_Order['virtual_sum'], 2),
+            /*'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
             'produce' => $this->_Order['dealer_produce'] + $this->_Order['sum'],
             'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
-            'virtual_produce' => $this->_Order['dealer_virtual_produce'] + $this->_Order['virtual_sum'],
+            'virtual_produce' => $this->_Order['dealer_virtual_produce'] + $this->_Order['virtual_sum'],*/
             'last_order' => date('Y-m-d H:i:s')
         ), $this->_Order['dealer_id']);
     }
@@ -204,10 +208,10 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             'title' => $this->_Order['order_num'],
             'category' => $this->_get_category(),
             'source_id' => $this->_Order['order_id'],
-            'balance' => $this->_Order['dealer_balance'] - $this->_NeedPay,
+            'balance' => bcsub($this->_Order['dealer_balance'], $this->_NeedPay, 2),
             'remark' => '订单金额￥' . $this->_Order['sum'],
             'virtual_amount' => -1 * $this->_VirtualNeedPay,
-            'virtual_balance' => $this->_Order['dealer_virtual_balance'] - $this->_VirtualNeedPay,
+            'virtual_balance' => bcsub($this->_Order['dealer_virtual_balance'], $this->_VirtualNeedPay, 2),
             'inside' => $this->_NeedPay > ZERO ? NO : YES,
             'source_status' => $this->_Order['status'] // 订单状态
         );
@@ -355,7 +359,8 @@ class Wait_sure_workflow extends Workflow_order_abstract {
             }
         } else {
             $this->_Classify[$Key]['amount'] += $BoardPlate['amount'];
-            $this->_Classify[$Key]['area'] += $BoardPlate['area'];
+            $this->_Classify[$Key]['area'] = bcadd($this->_Classify[$Key]['area'], $BoardPlate['area']);
+            // $this->_Classify[$Key]['area'] += $BoardPlate['area'];
         }
         return $this->_Classify[$Key]['v'];
     }
@@ -589,10 +594,14 @@ class Wait_sure_workflow extends Workflow_order_abstract {
     private function _clear_dealer_finance() {
         $this->_CI->load->model('dealer/dealer_model');
         return $this->_CI->dealer_model->update(array(
-            'balance' => $this->_Order['dealer_balance'] + $this->_Order['payed'],
+            'balance' => bcadd($this->_Order['dealer_balance'], $this->_Order['payed'], 2),
+            'produce' => bcsub($this->_Order['dealer_produce'], $this->_Order['sum'], 2),
+            'virtual_balance' => bcadd($this->_Order['dealer_virtual_balance'], $this->_Order['virtual_payed'], 2),
+            'virtual_produce' => bcsub($this->_Order['dealer_virtual_produce'], $this->_Order['virtual_sum'], 2)
+            /*'balance' => $this->_Order['dealer_balance'] + $this->_Order['payed'],
             'produce' => $this->_Order['dealer_produce'] - $this->_Order['sum'],
             'virtual_balance' => $this->_Order['dealer_virtual_balance'] + $this->_Order['virtual_payed'],
-            'virtual_produce' => $this->_Order['dealer_virtual_produce'] - $this->_Order['virtual_sum']
+            'virtual_produce' => $this->_Order['dealer_virtual_produce'] - $this->_Order['virtual_sum']*/
         ), $this->_Order['dealer_id']);
     }
     private function _clear_order_product_finance_flow () {

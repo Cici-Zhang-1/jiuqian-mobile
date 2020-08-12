@@ -122,8 +122,10 @@ class D_k extends D_abstract{
                 array_push($Opbids, $Board[$value['board']]['v']);
             }else{
                 $Board[$value['board']]['amount']++;
-                $Board[$value['board']]['area'] += $value['area'];
-                $Board[$value['board']]['virtual_area'] += $value['area'];
+                $Board[$value['board']]['area'] = bcadd($Board[$value['board']]['area'], $value['area']);
+                // $Board[$value['board']]['area'] += $value['area'];
+                $Board[$value['board']]['virtual_area'] = bcadd($Board[$value['board']]['virtual_area'], $value['area']);
+                // $Board[$value['board']]['virtual_area'] += $value['area'];
                 $Board[$value['board']]['sum'] += $value['sum'];
                 $Board[$value['board']]['virtual_sum'] += $value['sum'];
             }

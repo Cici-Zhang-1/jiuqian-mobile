@@ -155,7 +155,8 @@ class Print_data extends MY_Controller{
                         'amount' => $value['amount']
                     );
                 }else{
-                    $Board[$value['board']]['area'] += $value['area'];
+                    $Board[$value['board']]['area'] = bcadd($Board[$value['board']]['area'], $value['area'], 3);
+                    // $Board[$value['board']]['area'] += $value['area'];
                     $Board[$value['board']]['amount'] += $value['amount'];
                 }
             }
@@ -214,10 +215,12 @@ class Print_data extends MY_Controller{
                         'area' => $value['area']
                     );
                 }else{
-                    $Board[$Tmp[3]]['area'] += $value['area'];
+                    $Board[$Tmp[3]]['area'] = bcadd($Board[$Tmp[3]]['area'], $value['area'], 3);
+                    // $Board[$Tmp[3]]['area'] += $value['area'];
                     $Board[$Tmp[3]]['amount'] += $value['amount'];
                 }
-                $Area += $value['area'];
+                $Area = bcadd($Area, $value['area'], 3);
+                // $Area += $value['area'];
                 $Amount += $value['amount'];
             }
             ksort($Plate);
@@ -268,9 +271,11 @@ class Print_data extends MY_Controller{
                     );
                 }else{
                     $Board[$value['board']]['amount'] += $value['amount'];
-                    $Board[$value['board']]['area'] += $value['area'];
+                    $Board[$value['board']]['area'] = bcadd($Board[$value['board']]['area'], $value['area'], 3);
+                    // $Board[$value['board']]['area'] += $value['area'];
                     $Board[$value['board']]['open_hole'] += $value['open_hole'];
-                    $Board[$value['board']]['invisibility'] += $value['invisibility'];
+                    $Board[$value['board']]['invisibility'] = bcadd($Board[$value['board']]['invisibility'], $value['invisibility'], 3);
+                    // $Board[$value['board']]['invisibility'] += $value['invisibility'];
                 }
             }
         }else{
@@ -292,8 +297,9 @@ class Print_data extends MY_Controller{
             $Count = 1;
             foreach ($Query as $key => $value){
                 $Board['amount'] += $value['amount'];
-                $Board['area'] += $value['area'];
-                
+                $Board['area'] = bcadd($Board['area'], $value['area'], 3);
+                // $Board['area'] += $value['area'];
+
                 $Plate[] = array(
                     $Count++,
                     $value['plate_name'],

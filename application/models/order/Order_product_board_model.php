@@ -225,6 +225,90 @@ class Order_product_board_model extends MY_Model{
         return $Return;
     }
 
+    /**
+     * 获取预优化数据
+     * @param $Search
+     * @return array|bool
+     */
+    public function select_pre_optimize ($Search) {
+        $Item = $this->_Item . __FUNCTION__;
+        $Cache = $this->_Cache . __FUNCTION__ . array_to_string($Search);
+        $Return = false;
+        if (!($Return = $this->cache->get($Cache))) {
+            $Search['pn'] = $this->_page_pre_optimize_num($Search);
+            if(!empty($Search['pn'])){
+                $Sql = $this->_unformat_as($Item);
+                $this->HostDb->select($Sql)->from('order_product_board')
+                    ->join('order_product', 'op_id = opb_order_product_id', 'left')
+                    ->join('order', 'o_id = op_order_id', 'left')
+                    ->join('order_datetime', 'od_order_id = o_id', 'left')
+                    ->join('user AS D', 'D.u_id = op_dismantle', 'left')
+                    ->where('op_status >= ', OP_DISMANTLED)
+                    ->where('o_status >= ', O_DISMANTLING)
+                    ->where('opb_amount > ', ZERO);
+                if (!empty($Search['keyword'])) {
+                    $this->HostDb->group_start()
+                        ->like('op_remark', $Search['keyword'])
+                        ->or_like('o_remark', $Search['keyword'])
+                        ->or_like('o_dealer', $Search['keyword'])
+                        ->or_like('o_owner', $Search['keyword'])
+                        ->or_like('op_num', $Search['keyword'])
+                        ->or_like('opb_board', $Search['keyword'])
+                        ->group_end();
+                }
+                $this->HostDb->order_by('op_num', 'desc')->order_by('opb_board');
+
+                $Query = $this->HostDb->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Return = array(
+                    'content' => $Query->result_array(),
+                    'num' => $this->_Num,
+                    'p' => $Search['p'],
+                    'pn' => $Search['pn'],
+                    'pagesize' => $Search['pagesize']
+                );
+                $this->cache->save($Cache, $Return, MONTHS);
+            } else {
+                $GLOBALS['error'] = '没有符合搜索条件的预优化订单';
+            }
+        }
+        return $Return;
+    }
+    private function _page_pre_optimize_num ($Search) {
+        $this->HostDb->select('count(opb_id) as num', FALSE)
+            ->from('order_product_board')
+            ->join('order_product', 'op_id = opb_order_product_id', 'left')
+            ->join('order', 'o_id = op_order_id', 'left')
+            ->where('op_status >= ', OP_DISMANTLED)
+            ->where('o_status >= ', O_DISMANTLING)
+            ->where('opb_amount > ', ZERO);
+            #->where_in('op_product_id', $Search['product_id'])
+        if (!empty($Search['keyword'])) {
+            $this->HostDb->group_start()
+                ->like('op_remark', $Search['keyword'])
+                ->or_like('o_remark', $Search['keyword'])
+                ->or_like('o_dealer', $Search['keyword'])
+                ->or_like('o_owner', $Search['keyword'])
+                ->or_like('op_num', $Search['keyword'])
+                ->or_like('opb_board', $Search['keyword'])
+                ->group_end();
+        }
+
+        $Query = $this->HostDb->get();
+        if($Query->num_rows() > 0){
+            $Row = $Query->row_array();
+            $Query->free_result();
+            $this->_Num = $Row['num'];
+            if(intval($Row['num']%$Search['pagesize']) == 0){
+                $Pn = intval($Row['num']/$Search['pagesize']);
+            }else{
+                $Pn = intval($Row['num']/$Search['pagesize'])+1;
+            }
+            return $Pn;
+        }else{
+            return false;
+        }
+    }
+
     public function select_next_pack () {
         $Item = $this->_Item . __FUNCTION__;
         $Return = false;
@@ -535,11 +619,20 @@ class Order_product_board_model extends MY_Model{
                 ->join('order_product', 'op_id = opb_order_product_id', 'left')
                 ->join('order', 'o_id = op_order_id', 'left')
                 ->join('order_datetime', 'od_order_id = o_id', 'left')
-                ->where('o_order_type', REGULAR_ORDER)
-                ->where('od_check_datetime > ', $Con['start_date'])
-                ->where('od_check_datetime < ', $Con['end_date'])
+                ->group_start()
+                    ->group_start()
+                        ->where('od_check_datetime > ', $Con['start_date'])
+                        ->where('od_check_datetime < ', $Con['end_date'])
+                        ->where('o_status > ', O_CHECKED)
+                    ->group_end()
+                    ->or_group_start()
+                        ->where('od_sure_datetime > ', $Con['start_date'])
+                        ->where('od_sure_datetime < ', $Con['end_date'])
+                        ->where('o_status > ', O_WAIT_SURE)
+                    ->group_end()
+                ->group_end()
+                // ->where('o_order_type', REGULAR_ORDER)
                 ->where('op_status > ', OP_DISMANTLING)
-                ->where('o_status > ', O_CHECKED)
                 ->where('opb_area > ', ZERO);
 
             $Query = $this->HostDb->get();
@@ -574,11 +667,11 @@ class Order_product_board_model extends MY_Model{
                 ->join('order_datetime', 'od_order_id = o_id', 'left')
                 ->where('op_dismantle', $Con['dismantle'])
                 ->where('op_status > ', OP_DISMANTLING)
-                ->where('o_status > ', O_CHECKED)
-                ->where('od_check_datetime > ', $Con['start_date']);
+                ->where('o_status > ', O_WAIT_SURE)
+                ->where('od_sure_datetime >= ', $Con['start_date']);
 
             if(!empty($Con['end_date'])){
-                $this->HostDb->where('od_check_datetime < ', $Con['end_date']);
+                $this->HostDb->where('od_sure_datetime < ', $Con['end_date']);
             }
 
             $Query = $this->HostDb->order_by('o_id', 'desc')->order_by('op_product_id')->order_by('op_id')->get();
@@ -587,7 +680,7 @@ class Order_product_board_model extends MY_Model{
                 $Query->free_result();
                 $this->cache->save($Cache, $Return, HOURS);
             }else{
-                $GLOBALS['error'] = '在此期间段您没有分解!';
+                $GLOBALS['error'] = '在此期间段您没有确认生产的分解!';
                 $Return = false;
             }
         }
@@ -622,7 +715,7 @@ class Order_product_board_model extends MY_Model{
             $Group = false;
             if (!empty($Con['board_color'])) {
                 if ($Group) {
-                    $this->HostDb->or_where_in('b_color', $Con['board_color']);
+                    $this->HostDb->where_in('b_color', $Con['board_color']);
                 } else {
                     $this->HostDb->group_start();
                     $this->HostDb->where_in('b_color', $Con['board_color']);
@@ -631,7 +724,7 @@ class Order_product_board_model extends MY_Model{
             }
             if (!empty($Con['board_nature'])) {
                 if ($Group) {
-                    $this->HostDb->or_where_in('b_nature', $Con['board_nature']);
+                    $this->HostDb->where_in('b_nature', $Con['board_nature']);
                 } else {
                     $this->HostDb->group_start();
                     $this->HostDb->where_in('b_nature', $Con['board_nature']);
@@ -640,14 +733,17 @@ class Order_product_board_model extends MY_Model{
             }
             if (!empty($Con['board_thick'])) {
                 if ($Group) {
-                    $this->HostDb->or_where_in('b_thick', $Con['board_thick']);
+                    $this->HostDb->where_in('b_thick', $Con['board_thick']);
                 } else {
                     $this->HostDb->group_start();
                     $this->HostDb->where_in('b_thick', $Con['board_thick']);
                     $Group = true;
                 }
             }
-            if (!empty($Con['product_id'])) {
+            if ($Group) {
+                $this->HostDb->group_end();
+            }
+            /*if (!empty($Con['product_id'])) {
                 if ($Group) {
                     $this->HostDb->or_where_in('p_id', $Con['product_id']);
                 } else {
@@ -655,10 +751,9 @@ class Order_product_board_model extends MY_Model{
                     $this->HostDb->where_in('p_id', $Con['product_id']);
                     $Group = true;
                 }
-            }
-            if ($Group) {
-                $this->HostDb->group_end();
-            }
+            }*/
+            $this->HostDb->where_in('p_id', $Con['product_id']);
+
             if(!empty($Con['keyword'])){
                 $this->HostDb->group_start()
                     ->like('o_dealer', $Con['keyword'])

@@ -6,6 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @package  CodeIgniter
  * @category Controller
+ * SELECT `m_id` as `menu_v` FROM `j_role_menu` LEFT JOIN `j_menu` ON `m_id` = `rm_menu_id` WHERE `rm_role_id` in (SELECT ur_role_id FROM j_usergroup_role WHERE ur_usergroup_id = ) AND `m_url` = '/order/order_product_board_plate/index/label' GROUP BY `m_id`
  */
 class Pick_sheet_detail extends MY_Controller {
     private $__Search = array(

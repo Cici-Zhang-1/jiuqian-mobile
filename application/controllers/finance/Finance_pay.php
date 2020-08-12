@@ -109,9 +109,9 @@ class Finance_pay extends MY_Controller {
             $this->_FinanceAccount = $this->_read_finance_account($Post['finance_account_id']);
         }
         $Data = array(
-            'balance' => $this->_FinanceAccount['balance'] - $Post['amount'],
-            'out' => $Post['amount'] + $this->_FinanceAccount['out'],
-            'out_fee' => $Post['fee'] + $this->_FinanceAccount['out_fee']
+            'balance' => bcsub($this->_FinanceAccount['balance'], $Post['amount'], 2),
+            'out' => bcadd($Post['amount'], $this->_FinanceAccount['out'], 2),
+            'out_fee' => bcadd($Post['fee'], $this->_FinanceAccount['out_fee'], 2)
         );
         $Data['balance'] -= $Post['fee'];
         $this->load->model('finance/finance_account_model');
@@ -128,8 +128,8 @@ class Finance_pay extends MY_Controller {
             $this->_InFinanceAccount = $this->_read_finance_account($Post['in_finance_account_id']);
         }
         $Data = array(
-            'balance' => $Post['amount'] + $this->_InFinanceAccount['balance'] - $Post['fee'],
-            'in' => $Post['amount'] + $this->_InFinanceAccount['in'] - $Post['fee']
+            'balance' => bcadd($Post['amount'], bcsub($this->_InFinanceAccount['balance'], $Post['fee'], 2), 2),
+            'in' => bcadd($Post['amount'], bcsub($this->_InFinanceAccount['in'], $Post['fee'], 2), 2)
         );
         list($U, $S) = explode(' ', microtime());
         $Data['flow_num'] = number_format($S + $U, TEN, '.', '');

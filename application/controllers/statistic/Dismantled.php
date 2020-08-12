@@ -74,7 +74,7 @@ class Dismantled extends MY_Controller {
                         $this->_other($Value);
                 }
                 if ($Value['thick'] > THICK) {
-                    $this->_Thick += $Value['area'];
+                    $this->_Thick = bcadd($this->_Thick, $Value['area'], 3);
                 }
             }
             $Predict0 = array(
@@ -120,104 +120,126 @@ class Dismantled extends MY_Controller {
     private function _five ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_Five['cabinet'] += $Board['area'];
+                $this->_Five['cabinet'] = bcadd($this->_Five['cabinet'], $Board['area'], 3);
                 break;
             case WARDROBE:
-                $this->_Five['wardrobe'] += $Board['area'];
+                $this->_Five['wardrobe'] = bcadd($this->_Five['wardrobe'], $Board['area'], 3);
+                // $this->_Five['wardrobe'] += $Board['area'];
                 break;
             case DOOR:
-                $this->_Five['door'] += $Board['area'];
+                $this->_Five['door'] = bcadd($this->_Five['door'], $Board['area'], 3);
+                // $this->_Five['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_Five['wood'] += $Board['area'];
+                $this->_Five['wood'] = bcadd($this->_Five['wood'], $Board['area'], 3);
+                // $this->_Five['wood'] += $Board['area'];
                 break;
         }
-        $this->_Five['area'] += $Board['area'];
+        $this->_Five['area'] = bcadd($this->_Five['area'], $Board['area'], 3);
     }
     private function _nine ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_Nine['cabinet'] += $Board['area'];
+                $this->_Nine['cabinet'] = bcadd($this->_Nine['cabinet'], $Board['area'], 3);
+                // $this->_Nine['cabinet'] += $Board['area'];
                 break;
             case WARDROBE:
-                $this->_Nine['wardrobe'] += $Board['area'];
+                $this->_Nine['wardrobe'] = bcadd($this->_Nine['wardrobe'], $Board['area'], 3);
                 break;
             case DOOR:
-                $this->_Nine['door'] += $Board['area'];
+                $this->_Nine['door'] = bcadd($this->_Nine['door'], $Board['area'], 3);
+                // $this->_Nine['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_Nine['wood'] += $Board['area'];
+                $this->_Nine['wood'] = bcadd($this->_Nine['wood'], $Board['area'], 3);
+                // $this->_Nine['wood'] += $Board['area'];
                 break;
         }
-        $this->_Nine['area'] += $Board['area'];
+        $this->_Nine['area'] = bcadd($this->_Nine['area'], $Board['area'], 3);
     }
     private function _eighteen ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_Eighteen['cabinet'] += $Board['area'];
+                $this->_Eighteen['cabinet'] = bcadd($this->_Eighteen['cabinet'], $Board['area'], 3);
+                // $this->_Eighteen['cabinet'] += $Board['area'];
                 break;
             case WARDROBE:
-                $this->_Eighteen['wardrobe'] += $Board['area'];
+                $this->_Eighteen['wardrobe'] = bcadd($this->_Eighteen['wardrobe'], $Board['area'], 3);
+                // $this->_Eighteen['wardrobe'] += $Board['area'];
                 break;
             case DOOR:
-                $this->_Eighteen['door'] += $Board['area'];
+                $this->_Eighteen['door'] = bcadd($this->_Eighteen['door'], $Board['area'], 3);
+                // $this->_Eighteen['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_Eighteen['wood'] += $Board['area'];
+                $this->_Eighteen['wood'] = bcadd($this->_Eighteen['wood'], $Board['area'], 3);
+                // $this->_Eighteen['wood'] += $Board['area'];
                 break;
         }
-        $this->_Eighteen['area'] += $Board['area'];
+        $this->_Eighteen['area'] = bcadd($this->_Eighteen['area'], $Board['area'], 3);
     }
     private function _twenty_five ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_TwentyFive['cabinet'] += $Board['area'];
+                $this->_TwentyFive['cabinet'] = bcadd($this->_TwentyFive['cabinet'], $Board['area'], 3);
+                // $this->_TwentyFive['cabinet'] += $Board['area'];
                 break;
             case WARDROBE:
-                $this->_TwentyFive['wardrobe'] += $Board['area'];
+                $this->_TwentyFive['wardrobe'] = bcadd($this->_TwentyFive['wardrobe'], $Board['area'], 3);
+                // $this->_TwentyFive['wardrobe'] += $Board['area'];
                 break;
             case DOOR:
-                $this->_TwentyFive['door'] += $Board['area'];
+                $this->_TwentyFive['door'] = bcadd($this->_TwentyFive['door'], $Board['area'], 3);
+                // $this->_TwentyFive['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_TwentyFive['wood'] += $Board['area'];
+                $this->_TwentyFive['wood'] = bcadd($this->_TwentyFive['wood'], $Board['area'], 3);
+                // $this->_TwentyFive['wood'] += $Board['area'];
                 break;
         }
-        $this->_TwentyFive['area'] += $Board['area'];
+        $this->_TwentyFive['area'] = bcadd($this->_TwentyFive['area'], $Board['area'], 3);
     }
     private function _thirty_six ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_ThirtySix['cabinet'] += $Board['area'];
+                $this->_ThirtySix['cabinet'] = bcadd($this->_ThirtySix['cabinet'], $Board['area'], 3);
+                // $this->_ThirtySix['cabinet'] += $Board['area'];
                 break;
             case WARDROBE:
-                $this->_ThirtySix['wardrobe'] += $Board['area'];
+                $this->_ThirtySix['wardrobe'] = bcadd($this->_ThirtySix['wardrobe'], $Board['area'], 3);
+                // $this->_ThirtySix['wardrobe'] += $Board['area'];
                 break;
             case DOOR:
-                $this->_ThirtySix['door'] += $Board['area'];
+                $this->_ThirtySix['door'] = bcadd($this->_ThirtySix['door'], $Board['area'], 3);
+                // $this->_ThirtySix['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_ThirtySix['wood'] += $Board['area'];
+                $this->_ThirtySix['wood'] = bcadd($this->_ThirtySix['wood'], $Board['area'], 3);
+                // $this->_ThirtySix['wood'] += $Board['area'];
                 break;
         }
-        $this->_ThirtySix['area'] += $Board['area'];
+        $this->_ThirtySix['area'] = bcadd($this->_ThirtySix['area'], $Board['area'], 3);
     }
     private function _other ($Board) {
         switch ($Board['product_id']) {
             case CABINET:
-                $this->_Other['cabinet'] += $Board['area'];
+                $this->_Other['cabinet'] = bcadd($this->_Other['cabinet'], $Board['area'], 3);
+                // $this->_Other['cabinet'] += $Board['area'];
                 break;
             case WARDROBE:
-                $this->_Other['wardrobe'] += $Board['area'];
+                $this->_Other['wardrobe'] = bcadd($this->_Other['wardrobe'], $Board['area'], 3);
+                // $this->_Other['wardrobe'] += $Board['area'];
                 break;
             case DOOR:
-                $this->_Other['door'] += $Board['area'];
+                $this->_Other['door'] = bcadd($this->_Other['door'], $Board['area'], 3);
+                // $this->_Other['door'] += $Board['area'];
                 break;
             case WOOD:
-                $this->_Other['wood'] += $Board['area'];
+                $this->_Other['wood'] = bcadd($this->_Other['wood'], $Board['area'], 3);
+                // $this->_Other['wood'] += $Board['area'];
                 break;
         }
-        $this->_Other['area'] += $Board['area'];
+        $this->_Other['area'] = bcadd($this->_Other['area'], $Board['area'], 3);
     }
 
     private function _detail() {

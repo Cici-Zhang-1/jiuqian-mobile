@@ -142,6 +142,8 @@ class Order_product_fitting_model extends MY_Model{
             $Query = $this->HostDb->select($Sql, false)
                 ->from('order_product_fitting')
                 ->join('goods_speci', 'gs_id = opf_goods_speci_id', 'left')
+                ->join('goods', 'g_id = gs_goods_id', 'left')
+                ->join('supplier', 's_id = g_supplier_id', 'left')
                 ->join('order_product', 'op_id = opf_order_product_id', 'left')
                 ->join('order', 'o_id = op_order_id', 'left')
                 ->order_by('op_num')

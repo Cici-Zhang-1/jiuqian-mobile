@@ -126,8 +126,8 @@ class Order_product_board_plate extends MY_Controller {
                 $Qrcode = explode('-', $value['qrcode']);
                 $SuffQrcodes[] = array_pop($Qrcode);
             }
-            $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-            $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+            $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+            $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
             $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
             if($value['area'] < MIN_AREA){
                 $value['area'] = MIN_AREA;
@@ -137,24 +137,29 @@ class Order_product_board_plate extends MY_Controller {
                 $value['edge'], $value['slot'], $value['punch'], $value['board'], $value['remark']));
 
             if(isset($List[$Tmp2])){
-                $List[$Tmp2]['area'] += $value['area'];
+                $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area']);
+                // $List[$Tmp2]['area'] += $value['area'];
                 $List[$Tmp2]['amount'] += 1;
             }else{
                 $List[$Tmp2] = $value;
             }
             if ($value['thick'] > THICK) {
                 $this->_Statistic['thick_amount'] += ONE;
-                $this->_Statistic['thick_area'] += $value['area'];
+                $this->_Statistic['thick_area'] = bcadd($this->_Statistic['thick_area'], $value['area'], 3);
+                // $this->_Statistic['thick_area'] += $value['area'];
             } else {
                 $this->_Statistic['thin_amount'] += ONE;
-                $this->_Statistic['thin_area'] += $value['area'];
+                $this->_Statistic['thin_area'] = bcadd($this->_Statistic['thin_area'], $value['area'], 3);
+                // $this->_Statistic['thin_area'] += $value['area'];
             }
 
             if ('4H' == $value['edge']) {
                 $this->_Statistic['4h_amount'] += ONE;
-                $this->_Statistic['4h_area'] += $value['area'];
+                $this->_Statistic['4h_area'] = bcadd($this->_Statistic['4h_area'], $value['area'], 3);
+                // $this->_Statistic['4h_area'] += $value['area'];
             }
-            $this->_Statistic['total_area'] += $value['area'];
+            $this->_Statistic['total_area'] = bcadd($this->_Statistic['total_area'], $value['area'], 3);
+            // $this->_Statistic['total_area'] += $value['area'];
         }
         $this->_Statistic['total_amount'] = count($BoardPlate);
         ksort($List);
@@ -262,8 +267,8 @@ class Order_product_board_plate extends MY_Controller {
                     foreach ($Data['content'] as $Key => $Value) {
                         $Data['content'][$Key]['real_width'] = $Data['content'][$Key]['width'];
                         $Data['content'][$Key]['real_length'] = $Data['content'][$Key]['length'];
-                        $Data['content'][$Key]['width'] = $Value['width'] - $Value['up_edge'] - $Value['down_edge'];
-                        $Data['content'][$Key]['length'] = $Value['length'] - $Value['left_edge'] - $Value['right_edge'];
+                        $Data['content'][$Key]['width'] = bcsub($Value['width'], $Value['up_edge'] + $Value['down_edge'], 1);
+                        $Data['content'][$Key]['length'] = bcsub($Value['length'], $Value['left_edge'] + $Value['right_edge'], 1);
                     }
                     $Data['order_product'] = $OrderProduct;
                 }

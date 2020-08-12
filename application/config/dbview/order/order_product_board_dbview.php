@@ -27,6 +27,23 @@ $config['order/order_product_board_model/select'] = array(
     'op_order_id' => 'order_id'
 );
 
+$config['order/order_product_board_model/select_pre_optimize'] = array(
+    'opb_id' => 'v',
+    'opb_board' => 'board',
+    'opb_area' => 'area',
+    'opb_amount' => 'amount',
+    'op_num' => 'num',
+    'op_remark' => 'remark',
+    'op_product' => 'product',
+    'o_id' => 'order_id',
+    'o_remark' => 'order_remark',
+    'o_dealer' => 'dealer',
+    'o_owner' => 'owner',
+    'o_request_outdate' => 'request_outdate',
+    'od_sure_datetime' => 'sure_datetime',
+    'D.u_truename' => 'dismantle'
+);
+
 $config['order/order_product_board_model/has_brothers'] = array(
     'opb_id' => 'v',
     'op_id' => 'order_product_id',

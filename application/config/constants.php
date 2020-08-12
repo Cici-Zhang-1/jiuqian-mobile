@@ -303,7 +303,7 @@ defined('THICK') OR define('THICK', 13);    // 厚薄板分界线
 defined('UNPRINT') OR define('UNPRINT', 0); // 未打印
 defined('PRINTED') OR define('PRINTED',1);    // 已打印
 
-define('MAX_LENGTH', 2432); //板块最大长度
+define('MAX_LENGTH', 2800); //板块最大长度
 define('MAX_WIDTH', 1220);  // 板块最大宽度
 
 defined('UNPAY') OR define('UNPAY', 0); // 未支付

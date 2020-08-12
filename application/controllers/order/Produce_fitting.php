@@ -77,7 +77,8 @@ class Produce_fitting extends MY_Controller{
                         'speci' => $value['speci'],
                         'amount' => $value['amount'],
                         'unit' => $value['unit'],
-                        'remark' => $value['remark']
+                        'remark' => $value['remark'],
+                        'code' => $value['code']
                     );
                     if ($value['status'] == WP_PRINT_LIST) {
                         array_push($First, $value['v']);

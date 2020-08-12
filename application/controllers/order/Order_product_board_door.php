@@ -90,8 +90,8 @@ class Order_product_board_door extends MY_Controller {
     private function _combine($BoardDoor) {
         $List = array();
         foreach ($BoardDoor as $key => $value){
-            $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-            $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+            $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+            $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
             $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
             if ($value['area'] < MIN_M_AREA) {
                 $value['area'] = MIN_M_AREA;
@@ -102,16 +102,20 @@ class Order_product_board_door extends MY_Controller {
                 $value['open_hole'], $value['invisibility'], $value['remark']));
 
             if(isset($List[$Tmp2])){
-                $List[$Tmp2]['area'] += $value['area'];
+                $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                // $List[$Tmp2]['area'] += $value['area'];
                 $List[$Tmp2]['open_hole'] += $value['open_hole'];
-                $List[$Tmp2]['invisibility'] += $value['invisibility'];
+                $List[$Tmp2]['invisibility'] = bcadd($List[$Tmp2]['invisibility'], $value['invisibility'], 3);
+                // $List[$Tmp2]['invisibility'] += $value['invisibility'];
                 $List[$Tmp2]['amount'] += 1;
             }else{
                 $List[$Tmp2] = $value;
             }
-            $this->_Statistic['total_area'] += $value['area'];
+            $this->_Statistic['total_area'] = bcadd($this->_Statistic['total_area'], $value['area'], 3);
+            // $this->_Statistic['total_area'] += $value['area'];
             $this->_Statistic['total_open_hole'] += $value['open_hole'];
-            $this->_Statistic['total_invisibility'] += $value['invisibility'];
+            $this->_Statistic['total_invisibility'] = bcadd($this->_Statistic['total_invisibility'], $value['invisibility'], 3);
+            // $this->_Statistic['total_invisibility'] += $value['invisibility'];
         }
         $this->_Statistic['total_amount'] = count($BoardDoor);
         ksort($List);

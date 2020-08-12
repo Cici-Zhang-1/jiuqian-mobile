@@ -28,7 +28,7 @@ abstract class P_abstract {
     protected function _edit_order_product(){
         if ($this->_OrderProductInfo['order_product_sum'] != $this->_OrderProduct['sum']) {
             $this->_OrderProduct['virtual_sum'] = $this->_OrderProduct['sum'];
-            $this->_SumDiff = $this->_OrderProduct['sum'] - $this->_OrderProductInfo['order_product_sum'];
+            $this->_SumDiff = bcsub($this->_OrderProduct['sum'], $this->_OrderProductInfo['order_product_sum'], 2);
             $this->_CI->order_product_model->update($this->_OrderProduct, $this->_OderProductId);
             $SumDetail = json_decode($this->_OrderProductInfo['sum_detail'], true);
             if ('P' == $this->_OrderProductInfo['code']){
@@ -40,7 +40,7 @@ abstract class P_abstract {
             }
             $Set = array(
                 'sum_detail' => json_encode($SumDetail),
-                'sum' => $this->_OrderProductInfo['sum'] + $this->_SumDiff
+                'sum' => bcadd($this->_OrderProductInfo['sum'], $this->_SumDiff, 2)
             );
             $Set['payed'] = $Set['sum'];
             $Set['virtual_payed'] = $Set['sum'];
@@ -69,18 +69,26 @@ abstract class P_abstract {
         $this->_CI->load->model('dealer/dealer_model');
         if ($this->_OrderProductInfo['status'] > O_WAIT_DELIVERY) {
             $this->_CI->dealer_model->update(array(
-                'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
+                'balance' => bcsub($this->_OrderProductInfo['dealer_balance'], $this->_SumDiff, 2),
+                'delivered' => bcadd($this->_OrderProductInfo['dealer_delivered'], $this->_SumDiff, 2),
+                'virtual_balance' => bcsub($this->_OrderProductInfo['dealer_virtual_balance'], $this->_SumDiff, 2),
+                'virtual_delivered' => bcadd($this->_OrderProductInfo['dealer_virtual_delivered'], $this->_SumDiff, 2)
+                /*'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
                 'delivered' => $this->_OrderProductInfo['dealer_delivered'] + $this->_SumDiff,
                 'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff,
-                'virtual_delivered' => $this->_OrderProductInfo['dealer_virtual_delivered'] + $this->_SumDiff
+                'virtual_delivered' => $this->_OrderProductInfo['dealer_virtual_delivered'] + $this->_SumDiff*/
             ), $this->_OrderProductInfo['dealer_id']);
             $this->_add_dealer_account_book();
         } else {
             $this->_CI->dealer_model->update(array(
-                'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
+                'balance' => bcsub($this->_OrderProductInfo['dealer_balance'], $this->_SumDiff, 2),
+                'virtual_balance' => bcsub($this->_OrderProductInfo['dealer_virtual_balance'], $this->_SumDiff, 2),
+                'produce' => bcadd($this->_OrderProductInfo['dealer_produce'], $this->_SumDiff, 2),
+                'virtual_produce' => bcadd($this->_OrderProductInfo['dealer_virtual_produce'], $this->_SumDiff, 2)
+                /*'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
                 'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff,
                 'produce' => $this->_OrderProductInfo['dealer_produce'] + $this->_SumDiff,
-                'virtual_produce' => $this->_OrderProductInfo['dealer_virtual_produce'] + $this->_SumDiff
+                'virtual_produce' => $this->_OrderProductInfo['dealer_virtual_produce'] + $this->_SumDiff*/
             ), $this->_OrderProductInfo['dealer_id']);
             $this->_add_dealer_account_book();
         }
@@ -97,10 +105,10 @@ abstract class P_abstract {
             'title' => $this->_OrderProductInfo['num'],
             'category' => $this->_get_category(),
             'source_id' => $this->_OrderProductInfo['order_id'],
-            'balance' => $this->_OrderProductInfo['dealer_balance'] - $this->_SumDiff,
+            'balance' => bcsub($this->_OrderProductInfo['dealer_balance'], $this->_SumDiff, 2),
             'remark' => '订单金额￥' . $this->_Sum,
             'virtual_amount' => -1 * $this->_SumDiff,
-            'virtual_balance' => $this->_OrderProductInfo['dealer_virtual_balance'] - $this->_SumDiff,
+            'virtual_balance' => bcsub($this->_OrderProductInfo['dealer_virtual_balance'], $this->_SumDiff, 2),
             'inside' => $this->_SumDiff > ZERO ? NO : YES,
             'source_status' => $this->_OrderProductInfo['status']
         );

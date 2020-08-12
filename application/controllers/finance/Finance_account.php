@@ -54,11 +54,16 @@ class Finance_account extends MY_Controller {
                 'intime' => 0
             );
             foreach ($Data['content'] as $key => $value){
-                $Statistics['balance'] += $value['balance'];
+                $Statistics['balance'] = bcadd($Statistics['balance'], $value['balance'],2 );
+                $Statistics['in'] = bcadd($Statistics['in'], $value['in'],2 );
+                $Statistics['in_fee'] = bcadd($Statistics['in_fee'], $value['in_fee'],2 );
+                $Statistics['out'] = bcadd($Statistics['out'], $value['out'],2 );
+                $Statistics['out_fee'] = bcadd($Statistics['out_fee'], $value['out_fee'],2 );
+                /*$Statistics['balance'] += $value['balance'];
                 $Statistics['in'] += $value['in'];
                 $Statistics['in_fee'] += $value['in_fee'];
                 $Statistics['out'] += $value['out'];
-                $Statistics['out_fee'] += $value['out_fee'];
+                $Statistics['out_fee'] += $value['out_fee'];*/
             }
             array_push($Data['content'], $Statistics);
             $Data['num'] += ONE;

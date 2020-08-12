@@ -57,7 +57,8 @@ $config['order/order_product_fitting_model/select_produce_by_order_product_id'] 
     'opf_remark' => 'remark',
     'opf_status' => 'status',
     'op_num' => 'order_product_num',
-    'o_dealer' => 'dealer'
+    'o_dealer' => 'dealer',
+    's_code' => 'code'
 );
 
 $config['order/order_product_fitting_model/select_by_order_product_id'] = array(

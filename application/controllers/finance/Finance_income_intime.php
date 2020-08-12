@@ -156,9 +156,9 @@ class Finance_income_intime extends MY_Controller {
             $this->_read_finance_account($Post['finance_account_id']);
         }
         $Data = array(
-            'balance' => $Post['amount'] + $this->_FinanceAccount['balance'],
-            'in' => $Post['amount'] + $this->_FinanceAccount['in'],
-            'in_fee' => $Post['fee'] + $this->_FinanceAccount['in_fee']
+            'balance' => bcadd($Post['amount'], $this->_FinanceAccount['balance'], 2),
+            'in' => bcadd($Post['amount'], $this->_FinanceAccount['in'], 2),
+            'in_fee' => bcadd($Post['fee'], $this->_FinanceAccount['in_fee'], 2)
         );
         $Data['balance'] -= $Post['fee'];
         $this->load->model('finance/finance_account_model');
@@ -188,8 +188,8 @@ class Finance_income_intime extends MY_Controller {
                         $this->_edit_finance_account($Post);
                         $this->_edit_finance_account($Query);
                     } else {
-                        $Post['amount'] = $Post['amount'] - $Query['amount'];
-                        $Post['fee'] = $Post['fee'] - $Query['fee'];
+                        $Post['amount'] = bcsub($Post['amount'], $Query['amount'], 2);
+                        $Post['fee'] = bcsub($Post['fee'], $Query['fee'], 2);
                         $this->_edit_finance_account($Post);
                     }
                     if (!empty($Post['dealer_id'])) {
@@ -291,10 +291,10 @@ class Finance_income_intime extends MY_Controller {
             $this->_read_dealer($Where);
         }
         $Data = array(
-            'balance' => $this->_Dealer['balance'] + $Post['corresponding'],
-            'received' => $this->_Dealer['received'] + $Post['corresponding'],
-            'virtual_balance' => $this->_Dealer['virtual_balance'] + $Post['corresponding'],
-            'virtual_received' => $this->_Dealer['virtual_received'] + $Post['corresponding']
+            'balance' => bcadd($this->_Dealer['balance'], $Post['corresponding'], 2),
+            'received' => bcadd($this->_Dealer['received'], $Post['corresponding'], 2),
+            'virtual_balance' => bcadd($this->_Dealer['virtual_balance'], $Post['corresponding'], 2),
+            'virtual_received' => bcadd($this->_Dealer['virtual_received'], $Post['corresponding'], 2)
         );
         $this->load->model('dealer/dealer_model');
         if (!!($this->dealer_model->update($Data, $Where))) {

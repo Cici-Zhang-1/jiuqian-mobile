@@ -190,7 +190,8 @@ class To {
             }
         } else {
             $this->_Classify[$Key]['amount'] += $BoardPlate['amount'];
-            $this->_Classify[$Key]['area'] += $BoardPlate['area'];
+            $this->_Classify[$Key]['area'] = bcadd($this->_Classify[$Key]['area'], $BoardPlate['area']);
+            // $this->_Classify[$Key]['area'] += $BoardPlate['area'];
         }
         return $this->_Classify[$Key]['v'];
     }

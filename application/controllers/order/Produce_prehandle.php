@@ -103,7 +103,8 @@ class Produce_prehandle extends MY_Controller{
                 $Classify = gh_escape($Classify);
                 if (isset($OrderProductClassify[$Key])) {
                     $OrderProductClassify[$Key]['amount'] += $value['amount'];
-                    $OrderProductClassify[$Key]['area'] += $value['area'];
+                    $OrderProductClassify[$Key]['area'] = bcadd($OrderProductClassify[$Key]['area'], $value['area'], 3);
+                    // $OrderProductClassify[$Key]['area'] += $value['area'];
                 }else{
                     $OrderProductClassify[$Key] = $Classify;
                     $OrderProductClassify[$Key]['amount'] = $value['amount'];

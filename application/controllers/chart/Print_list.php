@@ -166,8 +166,8 @@ class Print_list extends MY_Controller{
                     $Qrcode = explode('-', $value['qrcode']);
                     $SuffQrcodes[] = array_pop($Qrcode);
                 }
-                $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+                $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+                $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
                 $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
                 if($value['area'] < MIN_AREA){
                     $value['area'] = MIN_AREA;
@@ -177,22 +177,26 @@ class Print_list extends MY_Controller{
                     $value['edge'], $value['slot'], $value['punch'], $value['good'], $value['remark']));
 
                 if(isset($List[$Tmp2])){
-                    $List[$Tmp2]['area'] += $value['area'];
+                    $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                    // $List[$Tmp2]['area'] += $value['area'];
                     $List[$Tmp2]['num'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }
                 if(isset($Data['Statistic'][$value['thick']])){
                     $Data['Statistic'][$value['thick']]['amount'] += 1;
-                    $Data['Statistic'][$value['thick']]['area'] += $value['area'];
+                    $Data['Statistic'][$value['thick']]['area'] = bcadd($Data['Statistic'][$value['thick']]['area'], $value['area'], 3);
+                    // $Data['Statistic'][$value['thick']]['area'] += $value['area'];
                 }else{
                     $Data['Statistic'][$value['thick']] = array('amount' => 1, 'area' => $value['area']);
                 }
                 if ('4H' == $value['edge']) {
                     $Data['FourH']['Amount'] += 1;
-                    $Data['FourH']['Area'] += $value['area'];
+                    $Data['FourH']['Area'] = bcadd($Data['FourH']['Area'], $value['area'], 3);
+                    // $Data['FourH']['Area'] += $value['area'];
                 }
-                $Data['Area'] += $value['area'];
+                // $Data['Area'] += $value['area'];
+                $Data['Area'] = bcadd($Data['Area'], $value['area'], 3);
             }
             $Data['Amount'] = count($Plate);
             ksort($List);
@@ -227,25 +231,30 @@ class Print_list extends MY_Controller{
             foreach ($Plate as $key => $value){
                 $Tmp2 = implode('^', array($value['thick'], $value['plate_name'], $value['width'], $value['length'],
                     $value['punch'], $value['slot'], $value['punch'], $value['good'], $value['remark']));
-                $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+                $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+                $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
+                /*$value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
+                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];*/
                 $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
                 if ($value['area'] < MIN_AREA) {
                     $value['area'] = MIN_AREA;
                 }
                 if(isset($List[$Tmp2])){
-                    $List[$Tmp2]['area'] += $value['area'];
+                    $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                    // $List[$Tmp2]['area'] += $value['area'];
                     $List[$Tmp2]['num'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }
                 if(isset($Data['Statistic'][$value['thick']])){
                     $Data['Statistic'][$value['thick']]['amount'] += 1;
-                    $Data['Statistic'][$value['thick']]['area'] += $value['area'];
+                    $Data['Statistic'][$value['thick']]['area'] = bcadd($Data['Statistic'][$value['thick']]['area'], $value['area'], 3);
+                    // $Data['Statistic'][$value['thick']]['area'] += $value['area'];
                 }else{
                     $Data['Statistic'][$value['thick']] = array('amount' => 1, 'area' => $value['area']);
                 }
-                $Data['Area'] += $value['area'];
+                $Data['Area'] = bcadd($Data['Area'], $value['area'], 3);
+                // $Data['Area'] += $value['area'];
             }
             $Data['Amount'] = count($Plate);
             ksort($List);
@@ -337,8 +346,10 @@ class Print_list extends MY_Controller{
                         $Name = '其它板块';
                         break;
                 }
-                $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+                $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+                $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
+                /*$value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
+                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];*/
                 $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
                 if($value['area'] < MIN_AREA){
                     $value['area'] = MIN_AREA;
@@ -346,7 +357,8 @@ class Print_list extends MY_Controller{
 
                 if(isset($Data['Statistic'][$value['good']])){
                     $Data['Statistic'][$value['good']]['amount'] += 1;
-                    $Data['Statistic'][$value['good']]['area'] += $value['area'];
+                    $Data['Statistic'][$value['good']]['area'] = bcadd($Data['Statistic'][$value['good']]['area'], $value['area'], 3);
+                    // $Data['Statistic'][$value['good']]['area'] += $value['area'];
                 }else{
                     $Data['Statistic'][$value['good']] = array('amount' => 1, 'area' => $value['area']);
                 }
@@ -422,9 +434,11 @@ class Print_list extends MY_Controller{
         $Plate = $this->order_product_board_door_model->select_by_order_product_board_id($this->_Vs);
         if($Plate){
             $List = array();
-            foreach ($Plate as $key => $value){
-                $value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
-                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];
+            foreach ($Plate as $key => $value) {
+                $value['width'] = bcsub($value['width'], $value['up_edge'] + $value['down_edge'], 1);
+                $value['length'] = bcsub($value['length'], $value['left_edge'] + $value['right_edge'], 1);
+                /*$value['width'] = $value['width'] - $value['up_edge'] - $value['down_edge'];
+                $value['length'] = $value['length'] - $value['left_edge'] - $value['right_edge'];*/
                 $value['area'] = ceil($value['width']*$value['length']/M_ONE)/M_TWO;
                 if ($value['area'] < MIN_M_AREA) {
                     $value['area'] = MIN_M_AREA;
@@ -435,16 +449,20 @@ class Print_list extends MY_Controller{
                     $value['open_hole'], $value['invisibility'], $value['remark']));
 
                 if(isset($List[$Tmp2])){
-                    $List[$Tmp2]['area'] += $value['area'];
+                    $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                    // $List[$Tmp2]['area'] += $value['area'];
                     $List[$Tmp2]['open_hole'] += $value['open_hole'];
-                    $List[$Tmp2]['invisibility'] += $value['invisibility'];
+                    $List[$Tmp2]['invisibility'] = bcadd($List[$Tmp2]['invisibility'], $value['invisibility'], 3);
+                    // $List[$Tmp2]['invisibility'] += $value['invisibility'];
                     $List[$Tmp2]['amount'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }
-                $Data['Area'] += $value['area'];
+                $Data['Area'] = bcadd($Data['Area'], $value['area'], 3);
+                // $Data['Area'] += $value['area'];
                 $Data['OpenHole'] += $value['open_hole'];
-                $Data['Invisibility'] += $value['invisibility'];
+                $Data['Invisibility'] = bcadd($Data['Invisibility'], $value['invisibility'], 3);
+                // $Data['Invisibility'] += $value['invisibility'];
             }
             $Data['Amount'] = count($Plate);
             ksort($List);
@@ -477,12 +495,14 @@ class Print_list extends MY_Controller{
                 $value['m_length'] = $value['length'] - 3;
 
                 if(isset($List[$Tmp2])){
-                    $List[$Tmp2]['area'] += $value['area'];
+                    $List[$Tmp2]['area'] = bcadd($List[$Tmp2]['area'], $value['area'], 3);
+                    // $List[$Tmp2]['area'] += $value['area'];
                     $List[$Tmp2]['amount'] += 1;
                 }else{
                     $List[$Tmp2] = $value;
                 }
-                $Data['Area'] += $value['area'];
+                $Data['Area'] = bcadd($Data['Area'], $value['area'], 3);
+                // $Data['Area'] += $value['area'];
             }
             $Data['Amount'] = count($Plate);
             $Data['List'] = $List;

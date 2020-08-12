@@ -34,6 +34,37 @@ $config['order/order_product_board_plate_model/is_uploaded'] = array(
 	'opb_area' => 'area'
 );
 
+$config['order/order_product_board_plate_model/select_pre_optimize'] = array(
+    'opbp_id' => 'v',
+    'opbp_qrcode' => 'qrcode',
+    'opbp_cubicle_name' => 'cubicle_name',
+    'opbp_cubicle_num' => 'cubicle_num',
+    'opbp_plate_name' => 'plate_name',
+    'opbp_plate_num' => 'plate_num',
+    'opbp_width' => 'width',
+    'opbp_length' => 'length',
+    'opbp_thick' => 'thick',
+    'opbp_slot' => 'slot',
+    'opbp_punch' => 'punch',
+    'opbp_edge' => 'edge',
+    'opbp_remark' => 'remark',
+    'opbp_decide_size' => 'decide_size',
+    'if(opbp_abnormity = 0, "", "异")' => 'abnormity',
+    'opbp_up_edge' => 'up_edge',
+    'opbp_down_edge' => 'down_edge',
+    'opbp_left_edge' => 'left_edge',
+    'opbp_right_edge' => 'right_edge',
+    'opb_board' => 'board',
+    '0' => 'status',
+    '1' => 'sn',
+    'op_num' => 'order_product_num',
+    'op_product' => 'product',
+    'o_dealer' => 'dealers',
+    'd_name' => 'dealer',
+    's_name' => 'shop',
+    'o_owner' => 'owner',
+);
+
 $config['order/order_product_board_plate_model/select_optimize'] = array(
 	'opbp_id' => 'v',
 	'opbp_qrcode' => 'qrcode',

@@ -53,7 +53,8 @@ class Edge_statistic extends MY_Controller{
                             'amount' => 0
                         );
                     }
-                    $X[$Value['product']]['area'] += $Value['area'];
+                    $X[$Value['product']]['area'] = bcadd($X[$Value['product']]['area'], $Value['area'], 3);
+                    // $X[$Value['product']]['area'] += $Value['area'];
                     if (!in_array($Value['num'], $X[$Value['product']]['num'])) {
                         array_push($X[$Value['product']]['num'], $Value['num']);
                         $X[$Value['product']]['amount']++;
@@ -63,7 +64,8 @@ class Edge_statistic extends MY_Controller{
                     }
                 } elseif ($Value['order_type'] == 'B') {
                     if ($Value['area'] > 1.8) {
-                        $BMArea += $Value['area'];
+                        $BMArea = bcadd($BMArea, $Value['area'], 3);
+                        // $BMArea += $Value['area'];
                         if (!in_array($Value['num'], $BMOrderProductNum)) {
                             array_push($BMOrderProductNum, $Value['num']);
                             $BMAmount++;
@@ -72,7 +74,8 @@ class Edge_statistic extends MY_Controller{
                             }
                         }
                     } else {
-                        $BArea += $Value['area'];
+                        $BArea = bcadd($BArea, $Value['area'], 3);
+                        // $BArea += $Value['area'];
                         if (!in_array($Value['num'], $BOrderProductNum)) {
                             array_push($BOrderProductNum, $Value['num']);
                             $BAmount++;

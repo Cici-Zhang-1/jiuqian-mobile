@@ -106,35 +106,45 @@ class Board_predict extends MY_Controller {
         if ($Board['thick'] > THICK) {
             switch ($Board['product_id']) {
                 case CABINET:
-                    $this->_Predict1['cabinet'][ZERO] += $Board['area'];
+                    $this->_Predict1['cabinet'][ZERO] = bcadd($this->_Predict1['cabinet'][ZERO], $Board['area']);
+                    // $this->_Predict1['cabinet'][ZERO] += $Board['area'];
                     break;
                 case WARDROBE:
-                    $this->_Predict1['wardrobe'][ZERO] += $Board['area'];
+                    $this->_Predict1['wardrobe'][ZERO] = bcadd($this->_Predict1['wardrobe'][ZERO], $Board['area']);
+                    // $this->_Predict1['wardrobe'][ZERO] += $Board['area'];
                     break;
                 case DOOR:
-                    $this->_Predict1['door'][ZERO] += $Board['area'];
+                    $this->_Predict1['door'][ZERO] = bcadd($this->_Predict1['door'][ZERO], $Board['area']);
+                    // $this->_Predict1['door'][ZERO] += $Board['area'];
                     break;
                 case WOOD:
-                    $this->_Predict1['wood'][ZERO] += $Board['area'];
+                    $this->_Predict1['wood'][ZERO] = bcadd($this->_Predict1['wood'][ZERO], $Board['area']);
+                    // $this->_Predict1['wood'][ZERO] += $Board['area'];
                     break;
             }
-            $this->_Predict1['area'][ZERO] += $Board['area'];
+            $this->_Predict1['area'][ZERO] = bcadd($this->_Predict1['area'][ZERO], $Board['area']);
+            // $this->_Predict1['area'][ZERO] += $Board['area'];
         } else {
             switch ($Board['product_id']) {
                 case CABINET:
-                    $this->_Predict1['cabinet'][ONE] += $Board['area'];
+                    $this->_Predict1['cabinet'][ONE] = bcadd($this->_Predict1['cabinet'][ONE], $Board['area']);
+                    // $this->_Predict1['cabinet'][ONE] += $Board['area'];
                     break;
                 case WARDROBE:
-                    $this->_Predict1['wardrobe'][ONE] += $Board['area'];
+                    $this->_Predict1['wardrobe'][ONE] = bcadd($this->_Predict1['wardrobe'][ONE], $Board['area']);
+                    // $this->_Predict1['wardrobe'][ONE] += $Board['area'];
                     break;
                 case DOOR:
-                    $this->_Predict1['door'][ONE] += $Board['area'];
+                    $this->_Predict1['door'][ONE] = bcadd($this->_Predict1['door'][ONE], $Board['area']);
+                    // $this->_Predict1['door'][ONE] += $Board['area'];
                     break;
                 case WOOD:
-                    $this->_Predict1['wood'][ONE] += $Board['area'];
+                    $this->_Predict1['wood'][ONE] = bcadd($this->_Predict1['wood'][ONE], $Board['area']);
+                    // $this->_Predict1['wood'][ONE] += $Board['area'];
                     break;
             }
-            $this->_Predict1['area'][ONE] += $Board['area'];
+            $this->_Predict1['area'][ONE] = bcadd($this->_Predict1['area'][ONE], $Board['area']);
+            // $this->_Predict1['area'][ONE] += $Board['area'];
         }
     }
 
@@ -152,35 +162,45 @@ class Board_predict extends MY_Controller {
         if ($Board['thick'] > THICK) {
             switch ($Board['product_id']) {
                 case CABINET:
-                    $this->_Predict2['cabinet'][ZERO] += $Board['area'];
+                    $this->_Predict2['cabinet'][ZERO] = bcadd($this->_Predict2['cabinet'][ZERO], $Board['area']);
+                    // $this->_Predict2['cabinet'][ZERO] += $Board['area'];
                     break;
                 case WARDROBE:
-                    $this->_Predict2['wardrobe'][ZERO] += $Board['area'];
+                    $this->_Predict2['wardrobe'][ZERO] = bcadd($this->_Predict2['wardrobe'][ZERO], $Board['area']);
+                    // $this->_Predict2['wardrobe'][ZERO] += $Board['area'];
                     break;
                 case DOOR:
-                    $this->_Predict2['door'][ZERO] += $Board['area'];
+                    $this->_Predict2['door'][ZERO] = bcadd($this->_Predict2['door'][ZERO], $Board['area']);
+                    // $this->_Predict2['door'][ZERO] += $Board['area'];
                     break;
                 case WOOD:
-                    $this->_Predict2['wood'][ZERO] += $Board['area'];
+                    $this->_Predict2['wood'][ZERO] = bcadd($this->_Predict2['wood'][ZERO], $Board['area']);
+                    // $this->_Predict2['wood'][ZERO] += $Board['area'];
                     break;
             }
-            $this->_Predict2['area'][ZERO] += $Board['area'];
+            $this->_Predict2['area'][ZERO] = bcadd($this->_Predict2['area'][ZERO], $Board['area']);
+            // $this->_Predict2['area'][ZERO] += $Board['area'];
         } else {
             switch ($Board['product_id']) {
                 case CABINET:
-                    $this->_Predict2['cabinet'][ONE] += $Board['area'];
+                    $this->_Predict2['cabinet'][ONE] = bcadd($this->_Predict2['cabinet'][ONE], $Board['area']);
+                    // $this->_Predict2['cabinet'][ONE] += $Board['area'];
                     break;
                 case WARDROBE:
-                    $this->_Predict2['wardrobe'][ONE] += $Board['area'];
+                    $this->_Predict2['wardrobe'][ONE] = bcadd($this->_Predict2['wardrobe'][ONE], $Board['area']);
+                    // $this->_Predict2['wardrobe'][ONE] += $Board['area'];
                     break;
                 case DOOR:
-                    $this->_Predict2['door'][ONE] += $Board['area'];
+                    $this->_Predict2['door'][ONE] = bcadd($this->_Predict2['door'][ONE], $Board['area']);
+                    // $this->_Predict2['door'][ONE] += $Board['area'];
                     break;
                 case WOOD:
-                    $this->_Predict2['wood'][ONE] += $Board['area'];
+                    $this->_Predict2['wood'][ONE] = bcadd($this->_Predict2['wood'][ONE], $Board['area']);
+                    // $this->_Predict2['wood'][ONE] += $Board['area'];
                     break;
             }
-            $this->_Predict2['area'][ONE] += $Board['area'];
+            $this->_Predict2['area'][ONE] = bcadd($this->_Predict2['area'][ONE], $Board['area']);
+            // $this->_Predict2['area'][ONE] += $Board['area'];
         }
     }
 

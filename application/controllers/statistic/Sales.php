@@ -99,25 +99,29 @@ class Sales extends MY_Controller {
                     if (empty($Tmp[$value['dealer']]['产品'][$value['product']])) {
                         $Tmp[$value['dealer']]['产品'][$value['product']] = 0;
                     }
-                    $Tmp[$value['dealer']]['产品'][$value['product']] += $value['area'];
+                    $Tmp[$value['dealer']]['产品'][$value['product']] = bcadd($Tmp[$value['dealer']]['产品'][$value['product']], $value['area']);
+//                    $Tmp[$value['dealer']]['产品'][$value['product']] += $value['area'];
                 }
                 if (isset($value['board_thick']) && in_array($value['board_thick'], $this->_Search['board_thick'])) {
                     if (empty($Tmp[$value['dealer']]['板块厚度'][$value['board_thick']])) {
                         $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] += $value['area'];
+                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] = bcadd($Tmp[$value['dealer']]['板块厚度'][$value['board_thick']], $value['area']);
+//                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] += $value['area'];
                 }
                 if (isset($value['board_color']) && in_array($value['board_color'], $this->_Search['board_color'])) {
                     if (empty($Tmp[$value['dealer']]['板块颜色'][$value['board_color']])) {
                         $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] += $value['area'];
+                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] = bcadd($Tmp[$value['dealer']]['板块颜色'][$value['board_color']], $value['area']);
+//                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] += $value['area'];
                 }
                 if (isset($value['board_nature']) && in_array($value['board_nature'], $this->_Search['board_nature'])) {
                     if (empty($Tmp[$value['dealer']]['板块材质'][$value['board_nature']])) {
                         $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] += $value['area'];
+                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] = bcadd($Tmp[$value['dealer']]['板块材质'][$value['board_nature']], $value['area']);
+//                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] += $value['area'];
                 }
             }
         }
@@ -136,25 +140,29 @@ class Sales extends MY_Controller {
                     if (empty($Tmp[$value['dealer']]['产品'][$value['product']])) {
                         $Tmp[$value['dealer']]['产品'][$value['product']] = 0;
                     }
-                    $Tmp[$value['dealer']]['产品'][$value['product']] += $value['sum'];
+                    $Tmp[$value['dealer']]['产品'][$value['product']] = bcadd($Tmp[$value['dealer']]['产品'][$value['product']], $value['sum']);
+//                    $Tmp[$value['dealer']]['产品'][$value['product']] += $value['sum'];
                 }
                 if (isset($value['board_thick']) && in_array($value['board_thick'], $this->_Search['board_thick'])) {
                     if (empty($Tmp[$value['dealer']]['板块厚度'][$value['board_thick']])) {
                         $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] += $value['sum'];
+                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] = bcadd($Tmp[$value['dealer']]['板块厚度'][$value['board_thick']], $value['sum']);
+//                    $Tmp[$value['dealer']]['板块厚度'][$value['board_thick']] += $value['sum'];
                 }
                 if (isset($value['board_color']) && in_array($value['board_color'], $this->_Search['board_color'])) {
                     if (empty($Tmp[$value['dealer']]['板块颜色'][$value['board_color']])) {
                         $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] += $value['sum'];
+                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] = bcadd($Tmp[$value['dealer']]['板块颜色'][$value['board_color']], $value['sum']);
+//                    $Tmp[$value['dealer']]['板块颜色'][$value['board_color']] += $value['sum'];
                 }
                 if (isset($value['board_nature']) && in_array($value['board_nature'], $this->_Search['board_nature'])) {
                     if (empty($Tmp[$value['dealer']]['板块材质'][$value['board_nature']])) {
                         $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] = 0;
                     }
-                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] += $value['sum'];
+                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] = bcadd($Tmp[$value['dealer']]['板块材质'][$value['board_nature']], $value['sum']);
+//                    $Tmp[$value['dealer']]['板块材质'][$value['board_nature']] += $value['sum'];
                 }
             }
         }
