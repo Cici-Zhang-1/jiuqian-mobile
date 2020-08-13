@@ -12,7 +12,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="renderer" content="webkit">
-		<title>九千定制管理系统</title>
+		<title>襄阳管理系统</title>
         <link href="<?php echo base_url('style/ico/9000-32.ico');?>" rel="shortcut icon" sizes="32x32" type="image/x-icon"/>
         <link href="<?php echo base_url('style/ico/9000-16.ico');?>" rel="icon" sizes="16x16" type="image/x-icon"/>
         <link rel="apple-touch-icon" href="<?php echo base_url('style/ico/9000-16.ico');?>" type="image/x-icon" />
