@@ -25,7 +25,7 @@ class Workflow_order_product_board_model extends MY_Model {
             $Search['pn'] = $this->_page_num($Search);
             if(!empty($Search['pn'])){
                 $Sql = $this->_unformat_as($Item);
-                $Query = $this->HostDb->select($Sql)->from('Workflow_order_product_classify')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
+                $Query = $this->HostDb->select($Sql)->from('workflow_order_product_board')->limit($Search['pagesize'], ($Search['p']-1)*$Search['pagesize'])->get();
                 $Return = array(
                     'content' => $Query->result_array(),
                     'num' => $this->_Num,
@@ -43,7 +43,7 @@ class Workflow_order_product_board_model extends MY_Model {
 
     private function _page_num($Search){
         $this->HostDb->select('count(wopb_id) as num', FALSE);
-        $this->HostDb->from('Workflow_order_product_classify');
+        $this->HostDb->from('workflow_order_product_board');
 
         $Query = $this->HostDb->get();
         if($Query->num_rows() > 0){
@@ -69,7 +69,7 @@ class Workflow_order_product_board_model extends MY_Model {
     public function insert($Data) {
         $Item = $this->_Item.__FUNCTION__;
         $Data = $this->_format($Data, $Item);
-        if($this->HostDb->insert('Workflow_order_product_classify', $Data)){
+        if($this->HostDb->insert('workflow_order_product_board', $Data)){
             $this->remove_cache($this->_Module);
             return true;
         } else {
@@ -86,7 +86,7 @@ class Workflow_order_product_board_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format($value, $Item);
         }
-        if($this->HostDb->insert_batch('Workflow_order_product_classify', $Data)){
+        if($this->HostDb->insert_batch('workflow_order_product_board', $Data)){
             $this->remove_cache($this->_Module);
             return true;
         } else {
@@ -109,7 +109,7 @@ class Workflow_order_product_board_model extends MY_Model {
         } else {
             $this->HostDb->where('wopb_id', $Where);
         }
-        $this->HostDb->update('Workflow_order_product_classify', $Data);
+        $this->HostDb->update('workflow_order_product_board', $Data);
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -122,7 +122,7 @@ class Workflow_order_product_board_model extends MY_Model {
         foreach ($Data as $key => $value){
             $Data[$key] = $this->_format_re($value, $Item);
         }
-        $this->HostDb->update_batch('Workflow_order_product_classify', $Data, 'wopb_id');
+        $this->HostDb->update_batch('workflow_order_product_board', $Data, 'wopb_id');
         $this->remove_cache($this->_Module);
         return true;
     }
@@ -139,7 +139,7 @@ class Workflow_order_product_board_model extends MY_Model {
             $this->HostDb->where('wopb_id', $Where);
         }
 
-        $this->HostDb->delete('Workflow_order_product_classify');
+        $this->HostDb->delete('workflow_order_product_board');
         $this->remove_cache($this->_Module);
         return true;
     }
